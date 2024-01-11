@@ -29,26 +29,26 @@ public class Comment {
     private LocalDateTime date;
 
     @Column(nullable = false)
-    private CommentType commentType;
+    private CommentType type;
 
     @Column(nullable = true)
     private Long parentCommentId;
 
     @Builder
-    private Comment(Long id, Article article, String content, LocalDateTime date, CommentType commentType, Long parentCommentId) {
+    private Comment(Long id, Article article, String content, LocalDateTime date, CommentType type, Long parentCommentId) {
         this.id = id;
         this.article = article;
         this.content = content;
         this.date = date;
-        this.commentType = commentType;
+        this.type = type;
         this.parentCommentId = parentCommentId;
     }
 
-    public Comment createComment(Article article, String content, LocalDateTime date, CommentType commentType) {
-        return Comment.builder().article(article).content(content).date(date).commentType(commentType).build();
+    public Comment createComment(Article article, String content, LocalDateTime date, CommentType type) {
+        return Comment.builder().article(article).content(content).date(date).type(type).build();
     }
 
-    public Comment createReplyToComment(Article article, String content, LocalDateTime date, CommentType commentType, Long parentCommentId) {
-        return Comment.builder().article(article).content(content).date(date).commentType(commentType).parentCommentId(parentCommentId).build();
+    public Comment createReplyToComment(Article article, String content, LocalDateTime date, CommentType type, Long parentCommentId) {
+        return Comment.builder().article(article).content(content).date(date).type(type).parentCommentId(parentCommentId).build();
     }
 }

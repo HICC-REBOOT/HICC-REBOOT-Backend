@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,16 +23,6 @@ public class Member {
     @Column(unique = true, nullable = false)
     private String studentNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "DEPARTMENT_ID")
-    private Department department;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "COLLEGE_ID")
-    private College college;
-
     @Column(nullable = false)
     private String name;
 
@@ -42,6 +35,17 @@ public class Member {
 
     @Column(nullable = false)
     private String phoneNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEPARTMENT_ID")
+    private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COLLEGE_ID")
+    private College college;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<Article> articles = new ArrayList<>();
 
     private String refreshToken;
 
