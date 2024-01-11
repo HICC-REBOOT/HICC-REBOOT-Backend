@@ -18,10 +18,6 @@ public class Comment {
     @Column(name = "COMMENT_ID")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ARTICLE_ID")
-    private Article article;
-
     @Column(nullable = false)
     private String content;
 
@@ -29,13 +25,23 @@ public class Comment {
     private LocalDateTime date;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CommentType type;
 
     @Column(nullable = true)
     private Long parentCommentId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ARTICLE_ID")
+    private Article article;
+
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
     @Builder
     private Comment(Long id, Article article, String content, LocalDateTime date, CommentType type, Long parentCommentId) {
+
         this.id = id;
         this.article = article;
         this.content = content;
@@ -50,5 +56,19 @@ public class Comment {
 
     public Comment createReplyToComment(Article article, String content, LocalDateTime date, CommentType type, Long parentCommentId) {
         return Comment.builder().article(article).content(content).date(date).type(type).parentCommentId(parentCommentId).build();
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    //연관 관계 메서드
+    public void changeMember(Member member) {
+        this.member = member;
+        member.getComments().add(this);
     }
 }
