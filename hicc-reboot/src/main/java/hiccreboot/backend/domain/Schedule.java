@@ -22,7 +22,7 @@ public class Schedule {
     private String content;
 
     @Column(nullable = false)
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private ScheduleType scheduleType;
 
     @OneToMany
