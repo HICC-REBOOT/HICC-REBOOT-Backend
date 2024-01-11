@@ -12,6 +12,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueDepartment", columnNames = {"name"})})
 public class Department {
 
     @Id
