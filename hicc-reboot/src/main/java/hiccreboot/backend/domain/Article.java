@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article {
@@ -27,6 +30,9 @@ public class Article {
     @Enumerated
     @Column(nullable = false)
     private BoardType boardType;
+
+    @OneToMany(mappedBy = "article")
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder
     private Article(Member member, String subject, String content, BoardType boardType) {
