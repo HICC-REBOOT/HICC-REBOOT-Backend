@@ -27,7 +27,7 @@ public class Article {
     @Column(nullable = false)
     private String content;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
 
