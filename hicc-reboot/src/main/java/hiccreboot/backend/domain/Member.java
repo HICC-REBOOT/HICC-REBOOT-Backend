@@ -20,12 +20,12 @@ public class Member {
     @Column(unique = true, nullable = false)
     private String studentNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @Column(nullable = false)
     @JoinColumn(name = "DEPARTMENT_ID")
     private Department department;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @Column(nullable = false)
     @JoinColumn(name = "COLLEGE_ID")
     private College college;
