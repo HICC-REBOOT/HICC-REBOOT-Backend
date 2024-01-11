@@ -34,9 +34,11 @@ public class Article {
     @OneToMany(mappedBy = "article")
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "article")
+    private List<Appendix> appendices = new ArrayList<>();
+
     @Builder
     private Article(Member member, String subject, String content, BoardType boardType) {
-        this.id = id;
         this.member = member;
         this.subject = subject;
         this.content = content;
@@ -62,5 +64,11 @@ public class Article {
 
     public void updateBoardType(BoardType boardType) {
         this.boardType = boardType;
+    }
+
+    //연관 관계 메서드
+    public void addAppendix(Appendix appendix) {
+        this.appendices.add(appendix);
+        appendix.setArticle(this);
     }
 }
