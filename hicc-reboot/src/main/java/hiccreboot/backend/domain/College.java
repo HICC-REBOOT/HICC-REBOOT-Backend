@@ -27,7 +27,7 @@ public class College {
     @JoinColumn(name = "DEPARTMENT_ID")
     private Department department;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     private List<Member> members = new ArrayList<>();
 
     @Builder
