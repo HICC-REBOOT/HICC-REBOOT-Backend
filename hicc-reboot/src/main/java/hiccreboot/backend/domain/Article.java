@@ -2,9 +2,9 @@ package hiccreboot.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,18 +18,22 @@ public class Article {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ARTICLE_ID")
+    @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
     @Column(nullable = false)
     private String subject;
 
     @Column(nullable = false)
+    @Lob
     private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
+
+    @Column(nullable = false)
+    private LocalDateTime date;
 
     @OneToMany(mappedBy = "article")
     private List<Comment> comments = new ArrayList<>();
@@ -37,21 +41,15 @@ public class Article {
     @OneToMany(mappedBy = "article")
     private List<Appendix> appendices = new ArrayList<>();
 
-    @Builder
-    private Article(Member member, String subject, String content, BoardType boardType) {
-        this.member = member;
+    private Article(String subject, String content, BoardType boardType, LocalDateTime date) {
         this.subject = subject;
         this.content = content;
         this.boardType = boardType;
+        this.date = date;
     }
 
-    public Article createArticle(Member member, String subject, String content, BoardType boardType) {
-        return Article.builder()
-                .member(member)
-                .subject(subject)
-                .content(content)
-                .boardType(boardType)
-                .build();
+    public Article createArticle(String subject, String content, BoardType boardType, LocalDateTime date) {
+        return new Article(subject, content, boardType, date);
     }
 
     public void updateSubject(String subject) {
@@ -66,9 +64,18 @@ public class Article {
         this.boardType = boardType;
     }
 
+    public void updateDate(LocalDateTime date) {
+        this.date = date;
+    }
+
     //연관 관계 메서드
     public void addAppendix(Appendix appendix) {
         this.appendices.add(appendix);
         appendix.setArticle(this);
+    }
+
+    public void changeMember(Member member) {
+        this.member = member;
+        member.getArticles().add(this);
     }
 }

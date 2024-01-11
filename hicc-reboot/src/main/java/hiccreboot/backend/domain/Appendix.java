@@ -18,8 +18,7 @@ public class Appendix {
     private String path;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appendix", insertable = false, updatable = false)
-    @Column(nullable = false)
+    @JoinColumn(name = "ARTICLE_ID", insertable = false, updatable = false)
     private Article article;
 
     @Builder
