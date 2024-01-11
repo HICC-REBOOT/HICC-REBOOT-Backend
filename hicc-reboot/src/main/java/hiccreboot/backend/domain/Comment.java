@@ -18,8 +18,8 @@ public class Comment {
     @Column(name = "COMMENT_ID")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "ARTICLE_ID", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ARTICLE_ID")
     private Article article;
 
     @Column(nullable = false)
