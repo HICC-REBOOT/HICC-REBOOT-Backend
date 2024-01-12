@@ -2,6 +2,8 @@ package hiccreboot.backend.domain;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 public enum ScheduleType {
     ACADEMIC("학술"),
@@ -13,6 +15,13 @@ public enum ScheduleType {
 
     ScheduleType(String name) {
         this.name = name;
+    }
+
+    public static ScheduleType findByName(String name) {
+        return Arrays.stream(ScheduleType.values())
+                .filter(menu -> menu.getName().equals(name))
+                .findAny()
+                .orElse(ETC);
     }
 }
 
