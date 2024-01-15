@@ -5,10 +5,11 @@ import hiccreboot.backend.common.exception.ScheduleNotFoundException;
 import hiccreboot.backend.domain.Schedule;
 import hiccreboot.backend.domain.ScheduleDate;
 import hiccreboot.backend.domain.ScheduleType;
-import hiccreboot.backend.repository.ScheduleDateRepository;
-import hiccreboot.backend.repository.ScheduleRepository;
+import hiccreboot.backend.repository.Calender.ScheduleDateRepository;
+import hiccreboot.backend.repository.Calender.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,11 +31,12 @@ public class CalenderService {
         return scheduleRepository.findById(id);
     }
 
-    public Schedule saveSchedule(String name, List<LocalDate> dates, String content, String type) {
+    @Transactional
+    public Schedule saveSchedule(String name, List<LocalDate> dates, String content, ScheduleType type) {
         Schedule schedule = Schedule.createSchedule(
                 name,
                 content,
-                ScheduleType.findByName(type)
+                type
         );
 
         dates.stream()
@@ -47,6 +49,7 @@ public class CalenderService {
         return schedule;
     }
 
+    @Transactional
     public void deleteSchedule(Long id) {
         try {
             scheduleRepository.deleteById(id);
@@ -55,6 +58,7 @@ public class CalenderService {
         }
     }
 
+    @Transactional
     public Schedule updateSchedule(UpdateScheduleRequsetDTO updateScheduleRequsetDTO) {
         deleteSchedule(updateScheduleRequsetDTO.getScheduleId());
         return saveSchedule(updateScheduleRequsetDTO.getName(), updateScheduleRequsetDTO.getDates(), updateScheduleRequsetDTO.getContent(), updateScheduleRequsetDTO.getType());

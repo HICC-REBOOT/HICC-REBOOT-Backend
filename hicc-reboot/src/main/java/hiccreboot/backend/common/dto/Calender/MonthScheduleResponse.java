@@ -1,9 +1,15 @@
 package hiccreboot.backend.common.dto.Calender;
 
-import hiccreboot.backend.domain.ScheduleType;
+import lombok.Getter;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-public record MonthScheduleResponse(String name, Long scheduleId, LocalDate date, ScheduleType type) {
+@Getter
+public class MonthScheduleResponse {
+    private List<MonthScheduleElement> monthScheduleElements = new ArrayList<>();
 
+    public void addElement(MonthScheduleElement monthScheduleElement) {
+        monthScheduleElements.add(monthScheduleElement);
+    }
 }

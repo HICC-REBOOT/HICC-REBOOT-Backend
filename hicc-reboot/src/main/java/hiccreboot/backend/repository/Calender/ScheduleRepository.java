@@ -1,4 +1,4 @@
-package hiccreboot.backend.repository;
+package hiccreboot.backend.repository.Calender;
 
 import hiccreboot.backend.domain.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
