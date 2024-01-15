@@ -1,9 +1,6 @@
 package hiccreboot.backend.controller;
 
-import hiccreboot.backend.common.dto.Calender.DayScheduleRequestDTO;
-import hiccreboot.backend.common.dto.Calender.DayScheduleResponse;
-import hiccreboot.backend.common.dto.Calender.MonthScheduleResponse;
-import hiccreboot.backend.common.dto.Calender.UpdateScheduleRequsetDTO;
+import hiccreboot.backend.common.dto.Calender.*;
 import hiccreboot.backend.common.exception.ScheduleNotFoundException;
 import hiccreboot.backend.domain.Schedule;
 import hiccreboot.backend.domain.ScheduleDate;
@@ -25,19 +22,19 @@ public class CalenderController {
     private final CalenderService calenderService;
 
     @GetMapping("/month-schedule")
-    public Object monthSchedule(@RequestParam("year") int year, @RequestParam("month") int month) {
+    public Object searchMonthSchedule(@RequestParam("year") int year, @RequestParam("month") int month) {
         List<ScheduleDate> scheduleDates = calenderService.findAllByMonth(year, month);
 
-        List<MonthScheduleResponse> monthScheduleResponses = new ArrayList<>();
-        scheduleDates.stream().forEach(monthSchedule -> {
-            monthScheduleResponses.add(new MonthScheduleResponse(monthSchedule.getSchedule().getName(), monthSchedule.getSchedule().getId(), LocalDate.of(monthSchedule.getYear(), monthSchedule.getMonth(), monthSchedule.getDayOfMonth()), monthSchedule.getSchedule().getScheduleType()));
+        MonthScheduleResponse monthScheduleResponses = new MonthScheduleResponse();
+        scheduleDates.stream().forEach(scheduleDate -> {
+            monthScheduleResponses.addElement(new MonthScheduleElement(scheduleDate.getSchedule().getName(), scheduleDate.getSchedule().getId(), LocalDate.of(scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDayOfMonth()), scheduleDate.getSchedule().getScheduleType()));
         });
 
         return monthScheduleResponses;
     }
 
     @GetMapping("/schedule")
-    public Object daySchedule(@RequestParam("schedule-id") Long id) {
+    public Object searchDaySchedule(@RequestParam("schedule-id") Long id) {
         Optional<Schedule> schedule = calenderService.findSchedule(id);
 
         if (schedule.isPresent()) {
@@ -46,7 +43,7 @@ public class CalenderController {
             List<LocalDate> localDates = new ArrayList<>();
             foundSchedule.getScheduleDates().stream().forEach(scheduleDate -> LocalDate.of(scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDayOfMonth()));
 
-            return new DayScheduleResponse(foundSchedule.getName(), foundSchedule.getId(), localDates, foundSchedule.getScheduleType().getName(), foundSchedule.getContent());
+            return new DayScheduleResponse(foundSchedule.getName(), foundSchedule.getId(), localDates, foundSchedule.getScheduleType(), foundSchedule.getContent());
         }
         throw new ScheduleNotFoundException();
     }
@@ -70,7 +67,7 @@ public class CalenderController {
     }
 
     @DeleteMapping("schedule")
-    public Object deleteSchedule(@RequestParam("schedule-id") Long id) {
+    public Object deleteSchedule(@RequestParam("scheduleId") Long id) {
         calenderService.deleteSchedule(id);
 
         // 이 부분 status에 맞게 변경
