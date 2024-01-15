@@ -2,6 +2,7 @@ package hiccreboot.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Article {
 
@@ -35,10 +37,10 @@ public class Article {
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @OneToMany(mappedBy = "article")
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "article")
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appendix> appendices = new ArrayList<>();
 
     private Article(String subject, String content, BoardType boardType, LocalDateTime date) {
@@ -48,7 +50,7 @@ public class Article {
         this.date = date;
     }
 
-    public Article createArticle(String subject, String content, BoardType boardType, LocalDateTime date) {
+    public static Article createArticle(String subject, String content, BoardType boardType, LocalDateTime date) {
         return new Article(subject, content, boardType, date);
     }
 
