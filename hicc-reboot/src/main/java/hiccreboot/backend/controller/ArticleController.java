@@ -64,7 +64,7 @@ public class ArticleController {
     }
 
     @GetMapping("/article")
-    public Object searchArticle(@RequestParam("articleId") Long id) {
+    public Object searchArticle(@RequestParam("article-id") Long id) {
         Optional<Article> article = articleService.findArticle(id);
 
         // 이 부분 jwt로 유저이름이랑, 유저 등급 가져온다.
@@ -98,7 +98,7 @@ public class ArticleController {
     }
 
     @PatchMapping("/article")
-    public Object updateArticle(Member member, @RequestParam("articleId") Long id, ArticleRequestDTO articleRequestDTO) {
+    public Object updateArticle(Member member, @RequestParam("article-id") Long id, ArticleRequestDTO articleRequestDTO) {
         // Member 부분은 jwt에서 id 찾아서 가져오는 방식으로 수정
 
         articleService.deleteArticle(id);
@@ -111,7 +111,7 @@ public class ArticleController {
     }
 
     @DeleteMapping("/article")
-    public Object deleteArticle(@RequestParam("articleId") Long id) {
+    public Object deleteArticle(@RequestParam("article-id") Long id) {
         articleService.deleteArticle(id);
 
         //여기에 204 status에 맞게 return 작성
