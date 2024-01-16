@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Member;
+import hiccreboot.backend.domain.RefreshToken;
 import hiccreboot.backend.repository.member.MemberRepository;
+import hiccreboot.backend.repository.refreshToken.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
@@ -44,6 +46,7 @@ public class TokenProviderImpl implements TokenProvider {
 	private String refreshHeader;
 
 	private final MemberRepository memberRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 
 	@Override
 	public String createAccessToken(String studentNumber) {
@@ -62,28 +65,29 @@ public class TokenProviderImpl implements TokenProvider {
 	}
 
 	@Override
-	public String createRefreshToken() {
+	public String createRefreshToken(String studentNumber) {
 		Date now = new Date();
 		Date expiration = new Date(now.getTime() + refreshTokenExpirationPeriod);
 
-		return Jwts.builder()
+		Member member = getMemberByStudentNumber(studentNumber);
+
+		String issuedRefreshToken = Jwts.builder()
 			.setHeaderParam(Header.TYPE, Header.JWT_TYPE)
 			.setSubject(REFRESH_TOKEN_SUBJECT)
 			.setIssuedAt(now)
 			.setExpiration(expiration)
-			.setIssuer("Backend-server")
+			.setIssuer(issuer)
 			.signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
 			.compact();
-	}
 
-	@Override
-	public void updateRefreshToken(String studentNumber, String refreshToken) {
-		getMemberByStudentNumber(studentNumber).updateRefreshToken(refreshToken);
+		return refreshTokenRepository.save(RefreshToken.createRefreshToken(member, issuedRefreshToken)).getToken();
 	}
 
 	@Override
 	public void disableRefreshToken(String studentNumber) {
-		getMemberByStudentNumber(studentNumber).destroyRefreshToken();
+		memberRepository.findByStudentNumber(studentNumber)
+			.map(Member::getId)
+			.ifPresent(refreshTokenRepository::deleteById);
 	}
 
 	@Override
