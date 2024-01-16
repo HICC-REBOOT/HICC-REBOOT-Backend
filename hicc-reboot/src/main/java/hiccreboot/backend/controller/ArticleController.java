@@ -1,5 +1,19 @@
 package hiccreboot.backend.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import hiccreboot.backend.common.dto.Article.ArticleListResponse;
 import hiccreboot.backend.common.dto.Article.ArticleRequestDTO;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
@@ -10,113 +24,124 @@ import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.service.ArticleService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/bulletin-board")
+@RequestMapping("/api/article")
 @RequiredArgsConstructor
 public class ArticleController {
 
-    private final ArticleService articleService;
-    private final EntityManager em;
+	private final ArticleService articleService;
+	private final EntityManager em;
 
-    @GetMapping("/list")
-    public Object searchArticleList(@RequestParam(value = "page") int pageNumber,
-                                    @RequestParam(value = "size") int pageSize,
-                                    @RequestParam(value = "sort", required = false, defaultValue = "null") String sort,
-                                    @RequestParam(value = "search", required = false, defaultValue = "null") String search) {
-        //유저 이름,등급
-        Grade userGrade = Grade.APPLICANT;
-        String userName = "나야나";
+	@GetMapping
+	public Object searchArticleList(
+		@RequestParam(value = "page") int pageNumber,
+		@RequestParam(value = "size") int pageSize,
+		@RequestParam(value = "sort", required = false, defaultValue = "null") String sort,
+		@RequestParam(value = "search", required = false, defaultValue = "null") String search) {
+		//유저 이름,등급
+		Grade userGrade = Grade.APPLICANT;
+		String userName = "나야나";
 
-        if (sort.equals("null")) {
-            List<Article> articles = articleService.findArticles(pageNumber, pageSize).getContent();
+		if (sort.equals("null")) {
+			List<Article> articles = articleService.findArticles(pageNumber, pageSize).getContent();
 
-            ArticleListResponse articleListResponse = new ArticleListResponse();
-            articles.stream().forEach(article -> articleListResponse.addResult(ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(), article.getBoardType(), article.getSubject())));
+			ArticleListResponse articleListResponse = new ArticleListResponse();
+			articles.stream()
+				.forEach(article -> articleListResponse.addResult(
+					ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(),
+						article.getBoardType(), article.getSubject())));
 
-            return articleListResponse;
-        }
+			return articleListResponse;
+		}
 
-        if (sort.equals("member")) {
-            List<Article> articles = articleService.findArticlesByMemberName(pageNumber, pageSize, search).getContent();
+		if (sort.equals("member")) {
+			List<Article> articles = articleService.findArticlesByMemberName(pageNumber, pageSize, search).getContent();
 
-            ArticleListResponse articleListResponse = new ArticleListResponse();
-            articles.stream().forEach(article -> articleListResponse.addResult(ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(), article.getBoardType(), article.getSubject())));
+			ArticleListResponse articleListResponse = new ArticleListResponse();
+			articles.stream()
+				.forEach(article -> articleListResponse.addResult(
+					ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(),
+						article.getBoardType(), article.getSubject())));
 
-            return articleListResponse;
-        }
+			return articleListResponse;
+		}
 
-        if (sort.equals("subject")) {
-            List<Article> articles = articleService.findArticlesBySubject(pageNumber, pageSize, search).getContent();
+		if (sort.equals("subject")) {
+			List<Article> articles = articleService.findArticlesBySubject(pageNumber, pageSize, search).getContent();
 
-            ArticleListResponse articleListResponse = new ArticleListResponse();
-            articles.stream().forEach(article -> articleListResponse.addResult(ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(), article.getBoardType(), article.getSubject())));
+			ArticleListResponse articleListResponse = new ArticleListResponse();
+			articles.stream()
+				.forEach(article -> articleListResponse.addResult(
+					ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(),
+						article.getBoardType(), article.getSubject())));
 
-            return articleListResponse;
-        }
+			return articleListResponse;
+		}
 
-        return new ArticleNotFoundException();
-    }
+		return new ArticleNotFoundException();
+	}
 
-    @GetMapping("/article")
-    public Object searchArticle(@RequestParam("article-id") Long id) {
-        Optional<Article> article = articleService.findArticle(id);
+	@GetMapping("/{article-id}")
+	public Object searchArticle(@PathVariable("article-id") Long id) {
+		Optional<Article> article = articleService.findArticle(id);
 
-        // 이 부분 jwt로 유저이름이랑, 유저 등급 가져온다.
-        Grade userGrade = Grade.APPLICANT;
-        String userName = "나야나";
+		// 이 부분 jwt로 유저이름이랑, 유저 등급 가져온다.
+		Grade userGrade = Grade.APPLICANT;
+		String userName = "나야나";
 
+		if (article.isPresent()) {
+			return makeArticleDTO(article.get(), userGrade, userName);
+		}
+		throw new ArticleNotFoundException();
+	}
 
-        if (article.isPresent()) {
-            return makeArticleDTO(article.get(), userGrade, userName);
-        }
-        throw new ArticleNotFoundException();
-    }
+	private Object makeArticleDTO(Article article, Grade grade, String name) {
+		if (article.getAppendices().size() != 0) {
+			return ArticleResponse.createArticleResponse(article.getId(), grade, name, article.getDate(), true,
+				article.getAppendices(), article.getBoardType(), article.getSubject(), article.getContent());
+		}
+		return ArticleResponse.createArticleResponse(article.getId(), grade, name, article.getDate(), false,
+			article.getBoardType(), article.getSubject(), article.getContent());
+	}
 
-    private Object makeArticleDTO(Article article, Grade grade, String name) {
-        if (article.getAppendices().size() != 0) {
-            return ArticleResponse.createArticleResponse(article.getId(), grade, name, article.getDate(), true, article.getAppendices(), article.getBoardType(), article.getSubject(), article.getContent());
-        }
-        return ArticleResponse.createArticleResponse(article.getId(), grade, name, article.getDate(), false, article.getBoardType(), article.getSubject(), article.getContent());
-    }
+	@PostMapping("/article")
+	public Object addArticle(Member member, ArticleRequestDTO articleRequestDTO) {
+		//여기에 jwt로 Member 가져오는 로직 작성, 매개변수의 member 삭제!
 
-    @PostMapping("/article")
-    public Object addArticle(Member member, ArticleRequestDTO articleRequestDTO) {
-        //여기에 jwt로 Member 가져오는 로직 작성, 매개변수의 member 삭제!
+		articleService.saveArticle(member, articleRequestDTO.getSubject(), articleRequestDTO.getContent(),
+			articleRequestDTO.getBoard(), articleRequestDTO.getDate(), articleRequestDTO.getAppendices());
 
-        articleService.saveArticle(member, articleRequestDTO.getSubject(), articleRequestDTO.getContent(), articleRequestDTO.getBoard(), articleRequestDTO.getDate(), articleRequestDTO.getAppendices());
+		//여기에 204 status에 맞게 return 작성
+		HashMap<String, Object> returnValues = new HashMap<>();
+		returnValues.put("a", "b");
+		return returnValues;
+	}
 
-        //여기에 204 status에 맞게 return 작성
-        HashMap<String, Object> returnValues = new HashMap<>();
-        returnValues.put("a", "b");
-        return returnValues;
-    }
+	@PatchMapping("/{article-id}")
+	public Object updateArticle(
+		Member member,
+		@PathVariable("article-id") Long id,
+		@RequestBody ArticleRequestDTO articleRequestDTO) {
+		// Member 부분은 jwt에서 id 찾아서 가져오는 방식으로 수정
 
-    @PatchMapping("/article")
-    public Object updateArticle(Member member, @RequestParam("article-id") Long id, ArticleRequestDTO articleRequestDTO) {
-        // Member 부분은 jwt에서 id 찾아서 가져오는 방식으로 수정
+		articleService.deleteArticle(id);
+		articleService.saveArticle(member, articleRequestDTO.getSubject(), articleRequestDTO.getContent(),
+			articleRequestDTO.getBoard(), articleRequestDTO.getDate(), articleRequestDTO.getAppendices());
 
-        articleService.deleteArticle(id);
-        articleService.saveArticle(member, articleRequestDTO.getSubject(), articleRequestDTO.getContent(), articleRequestDTO.getBoard(), articleRequestDTO.getDate(), articleRequestDTO.getAppendices());
+		//여기에 204 status에 맞게 return 작성
+		HashMap<String, Object> returnValues = new HashMap<>();
+		returnValues.put("a", "b");
+		return returnValues;
+	}
 
-        //여기에 204 status에 맞게 return 작성
-        HashMap<String, Object> returnValues = new HashMap<>();
-        returnValues.put("a", "b");
-        return returnValues;
-    }
+	@DeleteMapping("/{article-id}")
+	public Object deleteArticle(@PathVariable("article-id") Long id) {
+		articleService.deleteArticle(id);
 
-    @DeleteMapping("/article")
-    public Object deleteArticle(@RequestParam("article-id") Long id) {
-        articleService.deleteArticle(id);
-
-        //여기에 204 status에 맞게 return 작성
-        HashMap<String, Object> returnValues = new HashMap<>();
-        returnValues.put("a", "b");
-        return returnValues;
-    }
+		//여기에 204 status에 맞게 return 작성
+		HashMap<String, Object> returnValues = new HashMap<>();
+		returnValues.put("a", "b");
+		return returnValues;
+	}
 }
