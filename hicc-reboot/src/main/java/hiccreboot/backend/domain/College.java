@@ -1,13 +1,20 @@
 package hiccreboot.backend.domain;
 
-import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -15,37 +22,14 @@ import java.util.List;
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueCollege", columnNames = {"name"})})
 public class College {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "COLLEGE_ID")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "COLLEGE_ID")
+	private Long id;
 
-    @Column(nullable = false)
-    private String name;
+	@Column(nullable = false)
+	private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEPARTMENT_ID")
-    private Department department;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Member> members = new ArrayList<>();
-
-    @Builder
-    private College(String name, Department department) {
-        this.name = name;
-        changeDepartment(department);
-    }
-
-    public College createCollege(String name, Department department) {
-        return College.builder()
-                .name(name)
-                .department(department)
-                .build();
-    }
-
-    //연관 관계 메서드
-    public void changeDepartment(Department department) {
-        this.department = department;
-        department.getCollege().add(this);
-    }
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<Member> members = new ArrayList<>();
 }
