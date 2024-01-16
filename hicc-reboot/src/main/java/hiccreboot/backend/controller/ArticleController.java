@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.dto.Article.ArticleListResponse;
-import hiccreboot.backend.common.dto.Article.ArticleRequestDTO;
+import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.service.ArticleService;
@@ -37,45 +38,22 @@ public class ArticleController {
 	public Object searchArticleList(
 		@RequestParam(value = "page") int pageNumber,
 		@RequestParam(value = "size") int pageSize,
+		@RequestParam(value = "board") BoardType boardType,
 		@RequestParam(value = "sort", required = false, defaultValue = "null") String sort,
 		@RequestParam(value = "search", required = false, defaultValue = "null") String search) {
-		//유저 이름,등급
-		Grade userGrade = Grade.APPLICANT;
-		String userName = "나야나";
 
-		if (sort.equals("null")) {
-			List<Article> articles = articleService.findArticles(pageNumber, pageSize).getContent();
+		//유저 이름,등급 jwt를 통해 가져온다
 
+		List<Article> articles = articleService.findArticleBySort(pageNumber, pageSize, sort, search);
+
+		if (!articles.isEmpty()) {
 			ArticleListResponse articleListResponse = new ArticleListResponse();
 			articles.stream()
 				.forEach(article -> articleListResponse.addResult(
 					ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(),
 						article.getBoardType(), article.getSubject())));
 
-			return articleListResponse;
-		}
-
-		if (sort.equals("member")) {
-			List<Article> articles = articleService.findArticlesByMemberName(pageNumber, pageSize, search).getContent();
-
-			ArticleListResponse articleListResponse = new ArticleListResponse();
-			articles.stream()
-				.forEach(article -> articleListResponse.addResult(
-					ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(),
-						article.getBoardType(), article.getSubject())));
-
-			return articleListResponse;
-		}
-
-		if (sort.equals("subject")) {
-			List<Article> articles = articleService.findArticlesBySubject(pageNumber, pageSize, search).getContent();
-
-			ArticleListResponse articleListResponse = new ArticleListResponse();
-			articles.stream()
-				.forEach(article -> articleListResponse.addResult(
-					ArticleResponse.createArticleResponse(article.getId(), userGrade, userName, article.getDate(),
-						article.getBoardType(), article.getSubject())));
-
+			// 이 부분 형식에 맞게 리턴
 			return articleListResponse;
 		}
 
@@ -91,26 +69,19 @@ public class ArticleController {
 		String userName = "나야나";
 
 		if (article.isPresent()) {
-			return makeArticleDTO(article.get(), userGrade, userName);
+
+			// 이 부분 형태에 맞게 return
+			return articleService.makeArticleDTO(article.get(), userGrade, userName);
 		}
 		throw new ArticleNotFoundException();
 	}
 
-	private Object makeArticleDTO(Article article, Grade grade, String name) {
-		if (article.getAppendices().size() != 0) {
-			return ArticleResponse.createArticleResponse(article.getId(), grade, name, article.getDate(), true,
-				article.getAppendices(), article.getBoardType(), article.getSubject(), article.getContent());
-		}
-		return ArticleResponse.createArticleResponse(article.getId(), grade, name, article.getDate(), false,
-			article.getBoardType(), article.getSubject(), article.getContent());
-	}
-
 	@PostMapping("/article")
-	public Object addArticle(Member member, ArticleRequestDTO articleRequestDTO) {
+	public Object addArticle(Member member, @RequestBody ArticleRequest articleRequest) {
 		//여기에 jwt로 Member 가져오는 로직 작성, 매개변수의 member 삭제!
 
-		articleService.saveArticle(member, articleRequestDTO.getSubject(), articleRequestDTO.getContent(),
-			articleRequestDTO.getBoard(), articleRequestDTO.getDate(), articleRequestDTO.getAppendices());
+		articleService.saveArticle(member, articleRequest.getSubject(), articleRequest.getContent(),
+			articleRequest.getBoard(), articleRequest.getDate(), articleRequest.getAppendices());
 
 		//여기에 204 status에 맞게 return 작성
 		HashMap<String, Object> returnValues = new HashMap<>();
@@ -122,12 +93,12 @@ public class ArticleController {
 	public Object updateArticle(
 		Member member,
 		@PathVariable("article-id") Long id,
-		@RequestBody ArticleRequestDTO articleRequestDTO) {
+		@RequestBody ArticleRequest articleRequest) {
 		// Member 부분은 jwt에서 id 찾아서 가져오는 방식으로 수정
 
 		articleService.deleteArticle(id);
-		articleService.saveArticle(member, articleRequestDTO.getSubject(), articleRequestDTO.getContent(),
-			articleRequestDTO.getBoard(), articleRequestDTO.getDate(), articleRequestDTO.getAppendices());
+		articleService.saveArticle(member, articleRequest.getSubject(), articleRequest.getContent(),
+			articleRequest.getBoard(), articleRequest.getDate(), articleRequest.getAppendices());
 
 		//여기에 204 status에 맞게 return 작성
 		HashMap<String, Object> returnValues = new HashMap<>();
