@@ -8,9 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface TokenProvider {
 	String createAccessToken(String studentNumber);
 
-	String createRefreshToken();
-
-	void updateRefreshToken(String studentNumber, String refreshToken);
+	String createRefreshToken(String studentNumber);
 
 	void disableRefreshToken(String studentNumber);
 
