@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum Grade {
-	PRESIDENT("ROLE_PRESIDENT", "회장"),
-	EXECUTIVE("ROLE_EXECUTIVE", "임원"),
-	NORMAL("ROLE_NORMAL", "일반"),
-	APPLICANT("ROLE_APPLICANT", "승인대기자");
+	PRESIDENT("PRESIDENT", "회장"),
+	EXECUTIVE("EXECUTIVE", "임원"),
+	NORMAL("NORMAL", "일반"),
+	APPLICANT("APPLICANT", "승인대기자");
 
 	private final String description;
 	private final String name;
