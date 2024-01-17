@@ -60,7 +60,7 @@ public class TokenProviderImpl implements TokenProvider {
 			.setExpiration(expiration)
 			.setIssuer(issuer)
 			.claim(STUDENT_NUMBER, studentNumber)
-			.signWith(SignatureAlgorithm.HS512, secretKey.getBytes())
+			.signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
 			.compact();
 	}
 
