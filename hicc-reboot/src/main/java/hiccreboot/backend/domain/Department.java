@@ -19,12 +19,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueCollege", columnNames = {"name"})})
-public class College {
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueDepartment", columnNames = {"name"})})
+public class Department {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "COLLEGE_ID")
+	@Column(name = "DEPARTMENT_ID")
 	private Long id;
 
 	@Column(nullable = false)
