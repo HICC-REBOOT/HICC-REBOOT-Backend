@@ -1,12 +1,15 @@
 package hiccreboot.backend.service;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import hiccreboot.backend.common.dto.DataListResponse;
+import hiccreboot.backend.common.dto.Main.LatestNewsResponse;
+import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.domain.Article;
-import hiccreboot.backend.repository.Article.ArticleRepository;
+import hiccreboot.backend.domain.Grade;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,14 +17,29 @@ import lombok.RequiredArgsConstructor;
 public class MainService {
 
 	private final MemberRepository memberRepository;
-	private final ArticleRepository articleRepository;
+	private final ArticleService articleService;
 
 	public Long findMemberCount() {
 		return MemberRepository.countBy();
 	}
 
-	public Slice<Article> findArticles(int pageNumber, int pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findByIdOrderByIdDesc(pageable);
+	public DataListResponse<LatestNewsResponse> makeLatestNews(int pageNumber, int pageSize, Grade memberGrade,
+		String memberName) {
+		List<Article> articles = articleService.findArticles(pageNumber, pageSize).getContent();
+
+		if (articles.isEmpty()) {
+			throw ArticleNotFoundException.EXCEPTION;
+		}
+
+		List<LatestNewsResponse> latestNewsResponses = new ArrayList<>();
+		articles.stream()
+			.forEach(article -> latestNewsResponses.add(new LatestNewsResponse(
+				article.getId(),
+				memberGrade,
+				memberName,
+				article.getDate(),
+				!article.getAppendices().isEmpty(),
+				article.getSubject())));
+		return DataListResponse.create(latestNewsResponses);
 	}
 }
