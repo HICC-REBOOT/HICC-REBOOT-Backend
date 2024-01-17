@@ -8,7 +8,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import hiccreboot.backend.common.auth.jwt.dto.AccessTokenAndRefreshTokenResponse;
+import hiccreboot.backend.common.auth.jwt.dto.AccessTokenResponse;
+import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
+import hiccreboot.backend.common.util.ResponseWriter;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.domain.RefreshToken;
 import hiccreboot.backend.repository.member.MemberRepository;
@@ -94,15 +98,24 @@ public class TokenProviderImpl implements TokenProvider {
 	public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
 		response.setStatus(HttpServletResponse.SC_OK);
 
-		response.setHeader(accessHeader, accessToken);
-		response.setHeader(refreshHeader, refreshToken);
+		AccessTokenAndRefreshTokenResponse tokenResponse = AccessTokenAndRefreshTokenResponse.builder()
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.build();
+
+		ResponseWriter.writeResponse(response, DataResponse.ok(tokenResponse));
+
 	}
 
 	@Override
 	public void sendAccessToken(HttpServletResponse response, String accessToken) {
 		response.setStatus(HttpServletResponse.SC_OK);
 
-		response.setHeader(accessHeader, accessToken);
+		AccessTokenResponse tokenResponse = AccessTokenResponse.builder()
+			.accessToken(accessToken)
+			.build();
+
+		ResponseWriter.writeResponse(response, DataResponse.ok(tokenResponse));
 	}
 
 	@Override
