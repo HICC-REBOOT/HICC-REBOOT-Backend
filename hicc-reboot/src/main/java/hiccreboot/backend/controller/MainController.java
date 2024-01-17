@@ -1,17 +1,17 @@
 package hiccreboot.backend.controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import hiccreboot.backend.common.dto.Main.LatestNewsResponse;
-import hiccreboot.backend.domain.Article;
-import hiccreboot.backend.service.ArticleService;
+import hiccreboot.backend.common.auth.jwt.TokenProvider;
+import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.service.MainService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,33 +20,25 @@ import lombok.RequiredArgsConstructor;
 public class MainController {
 
 	private final MainService mainService;
-	private final ArticleService articleService;
+	private final MemberService memberService;
+	private final TokenProvider tokenProvider;
 
 	@GetMapping("/member-count")
 	public Object searchMemberCount() {
 		Long memberCount = mainService.findMemberCount();
 
-		// 이 부분에 리턴 형식에 맞게 리턴
+		return DataResponse.ok(memberCount);
 	}
 
 	@GetMapping("/latest-news")
 	public Object searchLatestNews(
 		@RequestParam(value = "page") int pageNumber,
-		@RequestParam(value = "size") int pageSize) {
-		List<Article> articles = articleService.findArticles(pageNumber, pageSize).getContent();
+		@RequestParam(value = "size") int pageSize,
+		HttpServletRequest httpServletRequest) {
+		Optional<String> studentNumber = tokenProvider.extractStudentNumber(httpServletRequest);
+		Member member = memberService.findMemberByStudentNumber(studentNumber.get());
 
-		// jwt로 grade 가져온다.
-
-		List<LatestNewsResponse> latestNewsResponses = new ArrayList<>();
-		articles.stream().forEach(article -> latestNewsResponses.add(new LatestNewsResponse(
-			article.getId(),
-			grade,
-			name,
-			article.getDate(),
-			!article.getAppendices().isEmpty(),
-			article.getSubject())));
-
-		// 이 부분에 형식에 맞게 리턴
+		return mainService.makeLatestNews(pageNumber, pageSize, member.getGrade(), member.getName());
 	}
 }
 
