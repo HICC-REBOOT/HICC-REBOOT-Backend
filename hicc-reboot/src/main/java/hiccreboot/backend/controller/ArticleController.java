@@ -39,12 +39,13 @@ public class ArticleController {
 		@RequestParam(value = "page") int pageNumber,
 		@RequestParam(value = "size") int pageSize,
 		@RequestParam(value = "board") BoardType boardType,
-		@RequestParam(value = "sort", required = false, defaultValue = "null") String sort,
+		@RequestParam(value = "sort", required = false, defaultValue = "article") String sort,
 		@RequestParam(value = "search", required = false, defaultValue = "null") String search) {
 
 		//유저 이름,등급 jwt를 통해 가져온다
 
-		List<Article> articles = articleService.findArticleBySort(pageNumber, pageSize, sort, search);
+		List<Article> articles = articleService.findArticleBySortAndBoardType(pageNumber, pageSize, boardType, sort,
+			search);
 
 		if (!articles.isEmpty()) {
 			ArticleListResponse articleListResponse = new ArticleListResponse();

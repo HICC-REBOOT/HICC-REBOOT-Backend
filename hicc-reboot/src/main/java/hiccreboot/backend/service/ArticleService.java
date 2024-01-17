@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,34 +26,42 @@ public class ArticleService {
 
 	private final ArticleRepository articleRepository;
 
-	public Slice<Article> findArticles(int pageNumber, int pageSize) {
+	public Page<Article> findArticles(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findByIdOrderByIdDesc(pageable);
+		return articleRepository.findAll(pageable);
 	}
 
-	private Slice<Article> findArticlesByMemberName(int pageNumber, int pageSize, String search) {
+	public Page<Article> findArticlesByBoardType(int pageNumber, int pageSize, BoardType boardType) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findByMember_Name(search, pageable);
+		return articleRepository.findAllByBoardType(pageable, boardType);
 	}
 
-	private Slice<Article> findArticlesBySubject(int pageNumber, int pageSize, String search) {
+	private Page<Article> findArticlesByMemberNameAndBoardType(int pageNumber, int pageSize, BoardType boardType,
+		String search) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findBySubjectContaining(search, pageable);
+		return articleRepository.findByMember_NameAndBoardType(search, boardType, pageable);
 	}
 
-	public List<Article> findArticleBySort(int pageNumber, int pageSize, String sort, String search) {
+	private Page<Article> findArticlesBySubjectAndBoardType(int pageNumber, int pageSize, BoardType boardType,
+		String search) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		return articleRepository.findBySubjectContainingAndBoardType(search, boardType, pageable);
+	}
+
+	public List<Article> findArticleBySortAndBoardType(int pageNumber, int pageSize, BoardType boardType, String sort,
+		String search) {
 		if (sort.equals("null")) {
-			return findArticles(pageNumber, pageSize).getContent();
+			return findArticlesByBoardType(pageNumber, pageSize, boardType).getContent();
 		}
 		if (sort.equals("member")) {
-			return findArticlesByMemberName(pageNumber, pageSize, search).getContent();
+			return findArticlesByMemberNameAndBoardType(pageNumber, pageSize, boardType, search).getContent();
 		}
 		if (sort.equals("subject")) {
-			return findArticlesBySubject(pageNumber, pageSize, search).getContent();
+			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, search).getContent();
 		}
 
 		// 이 부분 sort 값이 없는 Exception으로 변경
-		return new ArticleNotFoundException();
+		throw ArticleNotFoundException.EXCEPTION;
 	}
 
 	public Optional<Article> findArticle(Long id) {
