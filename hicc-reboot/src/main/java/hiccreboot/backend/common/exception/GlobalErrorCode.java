@@ -11,6 +11,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
 	ARTICLE_NOT_FOUND(NOT_FOUND, "ARTICLE_NOT_FOUND_404_1", "글을 찾을 수 없습니다."),
 	SCHEDULE_NOT_FOUND(NOT_FOUND, "SCHEDULE_FOUND_404_1", "스케쥴을 찾을 수 없습니다."),
 
+	EMAIL_DUPLICATE(CONFLICT, "EMAIL_DUPLICATE_409_1", "이미 존재하는 이메일입니다."),
 	STUDENT_NUMBER_DUPLICATE(CONFLICT, "STUDENT_NUMBER_DUPLICATE_409_1", "이미 존재하는 회원입니다.");
 	private final Integer status;
 	private final String code;
