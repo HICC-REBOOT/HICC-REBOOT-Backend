@@ -13,6 +13,7 @@ import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
 import hiccreboot.backend.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,13 +27,13 @@ public class AuthController {
 	private final TokenProvider tokenProvider;
 
 	@PostMapping("/sign-up")
-	public BaseResponse signUp(@RequestBody SignUpRequest request) {
+	public BaseResponse signUp(@Valid @RequestBody SignUpRequest request) {
 		memberService.signUp(request);
 		return DataResponse.ok();
 	}
 
 	@PostMapping("/duplicate")
-	public BaseResponse checkDuplicate(@RequestBody StudentNumberCheckRequest request) {
+	public BaseResponse checkDuplicate(@Valid @RequestBody StudentNumberCheckRequest request) {
 		return memberService.checkDuplicate(request);
 	}
 
