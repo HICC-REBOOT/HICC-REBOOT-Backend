@@ -40,19 +40,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		String accessToken = tokenProvider.extractAccessToken(request)
-			.filter(tokenProvider::isValidToken)
-			.orElse(null);
+		if (request.getRequestURI().equals(LOGIN_URL)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
 		String refreshToken = tokenProvider.extractRefreshToken(request)
 			.filter(tokenProvider::isValidToken)
 			.orElse(null);
 
-		if (request.getRequestURI().equals(LOGIN_URL)) {
-			filterChain.doFilter(request, response);
-		} else if (request.getRequestURI().equals(REFRESH_URL) && refreshToken != null) {
+		if (request.getRequestURI().equals(REFRESH_URL) && refreshToken != null) {
 			checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-		} else if (accessToken != null) {
+			return;
+		}
+
+		String accessToken = tokenProvider.extractAccessToken(request)
+			.filter(tokenProvider::isValidToken)
+			.orElse(null);
+
+		if (accessToken != null) {
 			checkAccessTokenAndAuthentication(response, accessToken);
 			filterChain.doFilter(request, response);
 		} else {
