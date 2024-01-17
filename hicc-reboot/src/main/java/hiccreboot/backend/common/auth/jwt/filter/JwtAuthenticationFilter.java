@@ -28,8 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private static final String LOGIN_URL = "/api/login";
-	private static final String REFRESH_URL = "/api/refresh";
+	private static final String LOGIN_URL = "/api/auth/login";
+	private static final String REFRESH_URL = "/api/auth/refresh";
 
 	private final TokenProvider tokenProvider;
 	private final MemberRepository memberRepository;
