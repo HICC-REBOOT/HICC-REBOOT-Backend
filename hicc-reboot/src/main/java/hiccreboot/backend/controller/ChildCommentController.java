@@ -1,9 +1,5 @@
 package hiccreboot.backend.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,12 +8,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import hiccreboot.backend.common.dto.ParentComment.ParentCommentRequest;
-import hiccreboot.backend.common.exception.CommentNotFoundException;
-import hiccreboot.backend.domain.Article;
-import hiccreboot.backend.domain.ChildComment;
-import hiccreboot.backend.service.ArticleService;
+import hiccreboot.backend.common.auth.jwt.TokenProvider;
+import hiccreboot.backend.common.dto.BaseResponse;
+import hiccreboot.backend.common.dto.ChildComment.PostChildCommentRequest;
+import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.service.ChildCommentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,30 +22,28 @@ import lombok.RequiredArgsConstructor;
 public class ChildCommentController {
 
 	private final ChildCommentService childCommentService;
-	private final ArticleService articleService;
+	private final TokenProvider tokenProvider;
 
 	@GetMapping("/{article-id}")
-	public Object searchParentComment(@PathVariable("article-id") Long id) {
-		List<ChildComment> childComments = childCommentService.findChildComments(id);
-
-		// 이 부분에 알맞게 리턴하도록 변경
+	public BaseResponse searchChildComments(@PathVariable("article-id") Long id) {
+		return childCommentService.makeChildComments(id);
 	}
 
 	@PostMapping
-	public Object addParentComment(@RequestBody ParentCommentRequest parentCommentRequest) {
-		Optional<Article> article = articleService.findArticle(parentCommentRequest.articleId());
-		if (article.isPresent()) {
-			childCommentService.saveChildComment(article.get(), member, LocalDateTime.now(),parentCommentRequest.articleId(), parentCommentRequest.content());
+	public BaseResponse addChildComment(@RequestBody PostChildCommentRequest postChildCommentRequest,
+		HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
-			// 이 부분에 상태에 맞게 리턴
-			return
-		}
+		childCommentService.saveChildComment(studentNumber, postChildCommentRequest.getArticleId(),
+			postChildCommentRequest.getParentCommentId(), postChildCommentRequest.getContent());
 
-		return new CommentNotFoundException();
+		return DataResponse.noContent();
 	}
 
 	@DeleteMapping("/{id}")
-	public Object deleteParentComment(@PathVariable("id") Long id) {
+	public BaseResponse deleteChildComment(@PathVariable("id") Long id) {
 		childCommentService.deleteChildComment(id);
+
+		return DataResponse.noContent();
 	}
 }
