@@ -14,6 +14,7 @@ import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.Article.ArticlesResponse;
+import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.service.ArticleService;
@@ -45,8 +46,8 @@ public class ArticleController {
 		return articleService.makeArticle(id);
 	}
 
-	@PostMapping("/article")
-	public DataResponse addArticle(@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
+	@PostMapping
+	public BaseResponse addArticle(@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
 		articleService.saveArticle(studentNumber, articleRequest.getSubject(), articleRequest.getContent(),
@@ -56,7 +57,7 @@ public class ArticleController {
 	}
 
 	@PatchMapping("/{article-id}")
-	public Object updateArticle(
+	public BaseResponse updateArticle(
 		@PathVariable("article-id") Long id,
 		@RequestBody ArticleRequest articleRequest) {
 
@@ -67,7 +68,7 @@ public class ArticleController {
 	}
 
 	@DeleteMapping("/{article-id}")
-	public DataResponse deleteArticle(@PathVariable("article-id") Long id) {
+	public BaseResponse deleteArticle(@PathVariable("article-id") Long id) {
 		articleService.deleteArticle(id);
 
 		return DataResponse.noContent();
