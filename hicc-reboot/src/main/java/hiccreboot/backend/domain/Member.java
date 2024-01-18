@@ -51,10 +51,6 @@ public class Member {
 	@JoinColumn(name = "DEPARTMENT_ID")
 	private Department department;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "COLLEGE_ID")
-	private College college;
-
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	private List<Article> articles = new ArrayList<>();
 
@@ -100,17 +96,6 @@ public class Member {
 
 	public void destroyRefreshToken() {
 		this.refreshToken = null;
-	}
-
-	//연관 관계 메서드
-	public void changeDepartment(Department department) {
-		this.department = department;
-		department.getMembers().add(this);
-	}
-
-	public void changeCollege(College college) {
-		this.college = college;
-		college.getMembers().add(this);
 	}
 
 }
