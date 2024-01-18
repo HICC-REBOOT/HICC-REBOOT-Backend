@@ -55,4 +55,5 @@ public class MemberService {
 			.map(DataResponse::ok)
 			.orElseThrow();
 	}
+
 }

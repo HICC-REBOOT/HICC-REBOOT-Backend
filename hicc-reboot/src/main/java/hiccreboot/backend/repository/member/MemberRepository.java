@@ -9,5 +9,5 @@ import hiccreboot.backend.domain.Member;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	Optional<Member> findByStudentNumber(String studentNumber);
-	
+
 }
