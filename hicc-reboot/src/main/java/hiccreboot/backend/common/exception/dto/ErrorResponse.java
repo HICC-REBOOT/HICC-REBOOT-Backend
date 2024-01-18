@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatusCode;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.exception.CustomException;
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class ErrorResponse extends BaseResponse {
 
 	private final int status;

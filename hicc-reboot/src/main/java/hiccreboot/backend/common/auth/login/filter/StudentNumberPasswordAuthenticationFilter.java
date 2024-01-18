@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class StudentNumberPasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-	private static final String DEFAULT_LOGIN_URL = "/api/login";
+	private static final String DEFAULT_LOGIN_URL = "/api/auth/login";
 	private static final String DEFAULT_LOGIN_HTTP_METHOD = "POST";
 	private static final String CONTENT_TYPE = "application/json";
 	private static final AntPathRequestMatcher REQUEST_MATCHER = new AntPathRequestMatcher(DEFAULT_LOGIN_URL,
