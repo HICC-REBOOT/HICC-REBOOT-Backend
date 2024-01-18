@@ -1,7 +1,5 @@
 package hiccreboot.backend.controller;
 
-import java.util.Optional;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,9 +16,7 @@ import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.Article.ArticlesResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.domain.BoardType;
-import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.service.ArticleService;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -30,9 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class ArticleController {
 
 	private final ArticleService articleService;
-	private final EntityManager em;
 	private final TokenProvider tokenProvider;
-	private final MemberService memberService;
 
 	@GetMapping
 	public DataResponse<ArticlesResponse> searchArticleList(
@@ -53,10 +47,9 @@ public class ArticleController {
 
 	@PostMapping("/article")
 	public DataResponse addArticle(@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
-		Optional<String> studentNumber = tokenProvider.extractStudentNumber(httpServletRequest);
-		Member member = memberService.findMemberByStudentNumber(studentNumber.get());
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
-		articleService.saveArticle(member, articleRequest.getSubject(), articleRequest.getContent(),
+		articleService.saveArticle(studentNumber, articleRequest.getSubject(), articleRequest.getContent(),
 			articleRequest.getBoard(), articleRequest.getAppendices());
 
 		return DataResponse.noContent();
