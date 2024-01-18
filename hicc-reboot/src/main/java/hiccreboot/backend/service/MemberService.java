@@ -56,7 +56,4 @@ public class MemberService {
 			.orElseThrow();
 	}
 
-	public Member findByStudentNumber(String studentNumber) {
-
-	}
 }
