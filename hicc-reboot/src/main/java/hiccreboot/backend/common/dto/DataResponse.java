@@ -12,7 +12,7 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataResponse<T> extends BaseResponse {
 	private final T data;
-	
+
 	@Builder
 	protected DataResponse(boolean isSuccess, HttpStatusCode statusCode, T data) {
 		super(isSuccess, statusCode);
@@ -31,6 +31,13 @@ public class DataResponse<T> extends BaseResponse {
 		return DataResponse.<T>builder()
 			.isSuccess(true)
 			.statusCode(HttpStatus.OK)
+			.build();
+	}
+
+	public static <T> DataResponse<T> noContent() {
+		return DataResponse.<T>builder()
+			.isSuccess(true)
+			.statusCode(HttpStatus.NO_CONTENT)
 			.build();
 	}
 }
