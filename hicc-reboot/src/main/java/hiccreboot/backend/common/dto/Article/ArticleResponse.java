@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import hiccreboot.backend.domain.Appendix;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.domain.Grade;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,19 +19,17 @@ public class ArticleResponse {
 	private final String name;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
 	private final LocalDateTime date;
-	private final Boolean appendixExistence;
 	private final List<Appendix> appendices;
 	private final BoardType board;
 	private final String subject;
 	private final String content;
 
-	@Builder
+	@Builder(access = AccessLevel.PRIVATE)
 	private ArticleResponse(
 		Long articleId,
 		Grade grade,
 		String name,
 		LocalDateTime date,
-		Boolean appendixExistence,
 		List<Appendix> appendices,
 		BoardType board,
 		String subject,
@@ -39,7 +38,6 @@ public class ArticleResponse {
 		this.grade = grade;
 		this.name = name;
 		this.date = date;
-		this.appendixExistence = appendixExistence;
 		this.appendices = appendices;
 		this.board = board;
 		this.subject = subject;
@@ -51,7 +49,6 @@ public class ArticleResponse {
 		Grade grade,
 		String name,
 		LocalDateTime date,
-		Boolean appendixExistence,
 		List<Appendix> appendices,
 		BoardType board,
 		String subject,
@@ -62,7 +59,6 @@ public class ArticleResponse {
 			.grade(grade)
 			.name(name)
 			.date(date)
-			.appendixExistence(appendixExistence)
 			.appendices(appendices)
 			.board(board)
 			.subject(subject)

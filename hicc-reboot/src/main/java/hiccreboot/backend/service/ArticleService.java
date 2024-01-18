@@ -14,11 +14,13 @@ import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.Article.ArticlesResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Appendix;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
+import hiccreboot.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class ArticleService {
 
 	private final ArticleRepository articleRepository;
+	private final MemberRepository memberRepository;
 
 	public Page<Article> findArticles(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -100,7 +103,6 @@ public class ArticleService {
 			article.getMember().getGrade(),
 			article.getMember().getName(),
 			article.getDate(),
-			!article.getAppendices().isEmpty(),
 			article.getAppendices(),
 			article.getBoardType(),
 			article.getSubject(),
@@ -108,11 +110,14 @@ public class ArticleService {
 	}
 
 	@Transactional
-	public Article saveArticle(Member member, String subject, String content, BoardType boardType,
+	public Article saveArticle(String studentNumber, String subject, String content, BoardType boardType,
 		List<String> appendices) {
-		Article article = Article.createArticle(subject, content, boardType, LocalDateTime.now());
-		article.changeMember(member);
-		appendices.stream().forEach(appendix -> article.addAppendix(appendix));
+		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
+			MemberNotFoundException.EXCEPTION);
+		Article article = Article.createArticle(member, subject, content, boardType, LocalDateTime.now());
+
+		//이 부분 Appendix 추가하는 부분 수정
+		appendices.forEach(appendix -> article.addAppendix(appendix));
 
 		return articleRepository.save(article);
 	}
