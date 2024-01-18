@@ -44,9 +44,11 @@ public class WebSecurityConfig {
 	private final LoginFailureHandler loginFailureHandler;
 
 	private static String[] ALLOWED_PATTERN = new String[] {
-		"/api/login/**",
-		"/api/sign-up**",
-		"/api/logout**",
+		"/api/auth/login/**",
+		"/api/auth/sign-up/**",
+		"/api/auth/duplicate/**",
+		"/api/auth/departments",
+		"/api/auth/logout/**",
 	};
 
 	@Bean
@@ -64,7 +66,7 @@ public class WebSecurityConfig {
 				.anyRequest()
 				.authenticated()) // for develop
 			.logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
-				.logoutUrl("/api/logout")
+				.logoutUrl("/api/auth/logout")
 				.logoutSuccessHandler((request, response, authentication) -> {
 					tokenProvider.extractStudentNumber(request)
 						.ifPresent(tokenProvider::disableRefreshToken);
