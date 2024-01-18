@@ -74,7 +74,7 @@ public class ArticleController {
 	}
 
 	@DeleteMapping("/{article-id}")
-	public Object deleteArticle(@PathVariable("article-id") Long id) {
+	public DataResponse deleteArticle(@PathVariable("article-id") Long id) {
 		articleService.deleteArticle(id);
 
 		return DataResponse.noContent();
