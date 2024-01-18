@@ -1,14 +1,18 @@
 package hiccreboot.backend.repository.Article;
 
-import hiccreboot.backend.domain.Article;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.BoardType;
+
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    Slice<Article> findByIdOrderByIdDesc(Pageable pageable);
+	Page<Article> findAll(Pageable pageable);
 
-    Slice<Article> findByMember_Name(String name, Pageable pageable);
+	Page<Article> findAllByBoardType(Pageable pageable, BoardType boardType);
 
-    Slice<Article> findBySubjectContaining(String subject, Pageable pageable);
+	Page<Article> findByMember_NameAndBoardType(String name, BoardType boardType, Pageable pageable);
+
+	Page<Article> findBySubjectContainingAndBoardType(String subject, BoardType boardType, Pageable pageable);
 }

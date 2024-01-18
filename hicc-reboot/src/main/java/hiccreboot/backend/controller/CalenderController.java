@@ -67,7 +67,7 @@ public class CalenderController {
     }
 
     @DeleteMapping("schedule")
-    public Object deleteSchedule(@RequestParam("scheduleId") Long id) {
+    public Object deleteSchedule(@RequestParam("schedule-id") Long id) {
         calenderService.deleteSchedule(id);
 
         // 이 부분 status에 맞게 변경

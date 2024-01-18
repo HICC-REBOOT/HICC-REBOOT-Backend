@@ -1,22 +1,6 @@
 package hiccreboot.backend.domain;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -64,6 +48,13 @@ public class Article {
 		this.boardType = boardType;
 		this.date = date;
 	}
+	private Article(Member member, String subject, String content, BoardType boardType, LocalDateTime date) {
+		changeMember(member);
+		this.subject = subject;
+		this.content = content;
+		this.boardType = boardType;
+		this.date = date;
+	}
 
 	public static Article createArticle(String subject, String content, BoardType boardType, LocalDateTime date) {
 		return new Article(subject, content, boardType, date);
@@ -81,17 +72,9 @@ public class Article {
 		this.boardType = boardType;
 	}
 
-	public void updateDate(LocalDateTime date) {
-		this.date = date;
-	}
-
 	//연관 관계 메서드
-	public void addAppendix(Appendix appendix) {
-		this.appendices.add(appendix);
-		appendix.setArticle(this);
-	}
 
-	public void changeMember(Member member) {
+	private void changeMember(Member member) {
 		this.member = member;
 		member.getArticles().add(this);
 	}
