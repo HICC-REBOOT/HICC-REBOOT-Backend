@@ -3,6 +3,7 @@ package hiccreboot.backend.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
 import hiccreboot.backend.dto.response.ApplicantResponse;
+import hiccreboot.backend.dto.response.MemberResponse;
 import hiccreboot.backend.dto.response.MemberSimpleResponse;
 import hiccreboot.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,7 @@ public class MemberService {
 		memberRepository.save(member);
 	}
 
+	@Transactional(readOnly = true)
 	public BaseResponse checkDuplicate(StudentNumberCheckRequest request) {
 		memberRepository.findByStudentNumber(request.getStudentNumber())
 			.ifPresent(member -> {
@@ -55,6 +58,7 @@ public class MemberService {
 		return DataResponse.ok();
 	}
 
+	@Transactional(readOnly = true)
 	public BaseResponse findSimpleInfo(String studentNumber) {
 		return memberRepository.findByStudentNumber(studentNumber)
 			.map(MemberSimpleResponse::create)
@@ -62,31 +66,29 @@ public class MemberService {
 			.orElseThrow();
 	}
 
+	@Transactional(readOnly = true)
 	public DataResponse<Page<ApplicantResponse>> findAllApplicant(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Member> applicants = memberRepository.findAllByGrade(Grade.APPLICANT, pageable);
+		Page<ApplicantResponse> result = memberRepository.findAllByGrade(Grade.APPLICANT, pageable)
+			.map(ApplicantResponse::create);
 
-		return DataResponse.ok(applicants.map(ApplicantResponse::create));
+		return DataResponse.ok(result);
 	}
 
-	public BaseResponse approve(Long applicantId) {
+	public void approve(Long applicantId) {
 		memberRepository.findById(applicantId)
 			.filter(applicant -> applicant.getGrade().equals(Grade.APPLICANT))
 			.ifPresentOrElse(applicant -> applicant.updateGrade(Grade.NORMAL), () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
-
-		return DataResponse.ok();
 	}
 
-	public BaseResponse reject(Long applicantId) {
+	public void reject(Long applicantId) {
 		memberRepository.findById(applicantId)
 			.filter(applicant -> applicant.getGrade().equals(Grade.APPLICANT))
 			.ifPresentOrElse(memberRepository::delete, () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
-
-		return DataResponse.noContent();
 	}
 
 }

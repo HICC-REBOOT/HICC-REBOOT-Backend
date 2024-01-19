@@ -4,12 +4,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.dto.BaseResponse;
+import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.dto.request.ModifyGradeRequest;
 import hiccreboot.backend.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,18 +24,22 @@ public class AdminController {
 	private final MemberService memberService;
 
 	@GetMapping("/applicants")
-	public BaseResponse getApplicants(@RequestParam(value = "page") int page, @RequestParam(value = "size") int size) {
+	public BaseResponse findApplicants(@RequestParam(value = "page") int page, @RequestParam(value = "size") int size) {
 		return memberService.findAllApplicant(page, size);
 	}
 
 	@PatchMapping("/applicants/{applicant-id}")
 	public BaseResponse approveApplicant(@PathVariable(value = "applicant-id") Long applicantId) {
-		return memberService.approve(applicantId);
+		memberService.approve(applicantId);
+
+		return DataResponse.ok();
 	}
 
 	@DeleteMapping("/applicants/{applicant-id}")
 	public BaseResponse rejectApplicant(@PathVariable(value = "applicant-id") Long applicantId) {
-		return memberService.reject(applicantId);
+		memberService.reject(applicantId);
+
+		return DataResponse.noContent();
 	}
 
 }
