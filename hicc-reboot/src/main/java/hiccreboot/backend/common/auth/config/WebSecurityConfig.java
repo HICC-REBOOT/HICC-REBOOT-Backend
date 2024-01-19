@@ -49,6 +49,8 @@ public class WebSecurityConfig {
 		"/api/auth/duplicate/**",
 		"/api/auth/departments",
 		"/api/auth/logout/**",
+		"/swagger-ui/**",
+		"/api-docs/**"
 	};
 
 	@Bean
