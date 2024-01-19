@@ -1,6 +1,5 @@
 package hiccreboot.backend.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +38,7 @@ public class ChildCommentService {
 		List<ChildCommentResponse> childCommentResponses = new ArrayList<>();
 		childComments.stream()
 			.forEach((childComment) -> childCommentResponses.add(new ChildCommentResponse(
+				articleId,
 				childComment.getParentCommentId(),
 				childComment.getId(),
 				childComment.getMember().getName(),
@@ -53,9 +53,7 @@ public class ChildCommentService {
 			MemberNotFoundException.EXCEPTION);
 		Article article = articleRepository.findById(articleId).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
-		ChildComment childComment = ChildComment.createChildComment(LocalDateTime.now(), parentCommentId, content);
-		childComment.addArticle(article);
-		childComment.addMember(member);
+		ChildComment childComment = ChildComment.createChildComment(member, article, parentCommentId, content);
 
 		return childCommentRepository.save(childComment);
 	}

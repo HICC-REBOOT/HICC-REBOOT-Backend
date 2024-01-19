@@ -42,32 +42,34 @@ public class ChildComment {
 	@Column(nullable = false)
 	private String content;
 
-	@Builder
-	public ChildComment(Long id, LocalDateTime date, Member member, Article article, Long parentCommentId,
+	@Builder(access = AccessLevel.PRIVATE)
+	private ChildComment(LocalDateTime date, Member member, Article article, Long parentCommentId,
 		String content) {
-		this.id = id;
 		this.date = date;
-		this.member = member;
-		this.article = article;
+		addMember(member);
+		addArticle(article);
 		this.parentCommentId = parentCommentId;
 		this.content = content;
 	}
 
-	public static ChildComment createChildComment(LocalDateTime date, Long parentCommentId, String content) {
+	public static ChildComment createChildComment(Member member, Article article, Long parentCommentId,
+		String content) {
 		return ChildComment.builder()
-			.date(date)
+			.member(member)
+			.article(article)
+			.date(LocalDateTime.now())
 			.parentCommentId(parentCommentId)
 			.content(content)
 			.build();
 	}
 
 	//연관 관계 메서드
-	public void addMember(Member member) {
+	private void addMember(Member member) {
 		this.member = member;
 		member.getChildComments().add(this);
 	}
 
-	public void addArticle(Article article) {
+	private void addArticle(Article article) {
 		this.article = article;
 		article.getChildComments().add(this);
 	}
