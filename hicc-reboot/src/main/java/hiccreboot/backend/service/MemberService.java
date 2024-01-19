@@ -91,4 +91,39 @@ public class MemberService {
 			});
 	}
 
+	@Transactional(readOnly = true)
+	public DataResponse<Page<MemberResponse>> findMembers(int page, int size, String sortBy, String search) {
+		Pageable pageable = PageRequest.of(page, size, getSort(sortBy));
+
+		Page<MemberResponse> result = memberRepository.findAllByNameWithoutApplicant(search, pageable)
+			.map(MemberResponse::create);
+
+		return DataResponse.ok(result);
+	}
+
+	public void modifyGrade(Long modifiedMemberId, Grade grade) {
+		memberRepository.findById(modifiedMemberId)
+			.filter(memberNotPresident -> !memberNotPresident.getGrade().equals(Grade.PRESIDENT))
+			.ifPresentOrElse(member -> member.updateGrade(grade), () -> {
+				throw MemberNotFoundException.EXCEPTION;
+			});
+	}
+
+	public void expel(Long deletedMemberId) {
+		memberRepository.findById(deletedMemberId)
+			.filter(memberNotPresident -> !memberNotPresident.getGrade().equals(Grade.PRESIDENT))
+			.ifPresentOrElse(memberRepository::delete, () -> {
+				throw MemberNotFoundException.EXCEPTION;
+			});
+	}
+
+	private Sort getSort(String sortBy) {
+		if (sortBy.equals("department")) {
+			return Sort.by("department_id");
+		} else if (sortBy.equals("name")) {
+			return Sort.by("name");
+		} else {
+			return Sort.by("grade");
+		}
+	}
 }

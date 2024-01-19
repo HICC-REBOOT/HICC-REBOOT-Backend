@@ -42,4 +42,26 @@ public class AdminController {
 		return DataResponse.noContent();
 	}
 
+	@GetMapping("/members")
+	public BaseResponse findMembers(@RequestParam(value = "page") int page, @RequestParam(value = "size") int size,
+		@RequestParam(value = "sort", defaultValue = "grade") String sortBy,
+		@RequestParam(value = "search", defaultValue = "", required = false) String searchName) {
+		return memberService.findMembers(page, size, sortBy, searchName);
+	}
+
+	@PatchMapping("/president/members/{member-id}")
+	public BaseResponse modifyGrade(@PathVariable(value = "member-id") Long memberId,
+		@Valid @RequestBody ModifyGradeRequest request) {
+		memberService.modifyGrade(memberId, request.getGrade());
+
+		return DataResponse.ok();
+	}
+
+	@DeleteMapping("/president/members/{member-id}")
+	public BaseResponse expel(@PathVariable(value = "member-id") Long memberId) {
+		memberService.expel(memberId);
+
+		return DataResponse.noContent();
+	}
+
 }
