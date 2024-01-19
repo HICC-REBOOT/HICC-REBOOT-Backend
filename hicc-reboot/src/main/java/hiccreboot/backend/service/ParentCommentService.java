@@ -1,6 +1,5 @@
 package hiccreboot.backend.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,9 +52,7 @@ public class ParentCommentService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
-		ParentComment parentComment = ParentComment.createParentComment(LocalDateTime.now(), content);
-		parentComment.addArticle(article);
-		parentComment.addMember(member);
+		ParentComment parentComment = ParentComment.createParentComment(member, article, content);
 
 		return parentCommentRepository.save(parentComment);
 	}

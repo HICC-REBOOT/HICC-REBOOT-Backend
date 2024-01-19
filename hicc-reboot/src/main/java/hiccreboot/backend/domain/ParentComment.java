@@ -39,26 +39,30 @@ public class ParentComment {
 	@Column(nullable = false)
 	private String content;
 
-	@Builder
-	public ParentComment(Long id, LocalDateTime date, Member member, Article article, String content) {
-		this.id = id;
+	@Builder(access = AccessLevel.PRIVATE)
+	private ParentComment(LocalDateTime date, Member member, Article article, String content) {
 		this.date = date;
-		this.member = member;
-		this.article = article;
+		addMember(member);
+		addArticle(article);
 		this.content = content;
 	}
 
-	public static ParentComment createParentComment(LocalDateTime date, String content) {
-		return ParentComment.builder().date(date).content(content).build();
+	public static ParentComment createParentComment(Member member, Article article, String content) {
+		return ParentComment.builder()
+			.member(member)
+			.article(article)
+			.date(LocalDateTime.now())
+			.content(content)
+			.build();
 	}
 
 	//연관 관계 메서드
-	public void addMember(Member member) {
+	private void addMember(Member member) {
 		this.member = member;
 		member.getParentComments().add(this);
 	}
 
-	public void addArticle(Article article) {
+	private void addArticle(Article article) {
 		this.article = article;
 		article.getParentComments().add(this);
 	}
