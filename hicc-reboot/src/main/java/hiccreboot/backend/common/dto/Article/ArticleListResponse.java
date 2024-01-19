@@ -1,8 +1,6 @@
 package hiccreboot.backend.common.dto.Article;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -14,49 +12,39 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class
-ArticleResponse {
+public class ArticleListResponse {
 	private final Long articleId;
 	private final Grade grade;
 	private final String name;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private final LocalDateTime date;
-	private final List<String> urls;
 	private final BoardType board;
 	private final String subject;
-	private final String content;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private ArticleResponse(
+	private ArticleListResponse(
 		Long articleId,
 		Grade grade,
 		String name,
 		LocalDateTime date,
-		List<String> urls,
 		BoardType board,
-		String subject,
-		String content) {
+		String subject) {
 		this.articleId = articleId;
 		this.grade = grade;
 		this.name = name;
 		this.date = date;
-		this.urls = urls;
 		this.board = board;
 		this.subject = subject;
-		this.content = content;
 	}
 
-	public static ArticleResponse create(Article article) {
-		return ArticleResponse.builder()
+	public static ArticleListResponse create(Article article) {
+		return ArticleListResponse.builder()
 			.articleId(article.getId())
 			.grade(article.getMember().getGrade())
 			.name(article.getMember().getName())
 			.date(article.getDate())
-			.urls(
-				article.getAppendices().stream().map(appendix -> appendix.getUrl()).collect(Collectors.toList()))
 			.board(article.getBoardType())
 			.subject(article.getSubject())
-			.content(article.getContent())
 			.build();
 	}
 }

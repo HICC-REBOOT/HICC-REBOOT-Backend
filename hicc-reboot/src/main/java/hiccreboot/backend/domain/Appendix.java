@@ -10,9 +10,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Appendix {
 
@@ -22,21 +24,32 @@ public class Appendix {
 	private Long id;
 
 	@Column(nullable = false)
-	private String path;
+	private String fileName;
+
+	@Column(nullable = false)
+	private String fileNameExtention;
+
+	@Column(nullable = false)
+	private String url;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ARTICLE_ID")
 	private Article article;
 
-	@Builder
-	private Appendix(String path, Article article) {
-		this.path = path;
-		this.article = article;
+	@Builder(access = AccessLevel.PRIVATE)
+	private Appendix(String fileName, String fileNameExtention, String url, Article article) {
+		this.fileName = fileName;
+		this.url = url;
+		this.fileNameExtention = fileNameExtention;
+		changeArticle(article);
 	}
 
-	public Appendix createAppendix(String path) {
+	public static Appendix createAppendix(String fileName, String fileNameExtention, String url, Article article) {
 		return Appendix.builder()
-			.path(path)
+			.fileName(fileName)
+			.fileNameExtention(fileNameExtention)
+			.url(url)
+			.article(article)
 			.build();
 	}
 
