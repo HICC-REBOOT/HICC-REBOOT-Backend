@@ -78,7 +78,7 @@ public class MemberService {
 	public void approve(Long applicantId) {
 		memberRepository.findById(applicantId)
 			.filter(applicant -> applicant.getGrade().equals(Grade.APPLICANT))
-			.ifPresentOrElse(applicant -> applicant.updateGrade(Grade.NORMAL), () -> {
+			.ifPresentOrElse(Member::approve, () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
 	}
