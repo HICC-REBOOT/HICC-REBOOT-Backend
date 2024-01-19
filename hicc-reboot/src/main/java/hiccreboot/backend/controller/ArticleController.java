@@ -50,8 +50,8 @@ public class ArticleController {
 	public BaseResponse addArticle(@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
-		articleService.saveArticle(studentNumber, articleRequest.getSubject(), articleRequest.getContent(),
-			articleRequest.getBoard(), articleRequest.getAppendices());
+		articleService.saveArticle(studentNumber, articleRequest.subject(), articleRequest.content(),
+			articleRequest.board(), articleRequest.appendices());
 
 		return DataResponse.noContent();
 	}
