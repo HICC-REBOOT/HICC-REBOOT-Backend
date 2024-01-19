@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@Data
+@RequiredArgsConstructor
 public class ParentCommentResponse {
 
 	private final Long articleId;
@@ -16,11 +20,4 @@ public class ParentCommentResponse {
 	private final LocalDateTime date;
 	private final String content;
 
-	public ParentCommentResponse(Long articleId, Long commentId, String name, LocalDateTime date, String content) {
-		this.articleId = articleId;
-		this.commentId = commentId;
-		this.name = name;
-		this.date = date;
-		this.content = content;
-	}
 }

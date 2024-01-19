@@ -1,15 +1,13 @@
 package hiccreboot.backend.common.dto.ParentComment;
 
+import lombok.Data;
 import lombok.Getter;
 
 @Getter
+@Data
 public class PostParentCommentRequest {
 
-	private final Long articleId;
-	private final String content;
+	private Long articleId;
+	private String content;
 
-	public PostParentCommentRequest(Long articleId, String content) {
-		this.articleId = articleId;
-		this.content = content;
-	}
 }
