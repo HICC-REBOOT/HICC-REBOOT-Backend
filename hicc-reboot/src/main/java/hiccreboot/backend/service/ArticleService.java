@@ -1,6 +1,5 @@
 package hiccreboot.backend.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +37,7 @@ public class ArticleService {
 
 	private List<Article> findArticleBySortAndBoardType(int pageNumber, int pageSize, BoardType boardType, String sort,
 		String search) {
-		if (sort.equals("null")) {
+		if (sort.equals("article")) {
 			return findArticlesByBoardType(pageNumber, pageSize, boardType).getContent();
 		}
 		if (sort.equals("member")) {
@@ -48,7 +47,6 @@ public class ArticleService {
 			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, search).getContent();
 		}
 
-		// 이 부분 sort 값이 없는 Exception으로 변경
 		throw ArticleNotFoundException.EXCEPTION;
 	}
 
@@ -115,7 +113,7 @@ public class ArticleService {
 		List<String> appendices) {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
-		Article article = Article.createArticle(member, subject, content, boardType, LocalDateTime.now());
+		Article article = Article.createArticle(member, subject, content, boardType);
 
 		//이 부분 Appendix 추가하는 부분 수정
 		appendices.forEach(appendix -> article.addAppendix(appendix));

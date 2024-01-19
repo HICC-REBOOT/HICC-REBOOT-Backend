@@ -18,6 +18,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -58,13 +59,7 @@ public class Article {
 	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Appendix> appendices = new ArrayList<>();
 
-	private Article(String subject, String content, BoardType boardType, LocalDateTime date) {
-		this.subject = subject;
-		this.content = content;
-		this.boardType = boardType;
-		this.date = date;
-	}
-
+	@Builder(access = AccessLevel.PRIVATE)
 	private Article(Member member, String subject, String content, BoardType boardType, LocalDateTime date) {
 		changeMember(member);
 		this.subject = subject;
@@ -73,8 +68,8 @@ public class Article {
 		this.date = date;
 	}
 
-	public static Article createArticle(String subject, String content, BoardType boardType, LocalDateTime date) {
-		return new Article(subject, content, boardType, date);
+	public static Article createArticle(Member member, String subject, String content, BoardType boardType) {
+		return new Article(member, subject, content, boardType, LocalDateTime.now());
 	}
 
 	public void updateSubject(String subject) {
@@ -90,7 +85,6 @@ public class Article {
 	}
 
 	//연관 관계 메서드
-
 	private void changeMember(Member member) {
 		this.member = member;
 		member.getArticles().add(this);
