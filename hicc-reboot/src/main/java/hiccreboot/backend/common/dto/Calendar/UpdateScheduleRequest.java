@@ -15,23 +15,9 @@ import lombok.Getter;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UpdateScheduleRequest {
 
-	private final Long scheduleId;
-
-	private final String name;
-
-	private final List<LocalDate> dates;
-
-	private final ScheduleType type;
-
-	private final String content;
-
-	public UpdateScheduleRequest(Long scheduleId, String name, List<LocalDate> dates, ScheduleType type,
-		String content) {
-		this.scheduleId = scheduleId;
-		this.name = name;
-		this.dates = dates;
-		this.type = type;
-		this.content = content;
-	}
-
+	private Long scheduleId;
+	private String name;
+	private List<LocalDate> dates;
+	private ScheduleType type;
+	private String content;
 }

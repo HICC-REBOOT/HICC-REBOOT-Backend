@@ -92,15 +92,5 @@ public class CalendarService {
 		deleteSchedule(updateScheduleRequest.getScheduleId());
 		return saveSchedule(updateScheduleRequest.getName(), updateScheduleRequest.getDates(),
 			updateScheduleRequest.getContent(), updateScheduleRequest.getType());
-
-		//        Optional<Schedule> schedule = scheduleRepository.findById(updateScheduleRequsetDTO.getScheduleId());
-
-		//        if (schedule.isPresent()) {
-		//            Schedule updatedSchedule = schedule.get();
-		//            updatedSchedule.updateName(updateScheduleRequsetDTO.getName());
-		//            updatedSchedule.updateContent(updateScheduleRequsetDTO.getContent());
-		//            updatedSchedule.updateScheduleType(ScheduleType.findByName(updateScheduleRequsetDTO.getType()));
-		//        }
-		//        throw new ScheduleNotFoundException();
 	}
 }

@@ -4,22 +4,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 import hiccreboot.backend.domain.ScheduleType;
+import lombok.Data;
 import lombok.Getter;
 
 @Getter
+@Data
 public class PostScheduleRequest {
-	private final String name;
+	private String name;
 
-	private final List<LocalDate> dates;
+	private List<LocalDate> dates;
 
-	private final ScheduleType type;
+	private ScheduleType type;
 
-	private final String content;
-
-	public PostScheduleRequest(String name, List<LocalDate> dates, ScheduleType type, String content) {
-		this.name = name;
-		this.dates = dates;
-		this.type = type;
-		this.content = content;
-	}
+	private String content;
 }
