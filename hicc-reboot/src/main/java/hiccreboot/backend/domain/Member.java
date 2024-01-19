@@ -55,7 +55,10 @@ public class Member {
 	private List<Article> articles = new ArrayList<>();
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-	private List<Comment> comments = new ArrayList<>();
+	private List<ChildComment> childComments = new ArrayList<>();
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+	private List<ParentComment> parentComments = new ArrayList<>();
 
 	private String refreshToken;
 
