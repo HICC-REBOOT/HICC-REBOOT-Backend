@@ -92,6 +92,18 @@ public class Member {
 		this.grade = grade;
 	}
 
+	public void updatePhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public void updateDepartment(Department department) {
+		this.department = department;
+	}
+
+	public void updatePassword(String password) {
+		this.password = password;
+	}
+
 	public void passwordEncode(PasswordEncoder passwordEncoder) {
 		this.password = passwordEncoder.encode(this.password);
 	}
