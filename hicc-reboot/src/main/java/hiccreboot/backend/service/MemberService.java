@@ -10,16 +10,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.exception.DepartmentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.StudentDuplicateException;
 import hiccreboot.backend.domain.Department;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
+import hiccreboot.backend.dto.request.ProfileModifyRequest;
 import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
 import hiccreboot.backend.dto.response.ApplicantResponse;
 import hiccreboot.backend.dto.response.MemberResponse;
 import hiccreboot.backend.dto.response.MemberSimpleResponse;
+import hiccreboot.backend.dto.response.ProfileMemberResponse;
+import hiccreboot.backend.repository.department.DepartmentRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MemberService {
 	private final MemberRepository memberRepository;
+	private final DepartmentRepository departmentRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public void signUp(SignUpRequest request) {
@@ -125,5 +130,56 @@ public class MemberService {
 		} else {
 			return Sort.by("grade");
 		}
+	}
+
+	public DataResponse<ProfileMemberResponse> getProfile(String studentNumber) {
+		ProfileMemberResponse response = memberRepository.findByStudentNumber(studentNumber)
+			.map(ProfileMemberResponse::create)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		return DataResponse.ok(response);
+	}
+
+	public void modifyProfile(ProfileModifyRequest request, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		modifyPhoneNumber(member, request.getPhoneNumber());
+		modifyDepartment(member, request.getDepartment());
+		modifyPassword(member, request.getPassword());
+	}
+
+	public void withdraw(String studentNumber) {
+		memberRepository.findByStudentNumber(studentNumber)
+			.ifPresentOrElse(memberRepository::delete, () -> {
+				throw MemberNotFoundException.EXCEPTION;
+			});
+	}
+
+	private void modifyPhoneNumber(Member member, String phoneNumber) {
+		if (member.getPhoneNumber().equals(phoneNumber)) {
+			return;
+		}
+		member.updatePhoneNumber(phoneNumber);
+	}
+
+	private void modifyDepartment(Member member, String departmentName) {
+		if (member.getDepartment().getName().equals(departmentName)) {
+			return;
+		}
+		Department department = departmentRepository.findByName(departmentName)
+			.orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
+
+		member.updateDepartment(department);
+	}
+
+	private void modifyPassword(Member member, String password) {
+		String encodedPassword = passwordEncoder.encode(password);
+
+		if (member.getPassword().equals(encodedPassword)) {
+			return;
+		}
+		member.updatePassword(password);
+		member.passwordEncode(passwordEncoder);
 	}
 }
