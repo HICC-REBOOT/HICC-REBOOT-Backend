@@ -92,10 +92,13 @@ public class ArticleService {
 		return articleRepository.findById(id);
 	}
 
-	public DataResponse<ArticleResponse> makeArticle(Long id) {
+	public DataResponse<ArticleResponse> makeArticle(Long id, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
-		return DataResponse.ok(ArticleResponse.create(article));
+		return DataResponse.ok(ArticleResponse.create(article, member == article.getMember()));
 	}
 
 	@Transactional

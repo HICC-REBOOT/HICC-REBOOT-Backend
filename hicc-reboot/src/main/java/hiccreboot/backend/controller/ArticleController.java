@@ -15,6 +15,7 @@ import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.service.ArticleService;
@@ -44,8 +45,10 @@ public class ArticleController {
 	}
 
 	@GetMapping("/{article-id}")
-	public BaseResponse searchArticle(@PathVariable("article-id") Long id) {
-		return articleService.makeArticle(id);
+	public BaseResponse searchArticle(@PathVariable("article-id") Long id, HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+		return articleService.makeArticle(id, studentNumber);
 	}
 
 	@PostMapping
