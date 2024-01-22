@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import hiccreboot.backend.common.dto.Article.ArticleListResponse;
+import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
@@ -98,35 +99,35 @@ public class ArticleService {
 	}
 
 	@Transactional
-	public Article saveArticle(String studentNumber, String subject, String content, BoardType boardType,
-		List<ImageRequest> imageRequests) {
+	public Article saveArticle(String studentNumber, ArticleRequest articleRequest) {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
-		Article article = Article.createArticle(member, subject, content, boardType);
+		Article article = Article.createArticle(member, articleRequest.getSubject(), articleRequest.getContent(),
+			articleRequest.getBoard());
 
-		for (ImageRequest imageRequest : imageRequests) {
+		for (ImageRequest imageRequest : articleRequest.getImages()) {
 			String fileName = imageRequest.getFileName();
-			String fileNameExtention = imageRequest.getFileNameExtention();
+			String fileNameExtension = imageRequest.getFileNameExtension();
 			String key = imageRequest.getKey();
 			String url = imageRequest.getUrl();
-			Image.createImage(fileName, fileNameExtention, key, url, article);
+			Image.createImage(fileName, fileNameExtension, key, url, article);
 		}
 
 		return articleRepository.save(article);
 	}
 
 	@Transactional
-	public BaseResponse updateArticle(Long id, String subject, String content, BoardType boardType,
-		List<String> appendices) {
+	public BaseResponse updateArticle(Long id, ArticleRequest articleRequest) {
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
-		article.updateSubject(subject);
-		article.updateContent(content);
-		article.updateBoardType(boardType);
+		article.updateSubject(articleRequest.getSubject());
+		article.updateContent(articleRequest.getContent());
+		article.updateBoardType(articleRequest.getBoard());
+		article.getImages().clear();
+		articleRequest.getImages().stream()
+			.forEach(image -> Image.createImage(image.getFileName(), image.getFileNameExtension(), image.getKey(),
+				image.getUrl(), article));
 
-		List<Image> articleAppendices = article.getAppendices();
-
-		// update 구현
 		return DataResponse.noContent();
 	}
 
