@@ -37,22 +37,24 @@ public class ScheduleDate {
 	private Schedule schedule;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private ScheduleDate(int year, int month, int dayOfMonth) {
+	private ScheduleDate(int year, int month, int dayOfMonth, Schedule schedule) {
 		this.year = year;
 		this.month = month;
 		this.dayOfMonth = dayOfMonth;
+		addSchedule(schedule);
 	}
 
-	public static ScheduleDate createScheduleDate(int year, int month, int dayOfMonth) {
+	public static ScheduleDate createScheduleDate(int year, int month, int dayOfMonth, Schedule schedule) {
 		return ScheduleDate.builder()
 			.year(year)
 			.month(month)
 			.dayOfMonth(dayOfMonth)
+			.schedule(schedule)
 			.build();
 	}
 
 	//연관관계 메소드
-	public void addSchedule(Schedule schedule) {
+	private void addSchedule(Schedule schedule) {
 		this.schedule = schedule;
 		schedule.getScheduleDates().add(this);
 	}

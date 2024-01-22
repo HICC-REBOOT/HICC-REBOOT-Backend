@@ -39,9 +39,7 @@ public class CalendarService {
 		List<SimpleScheduleResponse> simpleScheduleResponses = new ArrayList<>();
 		scheduleDates.stream().forEach(scheduleDate -> {
 			simpleScheduleResponses.add(
-				new SimpleScheduleResponse(scheduleDate.getSchedule().getName(), scheduleDate.getSchedule().getId(),
-					LocalDate.of(scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDayOfMonth()),
-					scheduleDate.getSchedule().getScheduleType()));
+				SimpleScheduleResponse.create(scheduleDate));
 		});
 
 		return DataResponse.ok(simpleScheduleResponses);
@@ -71,9 +69,8 @@ public class CalendarService {
 
 		dates.stream()
 			.forEach(date -> {
-				ScheduleDate scheduleDate = ScheduleDate.createScheduleDate(date.getYear(), date.getMonthValue(),
-					date.getDayOfMonth());
-				scheduleDate.addSchedule(schedule);
+				ScheduleDate.createScheduleDate(date.getYear(), date.getMonthValue(),
+					date.getDayOfMonth(), schedule);
 			});
 		scheduleRepository.save(schedule);
 
@@ -86,11 +83,23 @@ public class CalendarService {
 	}
 
 	@Transactional
-	public Schedule updateSchedule(UpdateScheduleRequest updateScheduleRequest) {
+	public Schedule updateSchedule(Long id, UpdateScheduleRequest updateScheduleRequest) {
+		Schedule schedule = findSchedule(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
-		// 이 부분 수정
-		deleteSchedule(updateScheduleRequest.getScheduleId());
-		return saveSchedule(updateScheduleRequest.getName(), updateScheduleRequest.getDates(),
-			updateScheduleRequest.getContent(), updateScheduleRequest.getType());
+		//scheduleDate 삭제
+		schedule.getScheduleDates().forEach(scheduleDate -> scheduleDateRepository.deleteById(scheduleDate.getId()));
+		schedule.getScheduleDates().clear();
+
+		//schedule 변경
+		schedule.updateName(updateScheduleRequest.getName());
+		schedule.updateContent(updateScheduleRequest.getContent());
+		schedule.updateScheduleType(updateScheduleRequest.getType());
+		updateScheduleRequest.getDates().stream()
+			.forEach(date -> {
+				ScheduleDate.createScheduleDate(date.getYear(), date.getMonthValue(),
+					date.getDayOfMonth(), schedule);
+			});
+
+		return schedule;
 	}
 }
