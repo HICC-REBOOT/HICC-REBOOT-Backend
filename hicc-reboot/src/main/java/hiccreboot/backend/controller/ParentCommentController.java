@@ -25,8 +25,11 @@ public class ParentCommentController {
 	private final TokenProvider tokenProvider;
 
 	@GetMapping("/{article-id}")
-	public BaseResponse searchParentComment(@PathVariable("article-id") Long id) {
-		return parentCommentService.makeParentComments(id);
+	public BaseResponse searchParentComment(@PathVariable("article-id") Long id,
+		HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
+
+		return parentCommentService.makeParentComments(id, studentNumber);
 	}
 
 	@PostMapping
