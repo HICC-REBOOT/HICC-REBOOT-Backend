@@ -57,7 +57,7 @@ public class Article {
 	private List<ChildComment> childComments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Appendix> appendices = new ArrayList<>();
+	private List<Image> images = new ArrayList<>();
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Article(Member member, String subject, String content, BoardType boardType, LocalDateTime date) {

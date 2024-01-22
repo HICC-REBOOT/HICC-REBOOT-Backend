@@ -1,5 +1,6 @@
 package hiccreboot.backend.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,14 +10,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import hiccreboot.backend.common.dto.Article.ArticleListResponse;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
-import hiccreboot.backend.common.dto.Article.ArticlesResponse;
+import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.dto.S3.ImageRequest;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
-import hiccreboot.backend.domain.Appendix;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.BoardType;
+import hiccreboot.backend.domain.Image;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
@@ -67,7 +70,8 @@ public class ArticleService {
 		return articleRepository.findBySubjectContainingAndBoardType(search, boardType, pageable);
 	}
 
-	public DataResponse<ArticlesResponse> makeArticles(int pageNumber, int pageSize, BoardType boardType, String sort,
+	public DataResponse<List<ArticleListResponse>> makeArticles(int pageNumber, int pageSize, BoardType boardType,
+		String sort,
 		String search) {
 		List<Article> articles = findArticleBySortAndBoardType(pageNumber, pageSize, boardType, sort,
 			search);
@@ -76,18 +80,11 @@ public class ArticleService {
 			throw ArticleNotFoundException.EXCEPTION;
 		}
 
-		ArticlesResponse articlesResponse = new ArticlesResponse();
+		List<ArticleListResponse> articleResponses = new ArrayList<>();
 		articles.stream()
-			.forEach(article -> articlesResponse.add(
-				ArticleResponse.createArticleResponse(
-					article.getId(),
-					article.getMember().getGrade(),
-					article.getMember().getName(),
-					article.getDate(),
-					article.getBoardType(),
-					article.getSubject())));
+			.forEach(article -> articleResponses.add(ArticleListResponse.create(article)));
 
-		return DataResponse.ok(articlesResponse);
+		return DataResponse.ok(articleResponses);
 	}
 
 	public Optional<Article> findArticle(Long id) {
@@ -97,32 +94,29 @@ public class ArticleService {
 	public DataResponse<ArticleResponse> makeArticle(Long id) {
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
-		return DataResponse.ok(ArticleResponse.createArticleResponse(
-			article.getId(),
-			article.getMember().getGrade(),
-			article.getMember().getName(),
-			article.getDate(),
-			article.getAppendices(),
-			article.getBoardType(),
-			article.getSubject(),
-			article.getContent()));
+		return DataResponse.ok(ArticleResponse.create(article));
 	}
 
 	@Transactional
 	public Article saveArticle(String studentNumber, String subject, String content, BoardType boardType,
-		List<String> appendices) {
+		List<ImageRequest> imageRequests) {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
 		Article article = Article.createArticle(member, subject, content, boardType);
 
-		//이 부분 Appendix 추가하는 부분 수정
-		appendices.forEach(appendix -> article.addAppendix(appendix));
+		for (ImageRequest imageRequest : imageRequests) {
+			String fileName = imageRequest.getFileName();
+			String fileNameExtention = imageRequest.getFileNameExtention();
+			String key = imageRequest.getKey();
+			String url = imageRequest.getUrl();
+			Image.createImage(fileName, fileNameExtention, key, url, article);
+		}
 
 		return articleRepository.save(article);
 	}
 
 	@Transactional
-	public Article updateArticle(Long id, String subject, String content, BoardType boardType,
+	public BaseResponse updateArticle(Long id, String subject, String content, BoardType boardType,
 		List<String> appendices) {
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
@@ -130,9 +124,10 @@ public class ArticleService {
 		article.updateContent(content);
 		article.updateBoardType(boardType);
 
-		List<Appendix> articleAppendices = article.getAppendices();
+		List<Image> articleAppendices = article.getAppendices();
 
 		// update 구현
+		return DataResponse.noContent();
 	}
 
 	@Transactional
