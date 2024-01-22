@@ -39,7 +39,7 @@ public class MainService {
 				article.getMember().getGrade(),
 				article.getMember().getName(),
 				article.getDate(),
-				!article.getAppendices().isEmpty(),
+				!article.getImages().isEmpty(),
 				article.getSubject())));
 		return DataResponse.ok(latestNewsResponses);
 	}

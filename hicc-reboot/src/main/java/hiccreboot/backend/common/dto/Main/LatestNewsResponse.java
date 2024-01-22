@@ -5,5 +5,5 @@ import java.time.LocalDateTime;
 import hiccreboot.backend.domain.Grade;
 
 public record LatestNewsResponse(Long articleId, Grade grade, String name, LocalDateTime date,
-								 Boolean appendixExistence, String subject) {
+								 Boolean imageExistence, String subject) {
 }

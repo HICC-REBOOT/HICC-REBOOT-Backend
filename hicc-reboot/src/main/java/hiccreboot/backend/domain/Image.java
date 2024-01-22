@@ -27,9 +27,9 @@ public class Image {
 	private String fileName;
 
 	@Column(nullable = false)
-	private String fileNameExtention;
+	private String fileNameExtension;
 
-	@Column(nullable = false)
+	@Column(nullable = false, name = "IMAGE_KEY")
 	private String key;
 
 	@Column(nullable = false)
@@ -40,19 +40,19 @@ public class Image {
 	private Article article;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private Image(String fileName, String fileNameExtention, String key, String url, Article article) {
+	private Image(String fileName, String fileNameExtension, String key, String url, Article article) {
 		this.fileName = fileName;
-		this.fileNameExtention = fileNameExtention;
+		this.fileNameExtension = fileNameExtension;
 		this.key = key;
 		this.url = url;
 		changeArticle(article);
 	}
 
-	public static Image createImage(String fileName, String fileNameExtention, String key, String url,
+	public static Image createImage(String fileName, String fileNameExtension, String key, String url,
 		Article article) {
 		return Image.builder()
 			.fileName(fileName)
-			.fileNameExtention(fileNameExtention)
+			.fileNameExtension(fileNameExtension)
 			.key(key)
 			.url(url)
 			.article(article)

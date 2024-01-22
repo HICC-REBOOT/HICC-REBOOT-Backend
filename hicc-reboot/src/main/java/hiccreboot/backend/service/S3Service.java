@@ -36,11 +36,11 @@ public class S3Service {
 		List<ImageResponse> response = new ArrayList<>();
 		for (ImageRequest imageRequest : imageRequests) {
 			String key = UUID.randomUUID() + imageRequest.getFileName();
-			String fileNameExtention = imageRequest.getFileNameExtention();
+			String fileNameExtension = imageRequest.getFileNameExtension();
 
 			//s3 디렉터리 경로 설정
-			if (!fileNameExtention.equals("")) {
-				key = fileNameExtention + "/" + key;
+			if (!fileNameExtension.equals("")) {
+				key = fileNameExtension + "/" + key;
 			}
 
 			response.add(ImageResponse.create(imageRequest.getFileName(), key, getPreSignedUrl(key)));
