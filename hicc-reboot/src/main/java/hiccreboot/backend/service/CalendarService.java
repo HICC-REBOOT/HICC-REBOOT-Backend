@@ -86,14 +86,11 @@ public class CalendarService {
 	public Schedule updateSchedule(Long id, UpdateScheduleRequest updateScheduleRequest) {
 		Schedule schedule = findSchedule(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
-		//scheduleDate 삭제
-		schedule.getScheduleDates().forEach(scheduleDate -> scheduleDateRepository.deleteById(scheduleDate.getId()));
-		schedule.getScheduleDates().clear();
-
 		//schedule 변경
 		schedule.updateName(updateScheduleRequest.getName());
 		schedule.updateContent(updateScheduleRequest.getContent());
 		schedule.updateScheduleType(updateScheduleRequest.getType());
+		schedule.getScheduleDates().clear();
 		updateScheduleRequest.getDates().stream()
 			.forEach(date -> {
 				ScheduleDate.createScheduleDate(date.getYear(), date.getMonthValue(),
