@@ -31,7 +31,9 @@ public class ChildCommentService {
 		return childCommentRepository.findAllByArticle_Id(articleId);
 	}
 
-	public BaseResponse makeChildComments(Long articleId) {
+	public BaseResponse makeChildComments(Long articleId, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
 		List<ChildComment> childComments = findChildComments(articleId);
 
@@ -42,6 +44,7 @@ public class ChildCommentService {
 				childComment.getParentCommentId(),
 				childComment.getId(),
 				childComment.getMember().getName(),
+				childComment.getMember() == member,
 				childComment.getDate(),
 				childComment.getContent())));
 		return DataResponse.ok(childCommentResponses);
