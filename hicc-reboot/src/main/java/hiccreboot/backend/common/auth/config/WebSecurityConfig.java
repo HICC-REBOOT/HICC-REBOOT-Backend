@@ -1,5 +1,6 @@
 package hiccreboot.backend.common.auth.config;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,6 +56,7 @@ public class WebSecurityConfig {
 		"/api/auth/duplicate/**",
 		"/api/auth/departments",
 		"/api/auth/logout/**",
+		"/api/main/**",
 		"/swagger-ui/**",
 		"/api-docs/**"
 	};
@@ -63,6 +68,7 @@ public class WebSecurityConfig {
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 				.requestMatchers(Stream.of(ALLOWED_PATTERN)
 					.map(AntPathRequestMatcher::antMatcher)
@@ -114,6 +120,21 @@ public class WebSecurityConfig {
 		provider.setPasswordEncoder(passwordEncoder());
 
 		return new ProviderManager(provider);
+	}
+
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+
+		configuration.setAllowCredentials(true);
+		configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT"));
+		configuration.setAllowedHeaders(List.of("*"));
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+
+		return source;
 	}
 
 }
