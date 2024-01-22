@@ -16,6 +16,7 @@ import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.dto.S3.ImageRequest;
+import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
@@ -33,6 +34,7 @@ public class ArticleService {
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
+	private final S3Service s3Service;
 
 	public Page<Article> findArticles(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -135,7 +137,19 @@ public class ArticleService {
 	}
 
 	@Transactional
-	public void deleteArticle(Long id) {
+	public void deleteArticle(Long id, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+		Article article = articleRepository.findById(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+
+		//S3 image 제거
+		article.getImages()
+			.forEach(image -> s3Service.deleteImage(image.getFileName()));
+
+		if (member != article.getMember()) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+
 		articleRepository.deleteById(id);
 	}
 
