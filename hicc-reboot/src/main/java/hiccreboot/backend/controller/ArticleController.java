@@ -73,8 +73,8 @@ public class ArticleController {
 	public BaseResponse deleteArticle(@PathVariable("article-id") Long id) {
 		Article article = articleService.findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
-		article.getAppendices()
-			.forEach(appendix -> s3Service.deleteImage(appendix.getFileName()));
+		article.getImages()
+			.forEach(image -> s3Service.deleteImage(image.getFileName()));
 
 		articleService.deleteArticle(id);
 

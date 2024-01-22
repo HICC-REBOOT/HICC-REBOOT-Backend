@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Appendix {
+public class Image {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "APPENDIX_ID")
+	@Column(name = "IMAGE_ID")
 	private Long id;
 
 	@Column(nullable = false)
@@ -30,6 +30,9 @@ public class Appendix {
 	private String fileNameExtention;
 
 	@Column(nullable = false)
+	private String key;
+
+	@Column(nullable = false)
 	private String url;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -37,17 +40,20 @@ public class Appendix {
 	private Article article;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private Appendix(String fileName, String fileNameExtention, String url, Article article) {
+	private Image(String fileName, String fileNameExtention, String key, String url, Article article) {
 		this.fileName = fileName;
-		this.url = url;
 		this.fileNameExtention = fileNameExtention;
+		this.key = key;
+		this.url = url;
 		changeArticle(article);
 	}
 
-	public static Appendix createAppendix(String fileName, String fileNameExtention, String url, Article article) {
-		return Appendix.builder()
+	public static Image createImage(String fileName, String fileNameExtention, String key, String url,
+		Article article) {
+		return Image.builder()
 			.fileName(fileName)
 			.fileNameExtention(fileNameExtention)
+			.key(key)
 			.url(url)
 			.article(article)
 			.build();
@@ -55,6 +61,6 @@ public class Appendix {
 
 	public void changeArticle(Article article) {
 		this.article = article;
-		article.getAppendices().add(this);
+		article.getImages().add(this);
 	}
 }

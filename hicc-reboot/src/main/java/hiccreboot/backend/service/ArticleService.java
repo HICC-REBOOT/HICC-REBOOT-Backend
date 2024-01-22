@@ -14,12 +14,12 @@ import hiccreboot.backend.common.dto.Article.ArticleListResponse;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
-import hiccreboot.backend.common.dto.S3.ImageDTO;
+import hiccreboot.backend.common.dto.S3.ImageRequest;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
-import hiccreboot.backend.domain.Appendix;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.BoardType;
+import hiccreboot.backend.domain.Image;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
@@ -99,16 +99,17 @@ public class ArticleService {
 
 	@Transactional
 	public Article saveArticle(String studentNumber, String subject, String content, BoardType boardType,
-		List<ImageDTO> images) {
+		List<ImageRequest> imageRequests) {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
 		Article article = Article.createArticle(member, subject, content, boardType);
 
-		for (ImageDTO image : images) {
-			String key = image.getKey();
-			String fileNameExtention = image.getFileNameExtention();
-			String url = image.getUrl();
-			Appendix.createAppendix(key, fileNameExtention, url, article);
+		for (ImageRequest imageRequest : imageRequests) {
+			String fileName = imageRequest.getFileName();
+			String fileNameExtention = imageRequest.getFileNameExtention();
+			String key = imageRequest.getKey();
+			String url = imageRequest.getUrl();
+			Image.createImage(fileName, fileNameExtention, key, url, article);
 		}
 
 		return articleRepository.save(article);
@@ -123,7 +124,7 @@ public class ArticleService {
 		article.updateContent(content);
 		article.updateBoardType(boardType);
 
-		List<Appendix> articleAppendices = article.getAppendices();
+		List<Image> articleAppendices = article.getAppendices();
 
 		// update 구현
 		return DataResponse.noContent();
