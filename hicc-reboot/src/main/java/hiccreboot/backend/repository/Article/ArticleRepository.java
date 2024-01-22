@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.BoardType;
+import hiccreboot.backend.domain.Member;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 	Page<Article> findAll(Pageable pageable);
@@ -15,4 +16,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 	Page<Article> findByMember_NameAndBoardType(String name, BoardType boardType, Pageable pageable);
 
 	Page<Article> findBySubjectContainingAndBoardType(String subject, BoardType boardType, Pageable pageable);
+
+	Page<Article> findAllByMember(Member member, Pageable pageable);
 }
