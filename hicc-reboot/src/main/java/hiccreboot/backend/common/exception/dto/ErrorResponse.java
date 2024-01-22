@@ -4,7 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 import hiccreboot.backend.common.dto.BaseResponse;
+import hiccreboot.backend.common.exception.BaseErrorCode;
 import hiccreboot.backend.common.exception.CustomException;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -24,7 +26,7 @@ public class ErrorResponse extends BaseResponse {
 		this.path = path;
 	}
 
-	@Builder
+	@Builder(access = AccessLevel.PRIVATE)
 	private ErrorResponse(ErrorReason errorReason, String path) {
 		this(HttpStatusCode.valueOf(errorReason.getStatus()), errorReason.getReason(), path);
 	}
@@ -36,4 +38,10 @@ public class ErrorResponse extends BaseResponse {
 			.build();
 	}
 
+	public static ErrorResponse fromErrorCode(BaseErrorCode errorCode, String path) {
+		return ErrorResponse.builder()
+			.errorReason(errorCode.getErrorReason())
+			.path(path)
+			.build();
+	}
 }

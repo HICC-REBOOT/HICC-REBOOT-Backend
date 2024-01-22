@@ -1,5 +1,6 @@
 package hiccreboot.backend.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,8 @@ public class Member {
 	@JoinColumn(name = "DEPARTMENT_ID")
 	private Department department;
 
+	private LocalDateTime approvedDate;
+
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	private List<Article> articles = new ArrayList<>();
 
@@ -101,4 +104,8 @@ public class Member {
 		this.refreshToken = null;
 	}
 
+	public void approve() {
+		this.grade = Grade.NORMAL;
+		this.approvedDate = LocalDateTime.now();
+	}
 }
