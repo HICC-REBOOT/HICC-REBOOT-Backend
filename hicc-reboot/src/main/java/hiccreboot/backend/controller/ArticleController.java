@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.Article.ArticleRequest;
-import hiccreboot.backend.common.dto.Article.ArticleResponse;
-import hiccreboot.backend.common.dto.Article.ArticlesResponse;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.service.ArticleService;
+import hiccreboot.backend.service.S3Service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -27,10 +28,11 @@ import lombok.RequiredArgsConstructor;
 public class ArticleController {
 
 	private final ArticleService articleService;
+	private final S3Service s3Service;
 	private final TokenProvider tokenProvider;
 
 	@GetMapping
-	public DataResponse<ArticlesResponse> searchArticleList(
+	public BaseResponse searchArticleList(
 		@RequestParam(value = "page") int pageNumber,
 		@RequestParam(value = "size") int pageSize,
 		@RequestParam(value = "board") BoardType boardType,
@@ -42,7 +44,7 @@ public class ArticleController {
 	}
 
 	@GetMapping("/{article-id}")
-	public DataResponse<ArticleResponse> searchArticle(@PathVariable("article-id") Long id) {
+	public BaseResponse searchArticle(@PathVariable("article-id") Long id) {
 		return articleService.makeArticle(id);
 	}
 
@@ -51,7 +53,7 @@ public class ArticleController {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
 		articleService.saveArticle(studentNumber, articleRequest.subject(), articleRequest.content(),
-			articleRequest.board(), articleRequest.appendices());
+			articleRequest.board(), articleRequest.images());
 
 		return DataResponse.noContent();
 	}
@@ -62,13 +64,18 @@ public class ArticleController {
 		@RequestBody ArticleRequest articleRequest) {
 
 		//update 구현
-		articleService.updateArticle();
+		// articleService.updateArticle();
 
 		return DataResponse.noContent();
 	}
 
 	@DeleteMapping("/{article-id}")
 	public BaseResponse deleteArticle(@PathVariable("article-id") Long id) {
+		Article article = articleService.findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+
+		article.getImages()
+			.forEach(image -> s3Service.deleteImage(image.getFileName()));
+
 		articleService.deleteArticle(id);
 
 		return DataResponse.noContent();

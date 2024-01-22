@@ -43,7 +43,10 @@ public class WebSecurityConfig {
 	private final LoginSuccessHandler loginSuccessHandler;
 	private final LoginFailureHandler loginFailureHandler;
 
-	private static String[] ALLOWED_PATTERN = new String[] {
+	private static final String PRESIDENT = "PRESIDENT";
+	private static final String[] PRESIDENT_AND_EXECUTIVE = new String[] {"PRESIDENT", "EXECUTIVE"};
+
+	private static final String[] ALLOWED_PATTERN = new String[] {
 		"/api/auth/login/**",
 		"/api/auth/sign-up/**",
 		"/api/auth/duplicate/**",
@@ -65,6 +68,8 @@ public class WebSecurityConfig {
 					.map(AntPathRequestMatcher::antMatcher)
 					.toArray(AntPathRequestMatcher[]::new))
 				.permitAll()
+				.requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/president/**")).hasRole(PRESIDENT)
+				.requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/**")).hasAnyRole(PRESIDENT_AND_EXECUTIVE)
 				.anyRequest()
 				.authenticated()) // for develop
 			.logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer

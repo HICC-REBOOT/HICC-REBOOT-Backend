@@ -106,17 +106,18 @@ public class MemberService {
 		return DataResponse.ok(result);
 	}
 
-	public void modifyGrade(Long modifiedMemberId, Grade grade) {
+	public void modifyGrade(Long modifiedMemberId, Grade grade, String presidentStudentNumber) {
 		memberRepository.findById(modifiedMemberId)
-			.filter(memberNotPresident -> !memberNotPresident.getGrade().equals(Grade.PRESIDENT))
+			.filter(modifiedMember -> validateTargetNotRequester(modifiedMember, presidentStudentNumber))
+			.filter(modifiedMember -> validateModifyAnotherGrade(modifiedMember, grade))
 			.ifPresentOrElse(member -> member.updateGrade(grade), () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
 	}
 
-	public void expel(Long deletedMemberId) {
+	public void expel(Long deletedMemberId, String presidentStudentNumber) {
 		memberRepository.findById(deletedMemberId)
-			.filter(memberNotPresident -> !memberNotPresident.getGrade().equals(Grade.PRESIDENT))
+			.filter(deletedMember -> validateTargetNotRequester(deletedMember, presidentStudentNumber))
 			.ifPresentOrElse(memberRepository::delete, () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
@@ -130,6 +131,14 @@ public class MemberService {
 		} else {
 			return Sort.by("grade");
 		}
+	}
+
+	private boolean validateTargetNotRequester(Member member, String requesterStudentNumber) {
+		return !member.getStudentNumber().equals(requesterStudentNumber);
+	}
+
+	private boolean validateModifyAnotherGrade(Member modifiedMember, Grade modifiedGrade) {
+		return !modifiedMember.getGrade().equals(modifiedGrade);
 	}
 
 	public DataResponse<ProfileMemberResponse> getProfile(String studentNumber) {
