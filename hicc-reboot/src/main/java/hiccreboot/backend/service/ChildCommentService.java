@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.ChildComment.ChildCommentResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.CommentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ChildComment;
@@ -62,7 +64,16 @@ public class ChildCommentService {
 	}
 
 	@Transactional
-	public void deleteChildComment(Long id) {
+	public void deleteChildComment(Long id, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+		ChildComment childComment = childCommentRepository.findById(id)
+			.orElseThrow(() -> CommentNotFoundException.EXCEPTION);
+
+		if (member != childComment.getMember()) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+
 		childCommentRepository.deleteById(id);
 	}
 }

@@ -43,8 +43,9 @@ public class ChildCommentController {
 	}
 
 	@DeleteMapping("/{id}")
-	public BaseResponse deleteChildComment(@PathVariable("id") Long id) {
-		childCommentService.deleteChildComment(id);
+	public BaseResponse deleteChildComment(@PathVariable("id") Long id, HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
+		childCommentService.deleteChildComment(id, studentNumber);
 
 		return DataResponse.noContent();
 	}
