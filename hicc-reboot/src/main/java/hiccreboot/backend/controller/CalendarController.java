@@ -3,7 +3,9 @@ package hiccreboot.backend.controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,30 +29,31 @@ public class CalendarController {
 		return calendarService.makeMonthSchedules(year, month);
 	}
 
-	@GetMapping("/schedule")
-	public BaseResponse searchSchedule(@RequestParam("schedule-id") Long id) {
+	@GetMapping("/schedule/{schedule-id}")
+	public BaseResponse searchSchedule(@PathVariable("schedule-id") Long id) {
 		return calendarService.makeSchedule(id);
 	}
 
 	@PostMapping("/schedule")
-	public BaseResponse addSchedule(PostScheduleRequest postScheduleRequest) {
+	public BaseResponse addSchedule(@RequestBody PostScheduleRequest postScheduleRequest) {
 		calendarService.saveSchedule(postScheduleRequest.getName(), postScheduleRequest.getDates(),
 			postScheduleRequest.getContent(), postScheduleRequest.getType());
 
 		return DataResponse.noContent();
 	}
 
-	@DeleteMapping("schedule")
-	public BaseResponse deleteSchedule(@RequestParam("schedule-id") Long id) {
+	@DeleteMapping("schedule/{schedule-id}")
+	public BaseResponse deleteSchedule(@PathVariable("schedule-id") Long id) {
 		calendarService.deleteSchedule(id);
 
 		return DataResponse.noContent();
 	}
 
-	@PatchMapping("schedule")
-	public BaseResponse updateSchedule(UpdateScheduleRequest updateScheduleRequest) {
-		// 이 부분 수정
-		calendarService.updateSchedule(updateScheduleRequest);
+	@PatchMapping("schedule/{schedule-id}")
+	public BaseResponse updateSchedule(@PathVariable("schedule-id") Long id,
+		@RequestBody UpdateScheduleRequest updateScheduleRequest) {
+
+		calendarService.updateSchedule(id, updateScheduleRequest);
 
 		return DataResponse.noContent();
 	}

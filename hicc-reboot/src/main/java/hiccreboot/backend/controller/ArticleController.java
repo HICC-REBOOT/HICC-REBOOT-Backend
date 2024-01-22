@@ -52,8 +52,7 @@ public class ArticleController {
 	public BaseResponse addArticle(@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
-		articleService.saveArticle(studentNumber, articleRequest.subject(), articleRequest.content(),
-			articleRequest.board(), articleRequest.images());
+		articleService.saveArticle(studentNumber, articleRequest);
 
 		return DataResponse.noContent();
 	}
@@ -63,8 +62,7 @@ public class ArticleController {
 		@PathVariable("article-id") Long id,
 		@RequestBody ArticleRequest articleRequest) {
 
-		//update 구현
-		// articleService.updateArticle();
+		articleService.updateArticle(id, articleRequest);
 
 		return DataResponse.noContent();
 	}

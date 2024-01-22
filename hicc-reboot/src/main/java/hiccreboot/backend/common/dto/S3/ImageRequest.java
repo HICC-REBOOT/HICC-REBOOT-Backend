@@ -10,22 +10,22 @@ import lombok.NoArgsConstructor;
 public class ImageRequest {
 
 	private String fileName;
-	private String fileNameExtention;
+	private String fileNameExtension;
 	private String key;
 	private String url;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private ImageRequest(String fileName, String fileNameExtention, String key, String url) {
+	private ImageRequest(String fileName, String fileNameExtension, String key, String url) {
 		this.fileName = fileName;
-		this.fileNameExtention = fileNameExtention;
+		this.fileNameExtension = fileNameExtension;
 		this.key = key;
 		this.url = url;
 	}
 
-	public static ImageRequest create(String fileName, String fileNameExtention, String key, String url) {
+	public static ImageRequest create(String fileName, String fileNameExtension, String key, String url) {
 		return ImageRequest.builder()
 			.fileName(fileName)
-			.fileNameExtention(fileNameExtention)
+			.fileNameExtension(fileNameExtension)
 			.key(key)
 			.url(url)
 			.build();
