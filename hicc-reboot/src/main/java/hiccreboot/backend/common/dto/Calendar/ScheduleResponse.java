@@ -6,10 +6,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import hiccreboot.backend.domain.ScheduleType;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Data
+@Getter
 @RequiredArgsConstructor
 public class ScheduleResponse {
 	private final String name;
