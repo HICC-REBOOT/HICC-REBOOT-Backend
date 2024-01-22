@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.dto.request.ModifyGradeRequest;
 import hiccreboot.backend.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
 	private final MemberService memberService;
+	private final TokenProvider tokenProvider;
 
 	@GetMapping("/applicants")
 	public BaseResponse findApplicants(@RequestParam(value = "page") int page, @RequestParam(value = "size") int size) {
@@ -51,15 +54,17 @@ public class AdminController {
 
 	@PatchMapping("/president/members/{member-id}")
 	public BaseResponse modifyGrade(@PathVariable(value = "member-id") Long memberId,
-		@Valid @RequestBody ModifyGradeRequest request) {
-		memberService.modifyGrade(memberId, request.getGrade());
+		@Valid @RequestBody ModifyGradeRequest request, HttpServletRequest servletRequest) {
+		String presidentStudentNumber = tokenProvider.extractStudentNumber(servletRequest).get();
+		memberService.modifyGrade(memberId, request.getGrade(), presidentStudentNumber);
 
 		return DataResponse.ok();
 	}
 
 	@DeleteMapping("/president/members/{member-id}")
-	public BaseResponse expel(@PathVariable(value = "member-id") Long memberId) {
-		memberService.expel(memberId);
+	public BaseResponse expel(@PathVariable(value = "member-id") Long memberId, HttpServletRequest servletRequest) {
+		String presidentStudentNumber = tokenProvider.extractStudentNumber(servletRequest).get();
+		memberService.expel(memberId, presidentStudentNumber);
 
 		return DataResponse.noContent();
 	}
