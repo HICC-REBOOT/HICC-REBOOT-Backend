@@ -29,7 +29,7 @@ public class Image {
 	@Column(nullable = false)
 	private String fileNameExtension;
 
-	@Column(nullable = false)
+	@Column(nullable = false, name = "IMAGE_KEY")
 	private String key;
 
 	@Column(nullable = false)
