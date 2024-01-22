@@ -53,7 +53,7 @@ ArticleResponse {
 			.name(article.getMember().getName())
 			.date(article.getDate())
 			.urls(
-				article.getAppendices().stream().map(appendix -> appendix.getUrl()).collect(Collectors.toList()))
+				article.getImages().stream().map(image -> image.getUrl()).collect(Collectors.toList()))
 			.board(article.getBoardType())
 			.subject(article.getSubject())
 			.content(article.getContent())

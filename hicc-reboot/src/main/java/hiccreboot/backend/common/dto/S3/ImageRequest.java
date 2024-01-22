@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ImageDTO {
+public class ImageRequest {
 
 	private String fileName;
 	private String fileNameExtention;
@@ -15,25 +15,20 @@ public class ImageDTO {
 	private String url;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private ImageDTO(String fileName, String fileNameExtention, String key, String url) {
+	private ImageRequest(String fileName, String fileNameExtention, String key, String url) {
 		this.fileName = fileName;
+		this.fileNameExtention = fileNameExtention;
 		this.key = key;
 		this.url = url;
-		this.fileNameExtention = fileNameExtention;
 	}
 
-	public static ImageDTO create(String fileName, String fileNameExtention) {
-		return ImageDTO.builder()
+	public static ImageRequest create(String fileName, String fileNameExtention, String key, String url) {
+		return ImageRequest.builder()
 			.fileName(fileName)
 			.fileNameExtention(fileNameExtention)
+			.key(key)
+			.url(url)
 			.build();
 	}
 
-	public static ImageDTO create(String key, String fileNameExtention, String preSignedUrl) {
-		return ImageDTO.builder()
-			.key(key)
-			.fileNameExtention(fileNameExtention)
-			.url(preSignedUrl)
-			.build();
-	}
 }

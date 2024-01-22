@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.HttpMethod;
@@ -16,9 +17,9 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
-import hiccreboot.backend.common.dto.S3.ImageDTO;
+import hiccreboot.backend.common.dto.S3.ImageRequest;
+import hiccreboot.backend.common.dto.S3.ImageResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -30,17 +31,19 @@ public class S3Service {
 
 	private final int TIME_LIMIT = 1000 * 60 * 2;
 
-	public BaseResponse getPreSignedUrls(List<ImageDTO> imageDTOS) {
+	public BaseResponse getPreSignedUrls(List<ImageRequest> imageRequests) {
 
-		List<ImageDTO> response = new ArrayList<>();
-		for (ImageDTO imageDTO : imageDTOS) {
-			String key = UUID.randomUUID() + imageDTO.getFileName();
-			String fileNameExtention = imageDTO.getFileNameExtention();
+		List<ImageResponse> response = new ArrayList<>();
+		for (ImageRequest imageRequest : imageRequests) {
+			String key = UUID.randomUUID() + imageRequest.getFileName();
+			String fileNameExtention = imageRequest.getFileNameExtention();
+
+			//s3 디렉터리 경로 설정
 			if (!fileNameExtention.equals("")) {
 				key = fileNameExtention + "/" + key;
 			}
 
-			response.add(ImageDTO.create(imageDTO.getFileName(), key, getPreSignedUrl(key)));
+			response.add(ImageResponse.create(imageRequest.getFileName(), key, getPreSignedUrl(key)));
 		}
 
 		return DataResponse.ok(response);
@@ -65,8 +68,7 @@ public class S3Service {
 
 	private Date getPreSignedUrlExpiration() {
 		Date expiration = new Date();
-		long expTimeMillis = expiration.getTime();
-		expTimeMillis += TIME_LIMIT;
+		long expTimeMillis = expiration.getTime() + TIME_LIMIT;
 		expiration.setTime(expTimeMillis);
 		return expiration;
 	}
