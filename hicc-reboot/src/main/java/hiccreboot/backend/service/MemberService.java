@@ -22,7 +22,11 @@ import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
 import hiccreboot.backend.dto.response.ApplicantResponse;
 import hiccreboot.backend.dto.response.MemberResponse;
 import hiccreboot.backend.dto.response.MemberSimpleResponse;
+import hiccreboot.backend.dto.response.PersonalArticleResponse;
+import hiccreboot.backend.dto.response.PersonalCommentResponse;
 import hiccreboot.backend.dto.response.ProfileMemberResponse;
+import hiccreboot.backend.repository.Article.ArticleRepository;
+import hiccreboot.backend.repository.Comment.CommentRepository;
 import hiccreboot.backend.repository.department.DepartmentRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,8 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	private final DepartmentRepository departmentRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final ArticleRepository articleRepository;
+	private final CommentRepository commentRepository;
 
 	public void signUp(SignUpRequest request) {
 
@@ -190,5 +196,29 @@ public class MemberService {
 		}
 		member.updatePassword(password);
 		member.passwordEncode(passwordEncoder);
+	}
+
+	public DataResponse<Page<PersonalArticleResponse>> findPersonalArticles(int page, int size, String studentNumber) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		Page<PersonalArticleResponse> result = articleRepository.findAllByMember(member, pageable)
+			.map(PersonalArticleResponse::create);
+
+		return DataResponse.ok(result);
+	}
+
+	public DataResponse<Page<PersonalCommentResponse>> findPersonalComments(int page, int size, String studentNumber) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		Page<PersonalCommentResponse> result = commentRepository.findAllByMember(member, pageable)
+			.map(PersonalCommentResponse::create);
+
+		return DataResponse.ok(result);
 	}
 }
