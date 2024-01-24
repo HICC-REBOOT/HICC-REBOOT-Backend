@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.ChildComment.ChildCommentResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.CommentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ChildComment;
@@ -31,7 +33,9 @@ public class ChildCommentService {
 		return childCommentRepository.findAllByArticle_Id(articleId);
 	}
 
-	public BaseResponse makeChildComments(Long articleId) {
+	public BaseResponse makeChildComments(Long articleId, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
 		List<ChildComment> childComments = findChildComments(articleId);
 
@@ -42,6 +46,7 @@ public class ChildCommentService {
 				childComment.getParentCommentId(),
 				childComment.getId(),
 				childComment.getMember().getName(),
+				childComment.getMember() == member,
 				childComment.getDate(),
 				childComment.getContent())));
 		return DataResponse.ok(childCommentResponses);
@@ -59,7 +64,16 @@ public class ChildCommentService {
 	}
 
 	@Transactional
-	public void deleteChildComment(Long id) {
+	public void deleteChildComment(Long id, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+		ChildComment childComment = childCommentRepository.findById(id)
+			.orElseThrow(() -> CommentNotFoundException.EXCEPTION);
+
+		if (member != childComment.getMember()) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+
 		childCommentRepository.deleteById(id);
 	}
 }

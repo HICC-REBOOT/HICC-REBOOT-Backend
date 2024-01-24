@@ -17,6 +17,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
 	STUDENT_NUMBER_DUPLICATE(CONFLICT, "STUDENT_NUMBER_DUPLICATE_409_1", "이미 존재하는 회원입니다."),
 
 	INTERNAL_SERVER_EXCEPTION(INTERNAL_SERVER, "INTERNAL_SERVER_ERROR_500_1", "내부 서버 에러입니다."),
+	ACCESS_FORBIDDEN(FORBIDDEN, "FORBIDDEN_403_1", "접근 권한이 없습니다."),
 	;
 	private final Integer status;
 	private final String code;

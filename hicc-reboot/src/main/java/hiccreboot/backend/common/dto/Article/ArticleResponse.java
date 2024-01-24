@@ -19,6 +19,7 @@ ArticleResponse {
 	private final Long articleId;
 	private final Grade grade;
 	private final String name;
+	private final Boolean isMine;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private final LocalDateTime date;
 	private final List<String> urls;
@@ -31,6 +32,7 @@ ArticleResponse {
 		Long articleId,
 		Grade grade,
 		String name,
+		Boolean isMine,
 		LocalDateTime date,
 		List<String> urls,
 		BoardType board,
@@ -39,6 +41,7 @@ ArticleResponse {
 		this.articleId = articleId;
 		this.grade = grade;
 		this.name = name;
+		this.isMine = isMine;
 		this.date = date;
 		this.urls = urls;
 		this.board = board;
@@ -46,11 +49,12 @@ ArticleResponse {
 		this.content = content;
 	}
 
-	public static ArticleResponse create(Article article) {
+	public static ArticleResponse create(Article article, Boolean isMine) {
 		return ArticleResponse.builder()
 			.articleId(article.getId())
 			.grade(article.getMember().getGrade())
 			.name(article.getMember().getName())
+			.isMine(isMine)
 			.date(article.getDate())
 			.urls(
 				article.getImages().stream().map(image -> image.getUrl()).collect(Collectors.toList()))
