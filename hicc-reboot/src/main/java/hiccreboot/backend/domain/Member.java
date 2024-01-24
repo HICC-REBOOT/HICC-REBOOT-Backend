@@ -66,8 +66,6 @@ public class Member {
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	private List<ParentComment> parentComments = new ArrayList<>();
 
-	private String refreshToken;
-
 	@Builder(access = AccessLevel.PRIVATE)
 	private Member(String studentNumber, Department department, String name, String password, Grade grade,
 		String phoneNumber, String email) {
@@ -99,14 +97,6 @@ public class Member {
 
 	public void passwordEncode(PasswordEncoder passwordEncoder) {
 		this.password = passwordEncoder.encode(this.password);
-	}
-
-	public void updateRefreshToken(String updateRefreshToken) {
-		this.refreshToken = updateRefreshToken;
-	}
-
-	public void destroyRefreshToken() {
-		this.refreshToken = null;
 	}
 
 	public void approve() {
