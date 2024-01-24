@@ -34,13 +34,8 @@ public class MainService {
 
 		List<LatestNewsResponse> latestNewsResponses = new ArrayList<>();
 		articles.stream()
-			.forEach(article -> latestNewsResponses.add(new LatestNewsResponse(
-				article.getId(),
-				article.getMember().getGrade(),
-				article.getMember().getName(),
-				article.getDate(),
-				!article.getImages().isEmpty(),
-				article.getSubject())));
+			.forEach(article -> latestNewsResponses.add(LatestNewsResponse.create(article)));
+
 		return DataResponse.ok(latestNewsResponses);
 	}
 }
