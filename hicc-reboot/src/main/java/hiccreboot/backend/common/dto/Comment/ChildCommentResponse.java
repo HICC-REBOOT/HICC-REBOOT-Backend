@@ -4,12 +4,11 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import hiccreboot.backend.domain.Comment;
 import hiccreboot.backend.domain.Grade;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public class ChildCommentResponse {
 
 	private final Long articleId;
@@ -22,4 +21,14 @@ public class ChildCommentResponse {
 	private final LocalDateTime date;
 	private final String content;
 
+	public ChildCommentResponse(Comment comment, Boolean isMine) {
+		this.articleId = comment.getArticle().getId();
+		this.parentCommentId = comment.getParentCommentId();
+		this.commentId = comment.getId();
+		this.name = comment.getMember().getName();
+		this.grade = comment.getMember().getGrade();
+		this.isMine = isMine;
+		this.date = comment.getDate();
+		this.content = comment.getContent();
+	}
 }

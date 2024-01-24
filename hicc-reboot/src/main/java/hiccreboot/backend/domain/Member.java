@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 public class Member {
 
 	@Id
-	@Column(name = "member_id")
+	@Column(name = "MEMBER_ID")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
@@ -58,10 +58,7 @@ public class Member {
 	private List<Article> articles = new ArrayList<>();
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-	private List<ChildComment> childComments = new ArrayList<>();
-
-	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-	private List<ParentComment> parentComments = new ArrayList<>();
+	private List<Comment> comments = new ArrayList<>();
 
 	private String refreshToken;
 

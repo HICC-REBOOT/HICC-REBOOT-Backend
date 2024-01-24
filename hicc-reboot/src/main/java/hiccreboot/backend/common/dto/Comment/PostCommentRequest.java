@@ -1,9 +1,10 @@
-package hiccreboot.backend.common.dto.ChildComment;
+package hiccreboot.backend.common.dto.Comment;
 
 import lombok.Getter;
 
 @Getter
-public class PostChildCommentRequest {
+public class PostCommentRequest {
+
 	private Long articleId;
 	private Long parentCommentId;
 	private String content;
