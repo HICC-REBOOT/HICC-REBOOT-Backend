@@ -14,11 +14,9 @@ import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
-import hiccreboot.backend.common.exception.ArticleNotFoundException;
-import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.service.ArticleService;
-import hiccreboot.backend.service.S3Service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 public class ArticleController {
 
 	private final ArticleService articleService;
-	private final S3Service s3Service;
 	private final TokenProvider tokenProvider;
 
 	@GetMapping
@@ -44,8 +41,10 @@ public class ArticleController {
 	}
 
 	@GetMapping("/{article-id}")
-	public BaseResponse searchArticle(@PathVariable("article-id") Long id) {
-		return articleService.makeArticle(id);
+	public BaseResponse searchArticle(@PathVariable("article-id") Long id, HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+		return articleService.makeArticle(id, studentNumber);
 	}
 
 	@PostMapping
@@ -68,13 +67,10 @@ public class ArticleController {
 	}
 
 	@DeleteMapping("/{article-id}")
-	public BaseResponse deleteArticle(@PathVariable("article-id") Long id) {
-		Article article = articleService.findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+	public BaseResponse deleteArticle(@PathVariable("article-id") Long id, HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
-		article.getImages()
-			.forEach(image -> s3Service.deleteImage(image.getFileName()));
-
-		articleService.deleteArticle(id);
+		articleService.deleteArticle(id, studentNumber);
 
 		return DataResponse.noContent();
 	}
