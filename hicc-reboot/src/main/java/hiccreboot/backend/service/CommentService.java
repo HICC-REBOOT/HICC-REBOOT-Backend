@@ -26,17 +26,18 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+	private final Long PARENT_COMMENT = -1L;
 
 	private final CommentRepository commentRepository;
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
 
 	public List<Comment> findParentComments(Long articleId) {
-		return commentRepository.findAllByArticle_IdAndParentCommentIdIsNull(articleId);
+		return commentRepository.findAllByArticle_IdAndParentCommentIdLessThanEqual(articleId, PARENT_COMMENT);
 	}
 
 	public List<Comment> findChildComments(Long articleId) {
-		return commentRepository.findAllByArticle_IdAndParentCommentIdNotNull(articleId);
+		return commentRepository.findAllByArticle_IdAndParentCommentIdGreaterThan(articleId, PARENT_COMMENT);
 	}
 
 	public BaseResponse makeParentComments(Long articleId, String studentNumber) {
@@ -76,11 +77,11 @@ public class CommentService {
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
 		Comment comment;
-		if (postCommentRequest.getParentCommentId() == null) {
-			comment = Comment.createParentComment(member, article, postCommentRequest.getContent());
-		} else {
+		if (postCommentRequest.getParentCommentId() > PARENT_COMMENT) {
 			comment = Comment.createChildComment(postCommentRequest.getParentCommentId(), member, article,
 				postCommentRequest.getContent());
+		} else {
+			comment = Comment.createParentComment(member, article, postCommentRequest.getContent());
 		}
 
 		return commentRepository.save(comment);

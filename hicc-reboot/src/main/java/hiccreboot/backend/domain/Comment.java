@@ -53,6 +53,7 @@ public class Comment {
 
 	public static Comment createParentComment(Member member, Article article, String content) {
 		return Comment.builder()
+			.parentCommentId(-1L)
 			.member(member)
 			.article(article)
 			.date(LocalDateTime.now())

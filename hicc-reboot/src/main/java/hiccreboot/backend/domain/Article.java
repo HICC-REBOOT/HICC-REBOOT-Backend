@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +19,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,6 +35,9 @@ public class Article {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "MEMBER_ID")
 	private Member member;
+
+	@Column(name = "ARTICLE_GRADE")
+	private ArticleGrade articleGrade;
 
 	@Column(nullable = false)
 	private String subject;
@@ -56,17 +59,24 @@ public class Article {
 	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
-	@Builder(access = AccessLevel.PRIVATE)
-	private Article(Member member, String subject, String content, BoardType boardType, LocalDateTime date) {
+	private Article(Member member, ArticleGrade articleGrade, String subject, String content, BoardType boardType,
+		LocalDateTime date) {
 		changeMember(member);
+		this.articleGrade = articleGrade;
 		this.subject = subject;
 		this.content = content;
 		this.boardType = boardType;
 		this.date = date;
 	}
 
-	public static Article createArticle(Member member, String subject, String content, BoardType boardType) {
-		return new Article(member, subject, content, boardType, LocalDateTime.now());
+	public static Article create(Member member, ArticleGrade articleGrade, String subject, String content,
+		BoardType boardType) {
+		return new Article(member, articleGrade, subject, content, boardType, LocalDateTime.now());
+	}
+
+	public static Article create(Member member, ArticleGrade articleGrade, ArticleRequest articleRequest) {
+		return new Article(member, articleGrade, articleRequest.getSubject(), articleRequest.getContent(),
+			articleRequest.getBoard(), LocalDateTime.now());
 	}
 
 	public void updateSubject(String subject) {
