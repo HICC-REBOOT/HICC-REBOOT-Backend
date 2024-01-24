@@ -52,6 +52,7 @@ public class WebSecurityConfig {
 		"/api/auth/duplicate/**",
 		"/api/auth/departments",
 		"/api/auth/logout/**",
+		"/api/auth/password/**",
 		"/swagger-ui/**",
 		"/api-docs/**"
 	};
