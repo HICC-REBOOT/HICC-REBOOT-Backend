@@ -1,7 +1,5 @@
 package hiccreboot.backend.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -41,16 +39,16 @@ public class ArticleService {
 		return articleRepository.findAll(pageable);
 	}
 
-	private List<Article> findArticleBySortAndBoardType(int pageNumber, int pageSize, BoardType boardType, String sort,
+	private Page<Article> findArticleBySortAndBoardType(int pageNumber, int pageSize, BoardType boardType, String sort,
 		String search) {
 		if (sort.equals("article")) {
-			return findArticlesByBoardType(pageNumber, pageSize, boardType).getContent();
+			return findArticlesByBoardType(pageNumber, pageSize, boardType);
 		}
 		if (sort.equals("member")) {
-			return findArticlesByMemberNameAndBoardType(pageNumber, pageSize, boardType, search).getContent();
+			return findArticlesByMemberNameAndBoardType(pageNumber, pageSize, boardType, search);
 		}
 		if (sort.equals("subject")) {
-			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, search).getContent();
+			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, search);
 		}
 
 		throw ArticleNotFoundException.EXCEPTION;
@@ -73,21 +71,17 @@ public class ArticleService {
 		return articleRepository.findBySubjectContainingAndBoardType(search, boardType, pageable);
 	}
 
-	public DataResponse<List<ArticleListResponse>> makeArticles(int pageNumber, int pageSize, BoardType boardType,
+	public DataResponse<Page<ArticleListResponse>> makeArticles(int pageNumber, int pageSize, BoardType boardType,
 		String sort,
 		String search) {
-		List<Article> articles = findArticleBySortAndBoardType(pageNumber, pageSize, boardType, sort,
-			search);
+		Page<ArticleListResponse> articles = findArticleBySortAndBoardType(pageNumber, pageSize, boardType, sort,
+			search).map(ArticleListResponse::create);
 
 		if (articles.isEmpty()) {
 			throw ArticleNotFoundException.EXCEPTION;
 		}
 
-		List<ArticleListResponse> articleResponses = new ArrayList<>();
-		articles.stream()
-			.forEach(article -> articleResponses.add(ArticleListResponse.create(article)));
-
-		return DataResponse.ok(articleResponses);
+		return DataResponse.ok(articles);
 	}
 
 	public Optional<Article> findArticle(Long id) {
