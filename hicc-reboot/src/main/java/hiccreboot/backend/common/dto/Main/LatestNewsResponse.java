@@ -2,6 +2,8 @@ package hiccreboot.backend.common.dto.Main;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.Grade;
 import lombok.Getter;
@@ -11,6 +13,7 @@ public class LatestNewsResponse {
 	private final Long articleId;
 	private final Grade grade;
 	private final String name;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	private final LocalDateTime date;
 	private final Boolean imageExistence;
 	private final String subject;
