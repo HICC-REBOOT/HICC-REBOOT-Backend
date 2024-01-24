@@ -42,8 +42,9 @@ public class MemberService {
 		String password = request.getPassword();
 		String phoneNumber = request.getPhoneNumber();
 		Department department = request.getDepartment();
+		String email = request.getEmail();
 
-		Member member = Member.signUp(studentNumber, department, name, password, phoneNumber);
+		Member member = Member.signUp(studentNumber, department, name, password, phoneNumber, email);
 
 		member.passwordEncode(passwordEncoder);
 		memberRepository.save(member);

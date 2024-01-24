@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import hiccreboot.backend.domain.Department;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -34,4 +35,8 @@ public class SignUpRequest {
 
 	@Schema(example = "컴퓨터공학과", implementation = Department.class)
 	private Department department;
+
+	@NotNull
+	@Email
+	private String email;
 }
