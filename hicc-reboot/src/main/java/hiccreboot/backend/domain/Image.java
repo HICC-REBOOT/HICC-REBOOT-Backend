@@ -1,5 +1,6 @@
 package hiccreboot.backend.domain;
 
+import hiccreboot.backend.common.dto.S3.ImageRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,6 +56,16 @@ public class Image {
 			.fileNameExtension(fileNameExtension)
 			.key(key)
 			.url(url)
+			.article(article)
+			.build();
+	}
+
+	public static Image createImage(ImageRequest imageRequest, Article article) {
+		return Image.builder()
+			.fileName(imageRequest.getFileName())
+			.fileNameExtension(imageRequest.getFileNameExtension())
+			.key(imageRequest.getKey())
+			.url(imageRequest.getUrl())
 			.article(article)
 			.build();
 	}
