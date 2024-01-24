@@ -51,10 +51,7 @@ public class Article {
 	private LocalDateTime date;
 
 	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ParentComment> parentComments = new ArrayList<>();
-
-	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ChildComment> childComments = new ArrayList<>();
+	private List<Comment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();

@@ -10,42 +10,50 @@ import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.BaseResponse;
+import hiccreboot.backend.common.dto.Comment.PostCommentRequest;
 import hiccreboot.backend.common.dto.DataResponse;
-import hiccreboot.backend.common.dto.ParentComment.PostParentCommentRequest;
-import hiccreboot.backend.service.ParentCommentService;
+import hiccreboot.backend.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/parent-comment")
+@RequestMapping("/api/comment")
 @RequiredArgsConstructor
-public class ParentCommentController {
+public class CommentController {
 
-	private final ParentCommentService parentCommentService;
+	private final CommentService commentService;
 	private final TokenProvider tokenProvider;
 
-	@GetMapping("/{article-id}")
+	@GetMapping("/parent/{article-id}")
 	public BaseResponse searchParentComment(@PathVariable("article-id") Long id,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
-		return parentCommentService.makeParentComments(id, studentNumber);
+		return commentService.makeParentComments(id, studentNumber);
+	}
+
+	@GetMapping("/child/{article-id}")
+	public BaseResponse searchChildComment(@PathVariable("article-id") Long id,
+		HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
+
+		return commentService.makeChildComments(id, studentNumber);
 	}
 
 	@PostMapping
-	public BaseResponse addParentComment(@RequestBody PostParentCommentRequest postParentCommentRequest,
+	public BaseResponse addComment(@RequestBody PostCommentRequest postCommentRequest,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
-		parentCommentService.saveParentComment(postParentCommentRequest.getArticleId(), studentNumber,
-			postParentCommentRequest.getContent());
+		commentService.saveComment(studentNumber, postCommentRequest);
 
 		return DataResponse.noContent();
 	}
 
 	@DeleteMapping("/{id}")
-	public BaseResponse deleteParentComment(@PathVariable("id") Long id, HttpServletRequest httpServletRequest) {
+	public BaseResponse deleteComment(@PathVariable("id") Long id, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
-		parentCommentService.deleteParentComment(id, studentNumber);
+
+		commentService.deleteComment(id, studentNumber);
 
 		return DataResponse.noContent();
 	}
