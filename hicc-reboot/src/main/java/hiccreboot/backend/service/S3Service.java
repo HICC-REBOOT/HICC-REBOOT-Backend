@@ -17,8 +17,8 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
-import hiccreboot.backend.common.dto.S3.ImageRequest;
 import hiccreboot.backend.common.dto.S3.ImageResponse;
+import hiccreboot.backend.common.dto.S3.SimpleImageRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,19 +31,19 @@ public class S3Service {
 
 	private final int TIME_LIMIT = 1000 * 60 * 2;
 
-	public BaseResponse getPreSignedUrls(List<ImageRequest> imageRequests) {
+	public BaseResponse getPreSignedUrls(List<SimpleImageRequest> simpleImageRequests) {
 
 		List<ImageResponse> response = new ArrayList<>();
-		for (ImageRequest imageRequest : imageRequests) {
-			String key = UUID.randomUUID() + imageRequest.getFileName();
-			String fileNameExtension = imageRequest.getFileNameExtension();
+		for (SimpleImageRequest simpleImageRequest : simpleImageRequests) {
+			String key = UUID.randomUUID() + simpleImageRequest.getFileName();
+			String fileNameExtension = simpleImageRequest.getFileNameExtension();
 
 			//s3 디렉터리 경로 설정
 			if (!fileNameExtension.equals("")) {
 				key = fileNameExtension + "/" + key;
 			}
 
-			response.add(ImageResponse.create(imageRequest.getFileName(), key, getPreSignedUrl(key)));
+			response.add(ImageResponse.create(simpleImageRequest.getFileName(), key, getPreSignedUrl(key)));
 		}
 
 		return DataResponse.ok(response);
