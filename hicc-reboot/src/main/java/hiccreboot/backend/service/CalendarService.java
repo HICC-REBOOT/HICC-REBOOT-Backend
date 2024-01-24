@@ -68,10 +68,7 @@ public class CalendarService {
 		Schedule schedule = Schedule.createSchedule(name, content, type);
 
 		dates.stream()
-			.forEach(date -> {
-				ScheduleDate.createScheduleDate(date.getYear(), date.getMonthValue(),
-					date.getDayOfMonth(), schedule);
-			});
+			.forEach(date -> ScheduleDate.create(date, schedule));
 		scheduleRepository.save(schedule);
 
 		return schedule;
@@ -93,7 +90,7 @@ public class CalendarService {
 		schedule.getScheduleDates().clear();
 		updateScheduleRequest.getDates().stream()
 			.forEach(date -> {
-				ScheduleDate.createScheduleDate(date.getYear(), date.getMonthValue(),
+				ScheduleDate.create(date.getYear(), date.getMonthValue(),
 					date.getDayOfMonth(), schedule);
 			});
 
