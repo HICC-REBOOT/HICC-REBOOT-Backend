@@ -18,7 +18,9 @@ import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
+import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Image;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
@@ -29,6 +31,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
+	private final String SORT_BY_ARTICLE = "article";
+	private final String SORT_BY_MEMBER_NAME = "member";
+	private final String SORT_BY_GRADE = "grade";
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
@@ -39,42 +44,53 @@ public class ArticleService {
 		return articleRepository.findAll(pageable);
 	}
 
-	private Page<Article> findArticleBySortAndBoardType(int pageNumber, int pageSize, BoardType boardType, String sort,
+	private Page<Article> findArticleBySortAndBoardTypeAndArticleGrade(int pageNumber, int pageSize,
+		BoardType boardType, ArticleGrade articleGrade,
+		String sort,
 		String search) {
 		if (sort.equals("article")) {
-			return findArticlesByBoardType(pageNumber, pageSize, boardType);
+			return findArticlesByBoardTypeAndArticleGrade(pageNumber, pageSize, boardType, articleGrade);
 		}
 		if (sort.equals("member")) {
-			return findArticlesByMemberNameAndBoardType(pageNumber, pageSize, boardType, search);
+			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageNumber, pageSize, boardType, articleGrade,
+				search);
 		}
 		if (sort.equals("subject")) {
-			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, search);
+			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, articleGrade, search);
 		}
 
 		throw ArticleNotFoundException.EXCEPTION;
 	}
 
-	private Page<Article> findArticlesByBoardType(int pageNumber, int pageSize, BoardType boardType) {
+	private Page<Article> findArticlesByBoardTypeAndArticleGrade(int pageNumber, int pageSize, BoardType boardType,
+		ArticleGrade articleGrade) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findAllByBoardType(pageable, boardType);
+		return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
 	}
 
-	private Page<Article> findArticlesByMemberNameAndBoardType(int pageNumber, int pageSize, BoardType boardType,
+	private Page<Article> findArticlesByMemberNameAndBoardTypeAndArticleGrade(int pageNumber, int pageSize,
+		BoardType boardType,
+		ArticleGrade articleGrade,
 		String search) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findByMember_NameAndBoardType(search, boardType, pageable);
+		return articleRepository.findAllByMember_NameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
+			pageable);
 	}
 
 	private Page<Article> findArticlesBySubjectAndBoardType(int pageNumber, int pageSize, BoardType boardType,
+		ArticleGrade articleGrade,
 		String search) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findBySubjectContainingAndBoardType(search, boardType, pageable);
+		return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
+			pageable);
 	}
 
 	public DataResponse<Page<ArticleListResponse>> makeArticles(int pageNumber, int pageSize, BoardType boardType,
+		ArticleGrade articleGrade,
 		String sort,
 		String search) {
-		Page<ArticleListResponse> articles = findArticleBySortAndBoardType(pageNumber, pageSize, boardType, sort,
+		Page<ArticleListResponse> articles = findArticleBySortAndBoardTypeAndArticleGrade(pageNumber, pageSize,
+			boardType, articleGrade, sort,
 			search).map(ArticleListResponse::create);
 
 		if (articles.isEmpty()) {
@@ -101,8 +117,8 @@ public class ArticleService {
 	public Article saveArticle(String studentNumber, ArticleRequest articleRequest) {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
-		Article article = Article.createArticle(member, articleRequest.getSubject(), articleRequest.getContent(),
-			articleRequest.getBoard());
+
+		Article article = Article.create(member, makeArticleGradeByMemberGrade(member.getGrade()), articleRequest);
 
 		for (ImageRequest imageRequest : articleRequest.getImages()) {
 			String fileName = imageRequest.getFileName();
@@ -113,6 +129,13 @@ public class ArticleService {
 		}
 
 		return articleRepository.save(article);
+	}
+
+	public ArticleGrade makeArticleGradeByMemberGrade(Grade grade) {
+		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
+			return ArticleGrade.EXECUTIVE;
+		}
+		return ArticleGrade.NORMAL;
 	}
 
 	@Transactional

@@ -15,6 +15,7 @@ import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
+import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
 import hiccreboot.backend.service.ArticleService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,10 +34,11 @@ public class ArticleController {
 		@RequestParam(value = "page") int pageNumber,
 		@RequestParam(value = "size") int pageSize,
 		@RequestParam(value = "board") BoardType boardType,
+		@RequestParam(value = "articleGrade", required = false, defaultValue = "NORMAL") ArticleGrade articleGrade,
 		@RequestParam(value = "sort", required = false, defaultValue = "article") String sort,
 		@RequestParam(value = "search", required = false, defaultValue = "null") String search) {
 
-		return articleService.makeArticles(pageNumber, pageSize, boardType,
+		return articleService.makeArticles(pageNumber, pageSize, boardType, articleGrade,
 			sort, search);
 	}
 
