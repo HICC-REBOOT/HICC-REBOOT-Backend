@@ -136,13 +136,13 @@ public class ArticleService {
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		Article article = articleRepository.findById(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
-		//S3 image 제거
-		article.getImages()
-			.forEach(image -> s3Service.deleteImage(image.getFileName()));
-
 		if (member != article.getMember()) {
 			throw AccessForbiddenException.EXCEPTION;
 		}
+
+		//S3 image 제거
+		article.getImages()
+			.forEach(image -> s3Service.deleteImage(image.getFileName()));
 
 		articleRepository.deleteById(id);
 	}
