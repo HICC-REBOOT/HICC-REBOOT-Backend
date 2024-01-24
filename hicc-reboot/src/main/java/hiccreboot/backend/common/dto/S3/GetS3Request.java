@@ -6,5 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class GetS3Request {
+
 	private List<SimpleImageRequest> images;
 }
