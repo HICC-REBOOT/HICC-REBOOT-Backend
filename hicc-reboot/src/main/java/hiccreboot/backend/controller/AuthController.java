@@ -1,6 +1,7 @@
 package hiccreboot.backend.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,8 +11,10 @@ import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.dto.ErrorResponse;
+import hiccreboot.backend.dto.request.ReissuePasswordRequest;
 import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
+import hiccreboot.backend.service.EmailService;
 import hiccreboot.backend.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
 	private final MemberService memberService;
+	private final EmailService emailService;
 	private final TokenProvider tokenProvider;
 
 	@PostMapping("/sign-up")
@@ -71,4 +75,13 @@ public class AuthController {
 			.orElse(null);
 		return memberService.findSimpleInfo(studentNumber);
 	}
+
+	@PostMapping("/password/{student-number}")
+	public BaseResponse reissuePassword(@PathVariable(value = "student-number") String studentNumber,
+		@Valid @RequestBody ReissuePasswordRequest request) {
+		emailService.sendTempPassword(studentNumber, request.getEmail());
+
+		return DataResponse.ok();
+	}
+
 }
