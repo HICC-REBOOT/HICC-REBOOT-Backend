@@ -172,9 +172,6 @@ public class MemberService {
 	}
 
 	private void modifyPhoneNumber(Member member, String phoneNumber) {
-		if (member.getPhoneNumber().equals(phoneNumber)) {
-			return;
-		}
 		member.updatePhoneNumber(phoneNumber);
 	}
 
@@ -189,11 +186,7 @@ public class MemberService {
 	}
 
 	private void modifyPassword(Member member, String password) {
-		String encodedPassword = passwordEncoder.encode(password);
 
-		if (member.getPassword().equals(encodedPassword)) {
-			return;
-		}
 		member.updatePassword(password);
 		member.passwordEncode(passwordEncoder);
 	}
