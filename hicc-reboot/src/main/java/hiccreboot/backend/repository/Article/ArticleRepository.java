@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
+import hiccreboot.backend.domain.Member;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 	Page<Article> findAll(Pageable pageable);
@@ -17,6 +18,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 		ArticleGrade articleGrade,
 		Pageable pageable);
 
+	Page<Article> findBySubjectContainingAndBoardType(String subject, BoardType boardType, Pageable pageable);
+
+	Page<Article> findAllByMember(Member member, Pageable pageable);
 	Page<Article> findAllBySubjectContainingAndBoardTypeAndArticleGrade(String subject, BoardType boardType,
 		ArticleGrade articleGrade,
 		Pageable pageable);
