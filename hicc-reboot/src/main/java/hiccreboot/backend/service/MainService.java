@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.dto.Main.LatestNewsResponse;
-import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +26,6 @@ public class MainService {
 
 	public DataResponse<List<LatestNewsResponse>> makeLatestNews(int pageNumber, int pageSize) {
 		List<Article> articles = articleService.findArticles(pageNumber, pageSize).getContent();
-
-		if (articles.isEmpty()) {
-			throw ArticleNotFoundException.EXCEPTION;
-		}
 
 		List<LatestNewsResponse> latestNewsResponses = new ArrayList<>();
 		articles.stream()
