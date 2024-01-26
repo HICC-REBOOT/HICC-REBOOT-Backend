@@ -8,5 +8,4 @@ public class ArticleImageRequest {
 	private String fileName;
 	private String fileNameExtension;
 	private String key;
-	private String url;
 }

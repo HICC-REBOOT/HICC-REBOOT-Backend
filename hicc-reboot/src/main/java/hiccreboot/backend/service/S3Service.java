@@ -1,9 +1,7 @@
 package hiccreboot.backend.service;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -37,25 +35,19 @@ public class S3Service {
 
 	private final int TIME_LIMIT = 1000 * 60 * 2;
 
-	public BaseResponse makePreSignedUrls(List<SimpleImageRequest> simpleImageRequests) {
+	public BaseResponse makePreSignedUrls(SimpleImageRequest simpleImageRequest) {
 		//확장자 검사
-		simpleImageRequests.stream()
-			.forEach(simpleImageRequest -> checkFileNameExtension(simpleImageRequest.getFileNameExtension()));
+		checkFileNameExtension(simpleImageRequest.getFileNameExtension());
 
-		List<ImageResponse> response = new ArrayList<>();
-		for (SimpleImageRequest simpleImageRequest : simpleImageRequests) {
-			String key = UUID.randomUUID() + simpleImageRequest.getFileName();
-			String fileNameExtension = simpleImageRequest.getFileNameExtension().toUpperCase();
+		String key = UUID.randomUUID() + simpleImageRequest.getFileName();
+		String fileNameExtension = simpleImageRequest.getFileNameExtension().toUpperCase();
 
-			//s3 디렉터리 경로 설정
-			if (!fileNameExtension.equals("")) {
-				key = fileNameExtension + "/" + key;
-			}
-
-			response.add(ImageResponse.create(simpleImageRequest.getFileName(), key, getPreSignedUrl(key)));
+		//s3 디렉터리 경로 설정
+		if (!fileNameExtension.equals("")) {
+			key = fileNameExtension + "/" + key;
 		}
 
-		return DataResponse.ok(response);
+		return DataResponse.ok(ImageResponse.create(simpleImageRequest.getFileName(), key, getPreSignedUrl(key)));
 	}
 
 	private void checkFileNameExtension(String fileNameExtension) {
@@ -72,15 +64,15 @@ public class S3Service {
 		throw FileNameExtenstionNotFoundException.EXCEPTION;
 	}
 
-	private String getPreSignedUrl(String fileName) {
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(fileName);
+	private String getPreSignedUrl(String key) {
+		GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(key);
 		URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
 		return url.toString();
 	}
 
-	private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String fileName) {
+	private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String key) {
 		GeneratePresignedUrlRequest generatePresignedUrlRequest =
-			new GeneratePresignedUrlRequest(bucket, fileName)
+			new GeneratePresignedUrlRequest(bucket, key)
 				.withMethod(HttpMethod.PUT)
 				.withExpiration(getPreSignedUrlExpiration());
 		generatePresignedUrlRequest.addRequestParameter(
@@ -96,7 +88,11 @@ public class S3Service {
 		return expiration;
 	}
 
-	public void deleteImage(String fileName) {
-		amazonS3.deleteObject(bucket, fileName);
+	public void deleteImage(String key) {
+		amazonS3.deleteObject(bucket, key);
+	}
+
+	public String getUrl(String key) {
+		return amazonS3.getUrl(bucket, key).toString();
 	}
 }
