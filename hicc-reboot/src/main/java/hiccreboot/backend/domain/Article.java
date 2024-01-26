@@ -37,6 +37,7 @@ public class Article {
 	private Member member;
 
 	@Column(name = "ARTICLE_GRADE")
+	@Enumerated(EnumType.STRING)
 	private ArticleGrade articleGrade;
 
 	@Column(nullable = false)
