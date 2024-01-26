@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +16,9 @@ import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
-import hiccreboot.backend.common.exception.SortNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
@@ -26,64 +27,61 @@ import hiccreboot.backend.domain.Image;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
-	private final String SORT_BY_ARTICLE = "ARTICLE";
 	private final String SORT_BY_MEMBER_NAME = "MEMBER";
-	private final String SORT_BY_GRADE = "GRADE";
+	private final String SORT_BY_SUBJECT = "SUBJECT";
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
 	private final S3Service s3Service;
+	private final EntityManager entityManager;
 
 	public Page<Article> findArticles(int pageNumber, int pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
 		return articleRepository.findAll(pageable);
 	}
 
-	private Page<Article> findArticleBySortAndBoardTypeAndArticleGrade(int pageNumber, int pageSize,
-		BoardType boardType, ArticleGrade articleGrade,
+	private Page<Article> findArticlesBySort(
+		Pageable pageable,
+		BoardType boardType,
+		ArticleGrade articleGrade,
 		String sort,
 		String search) {
 		sort = sort.toUpperCase();
-
-		if (sort.equals("ARTICLE")) {
-			return findArticlesByBoardTypeAndArticleGrade(pageNumber, pageSize, boardType, articleGrade);
-		}
-		if (sort.equals("MEMBER")) {
-			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageNumber, pageSize, boardType, articleGrade,
+		if (sort.equals(SORT_BY_SUBJECT)) {
+			return findArticlesBySubjectAndBoardType(pageable, boardType, articleGrade, search);
+		} else if (sort.equals(SORT_BY_MEMBER_NAME)) {
+			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade,
 				search);
+		} else {
+			return findArticlesByBoardTypeAndArticleGrade(pageable, boardType, articleGrade);
 		}
-		if (sort.equals("SUBJECT")) {
-			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, articleGrade, search);
-		}
-
-		throw SortNotFoundException.EXCEPTION;
 	}
 
-	private Page<Article> findArticlesByBoardTypeAndArticleGrade(int pageNumber, int pageSize, BoardType boardType,
+	private Page<Article> findArticlesByBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
 	}
 
-	private Page<Article> findArticlesByMemberNameAndBoardTypeAndArticleGrade(int pageNumber, int pageSize,
+	private Page<Article> findArticlesByMemberNameAndBoardTypeAndArticleGrade(Pageable pageable,
 		BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
-		return articleRepository.findAllByMember_NameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
+		return articleRepository.findAllByMemberNameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
 			pageable);
 	}
 
-	private Page<Article> findArticlesBySubjectAndBoardType(int pageNumber, int pageSize, BoardType boardType,
+	private Page<Article> findArticlesBySubjectAndBoardType(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 		return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
 			pageable);
 	}
@@ -92,13 +90,11 @@ public class ArticleService {
 		ArticleGrade articleGrade,
 		String sort,
 		String search) {
-		Page<ArticleListResponse> articles = findArticleBySortAndBoardTypeAndArticleGrade(pageNumber, pageSize,
+		PageRequest pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
+
+		Page<ArticleListResponse> articles = findArticlesBySort(pageable,
 			boardType, articleGrade, sort,
 			search).map(ArticleListResponse::create);
-
-		if (articles.isEmpty()) {
-			throw ArticleNotFoundException.EXCEPTION;
-		}
 
 		return DataResponse.ok(articles);
 	}
@@ -133,7 +129,10 @@ public class ArticleService {
 		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
 			return ArticleGrade.EXECUTIVE;
 		}
-		return ArticleGrade.NORMAL;
+		if (grade == Grade.NORMAL) {
+			return ArticleGrade.NORMAL;
+		}
+		throw AccessForbiddenException.EXCEPTION;
 	}
 
 	@Transactional
