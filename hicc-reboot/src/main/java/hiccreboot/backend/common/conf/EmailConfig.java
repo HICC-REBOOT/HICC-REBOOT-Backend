@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
@@ -55,6 +56,14 @@ public class EmailConfig {
 		mailSender.setJavaMailProperties(mailProperties());
 
 		return mailSender;
+	}
+
+	@Bean
+	public SimpleMailMessage simpleMailMessage() {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setFrom(username);
+		
+		return message;
 	}
 
 	private Properties mailProperties() {
