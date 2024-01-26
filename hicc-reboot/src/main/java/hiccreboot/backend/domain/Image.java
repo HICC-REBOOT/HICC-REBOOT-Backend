@@ -43,7 +43,7 @@ public class Image {
 	@Builder(access = AccessLevel.PRIVATE)
 	private Image(String fileName, String fileNameExtension, String key, String url, Article article) {
 		this.fileName = fileName;
-		this.fileNameExtension = fileNameExtension;
+		this.fileNameExtension = fileNameExtension.toUpperCase();
 		this.key = key;
 		this.url = url;
 		changeArticle(article);
