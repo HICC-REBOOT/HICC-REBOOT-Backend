@@ -10,16 +10,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.common.exception.DepartmentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.StudentDuplicateException;
 import hiccreboot.backend.domain.Department;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
+import hiccreboot.backend.dto.request.ProfileModifyRequest;
 import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
 import hiccreboot.backend.dto.response.ApplicantResponse;
 import hiccreboot.backend.dto.response.MemberResponse;
 import hiccreboot.backend.dto.response.MemberSimpleResponse;
+import hiccreboot.backend.dto.response.PersonalArticleResponse;
+import hiccreboot.backend.dto.response.PersonalCommentResponse;
+import hiccreboot.backend.dto.response.ProfileMemberResponse;
+import hiccreboot.backend.repository.Article.ArticleRepository;
+import hiccreboot.backend.repository.Comment.CommentRepository;
+import hiccreboot.backend.repository.department.DepartmentRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +38,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MemberService {
 	private final MemberRepository memberRepository;
+	private final DepartmentRepository departmentRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final ArticleRepository articleRepository;
+	private final CommentRepository commentRepository;
+
+	private static final String PHONE_NUMBER_REGEX = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$";
 
 	public void signUp(SignUpRequest request) {
 
@@ -119,9 +132,10 @@ public class MemberService {
 	}
 
 	private Sort getSort(String sortBy) {
-		if (sortBy.equals("department")) {
-			return Sort.by("department_id");
-		} else if (sortBy.equals("name")) {
+		String uppercaseSortBy = sortBy.toUpperCase();
+		if (uppercaseSortBy.equals("DEPARTMENT")) {
+			return Sort.by("department");
+		} else if (uppercaseSortBy.equals("NAME")) {
 			return Sort.by("name");
 		} else {
 			return Sort.by("grade");
@@ -134,5 +148,83 @@ public class MemberService {
 
 	private boolean validateModifyAnotherGrade(Member modifiedMember, Grade modifiedGrade) {
 		return !modifiedMember.getGrade().equals(modifiedGrade);
+	}
+
+	public DataResponse<ProfileMemberResponse> getProfile(String studentNumber) {
+		ProfileMemberResponse response = memberRepository.findByStudentNumber(studentNumber)
+			.map(ProfileMemberResponse::create)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		return DataResponse.ok(response);
+	}
+
+	public void modifyProfile(ProfileModifyRequest request, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		modifyPhoneNumber(member, request.getPhoneNumber());
+		modifyDepartment(member, request.getDepartment());
+		modifyPassword(member, request.getPassword());
+	}
+
+	public void withdraw(String studentNumber) {
+		memberRepository.findByStudentNumber(studentNumber)
+			.ifPresentOrElse(memberRepository::delete, () -> {
+				throw MemberNotFoundException.EXCEPTION;
+			});
+	}
+
+	private void modifyPhoneNumber(Member member, String phoneNumber) {
+		if (phoneNumber == null || !phoneNumber.matches(PHONE_NUMBER_REGEX)) {
+			return;
+		}
+
+		member.updatePhoneNumber(phoneNumber);
+	}
+
+	private void modifyDepartment(Member member, String departmentName) {
+		if (departmentName == null) {
+			return;
+		}
+
+		if (member.getDepartment().getName().equals(departmentName)) {
+			return;
+		}
+		Department department = departmentRepository.findByName(departmentName)
+			.orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
+
+		member.updateDepartment(department);
+	}
+
+	private void modifyPassword(Member member, String password) {
+		if (password == null || password.isBlank()) {
+			return;
+		}
+		member.updatePassword(password);
+		member.passwordEncode(passwordEncoder);
+	}
+
+	public DataResponse<Page<PersonalArticleResponse>> findPersonalArticles(int page, int size, String studentNumber) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		Page<PersonalArticleResponse> result = articleRepository.findAllByMember(member, pageable)
+			.map(PersonalArticleResponse::create);
+
+		return DataResponse.ok(result);
+	}
+
+	public DataResponse<Page<PersonalCommentResponse>> findPersonalComments(int page, int size, String studentNumber) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		Page<PersonalCommentResponse> result = commentRepository.findAllByMember(member, pageable)
+			.map(PersonalCommentResponse::create);
+
+		return DataResponse.ok(result);
 	}
 }
