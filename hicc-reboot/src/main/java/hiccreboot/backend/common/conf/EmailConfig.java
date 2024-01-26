@@ -62,7 +62,7 @@ public class EmailConfig {
 	public SimpleMailMessage simpleMailMessage() {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom(username);
-		
+
 		return message;
 	}
 

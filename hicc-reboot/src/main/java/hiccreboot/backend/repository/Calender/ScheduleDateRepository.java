@@ -1,10 +1,11 @@
 package hiccreboot.backend.repository.Calender;
 
-import hiccreboot.backend.domain.ScheduleDate;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import hiccreboot.backend.domain.ScheduleDate;
+
 public interface ScheduleDateRepository extends JpaRepository<ScheduleDate, Long> {
-    public List<ScheduleDate> findAllByYearAndMonth(int year, int month);
+	public List<ScheduleDate> findAllByYearAndMonth(int year, int month);
 }

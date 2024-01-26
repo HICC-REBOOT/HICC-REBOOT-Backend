@@ -15,5 +15,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 	List<Comment> findAllByArticle_IdAndParentCommentIdNotNull(Long id);
 
 	Page<Comment> findAllByMember(Member member, Pageable pageable);
+
 	List<Comment> findAllByArticle_IdAndParentCommentIdLessThanEqual(Long id, Long parentCommentId);
 }
