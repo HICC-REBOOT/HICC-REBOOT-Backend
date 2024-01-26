@@ -54,7 +54,8 @@ public class MemberService {
 		String name = request.getName();
 		String password = request.getPassword();
 		String phoneNumber = request.getPhoneNumber();
-		Department department = request.getDepartment();
+		Department department = departmentRepository.findByName(request.getDepartment())
+			.orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
 		String email = request.getEmail();
 
 		Member member = Member.signUp(studentNumber, department, name, password, phoneNumber, email);
