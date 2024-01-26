@@ -1,8 +1,5 @@
 package hiccreboot.backend.dto.response;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
 import lombok.AccessLevel;
@@ -11,7 +8,6 @@ import lombok.Getter;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ProfileMemberResponse {
 	private String name;
 	private Grade grade;

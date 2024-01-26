@@ -1,9 +1,9 @@
-package hiccreboot.backend.common.dto.S3;
+package hiccreboot.backend.common.dto.Article;
 
 import lombok.Getter;
 
 @Getter
-public class ImageRequest {
+public class ArticleImageRequest {
 
 	private String fileName;
 	private String fileNameExtension;
