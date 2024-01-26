@@ -43,6 +43,8 @@ public class MemberService {
 	private final ArticleRepository articleRepository;
 	private final CommentRepository commentRepository;
 
+	private static final String PHONE_NUMBER_REGEX = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$";
+
 	public void signUp(SignUpRequest request) {
 
 		if (memberRepository.findByStudentNumber(request.getStudentNumber()).isPresent()) {
@@ -130,9 +132,10 @@ public class MemberService {
 	}
 
 	private Sort getSort(String sortBy) {
-		if (sortBy.equals("department")) {
-			return Sort.by("department_id");
-		} else if (sortBy.equals("name")) {
+		String uppercaseSortBy = sortBy.toUpperCase();
+		if (uppercaseSortBy.equals("DEPARTMENT")) {
+			return Sort.by("department");
+		} else if (uppercaseSortBy.equals("NAME")) {
 			return Sort.by("name");
 		} else {
 			return Sort.by("grade");
@@ -172,10 +175,18 @@ public class MemberService {
 	}
 
 	private void modifyPhoneNumber(Member member, String phoneNumber) {
+		if (phoneNumber == null || !phoneNumber.matches(PHONE_NUMBER_REGEX)) {
+			return;
+		}
+
 		member.updatePhoneNumber(phoneNumber);
 	}
 
 	private void modifyDepartment(Member member, String departmentName) {
+		if (departmentName == null) {
+			return;
+		}
+
 		if (member.getDepartment().getName().equals(departmentName)) {
 			return;
 		}
@@ -186,7 +197,9 @@ public class MemberService {
 	}
 
 	private void modifyPassword(Member member, String password) {
-
+		if (password == null || password.isBlank()) {
+			return;
+		}
 		member.updatePassword(password);
 		member.passwordEncode(passwordEncoder);
 	}
