@@ -44,10 +44,8 @@ public class CommentService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
-		List<Comment> parentComments = findParentComments(articleId);
-
 		List<ParentCommentResponse> parentCommentResponses = new ArrayList<>();
-		parentComments.stream()
+		findParentComments(articleId).stream()
 			.forEach((parentComment) -> parentCommentResponses.add(new ParentCommentResponse(
 				parentComment,
 				parentComment.getMember() == member)));
@@ -59,13 +57,12 @@ public class CommentService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
-		List<Comment> childComments = findChildComments(articleId);
-
 		List<ChildCommentResponse> childCommentResponses = new ArrayList<>();
-		childComments.stream()
+		findChildComments(articleId).stream()
 			.forEach((childComment) -> childCommentResponses.add(new ChildCommentResponse(
 				childComment,
 				childComment.getMember() == member)));
+
 		return DataResponse.ok(childCommentResponses);
 	}
 

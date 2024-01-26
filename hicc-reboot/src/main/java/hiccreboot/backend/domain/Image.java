@@ -1,5 +1,6 @@
 package hiccreboot.backend.domain;
 
+import hiccreboot.backend.common.dto.Article.ArticleImageRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,7 +43,7 @@ public class Image {
 	@Builder(access = AccessLevel.PRIVATE)
 	private Image(String fileName, String fileNameExtension, String key, String url, Article article) {
 		this.fileName = fileName;
-		this.fileNameExtension = fileNameExtension;
+		this.fileNameExtension = fileNameExtension.toUpperCase();
 		this.key = key;
 		this.url = url;
 		changeArticle(article);
@@ -55,6 +56,16 @@ public class Image {
 			.fileNameExtension(fileNameExtension)
 			.key(key)
 			.url(url)
+			.article(article)
+			.build();
+	}
+
+	public static Image createImage(ArticleImageRequest articleImageRequest, Article article) {
+		return Image.builder()
+			.fileName(articleImageRequest.getFileName())
+			.fileNameExtension(articleImageRequest.getFileNameExtension())
+			.key(articleImageRequest.getKey())
+			.url(articleImageRequest.getUrl())
 			.article(article)
 			.build();
 	}

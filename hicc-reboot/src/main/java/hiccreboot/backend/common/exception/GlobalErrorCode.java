@@ -18,6 +18,8 @@ public enum GlobalErrorCode implements BaseErrorCode {
 
 	INTERNAL_SERVER_EXCEPTION(INTERNAL_SERVER, "INTERNAL_SERVER_ERROR_500_1", "내부 서버 에러입니다."),
 	ACCESS_FORBIDDEN(FORBIDDEN, "FORBIDDEN_403_1", "접근 권한이 없습니다."),
+	FILE_NAME_EXTENSION_NOT_FOUND(NOT_FOUND, " FILE_NAME_EXTENSION_NOT_FOUND_404_1", "파일확장자를 찾을 수 없습니다."),
+	SORT_NOT_FOUND(NOT_FOUND, " SORT_NOT_FOUND_404_1", "분류기준을 찾을 수 없습니다."),
 	;
 	private final Integer status;
 	private final String code;

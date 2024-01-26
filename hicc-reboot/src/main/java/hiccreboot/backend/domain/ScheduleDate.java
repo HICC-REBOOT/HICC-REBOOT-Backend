@@ -1,5 +1,7 @@
 package hiccreboot.backend.domain;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,11 +46,20 @@ public class ScheduleDate {
 		addSchedule(schedule);
 	}
 
-	public static ScheduleDate createScheduleDate(int year, int month, int dayOfMonth, Schedule schedule) {
+	public static ScheduleDate create(int year, int month, int dayOfMonth, Schedule schedule) {
 		return ScheduleDate.builder()
 			.year(year)
 			.month(month)
 			.dayOfMonth(dayOfMonth)
+			.schedule(schedule)
+			.build();
+	}
+
+	public static ScheduleDate create(LocalDate localDate, Schedule schedule) {
+		return ScheduleDate.builder()
+			.year(localDate.getYear())
+			.month(localDate.getMonthValue())
+			.dayOfMonth(localDate.getDayOfMonth())
 			.schedule(schedule)
 			.build();
 	}

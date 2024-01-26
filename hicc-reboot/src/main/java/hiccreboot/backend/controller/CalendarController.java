@@ -52,7 +52,6 @@ public class CalendarController {
 	@PatchMapping("schedule/{schedule-id}")
 	public BaseResponse updateSchedule(@PathVariable("schedule-id") Long id,
 		@RequestBody UpdateScheduleRequest updateScheduleRequest) {
-
 		calendarService.updateSchedule(id, updateScheduleRequest);
 
 		return DataResponse.noContent();

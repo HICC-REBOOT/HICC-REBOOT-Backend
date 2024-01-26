@@ -22,7 +22,7 @@ ArticleResponse {
 	private final Boolean isMine;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private final LocalDateTime date;
-	private final List<String> urls;
+	private final List<ArticleImageResponse> images;
 	private final BoardType board;
 	private final String subject;
 	private final String content;
@@ -34,7 +34,7 @@ ArticleResponse {
 		String name,
 		Boolean isMine,
 		LocalDateTime date,
-		List<String> urls,
+		List<ArticleImageResponse> images,
 		BoardType board,
 		String subject,
 		String content) {
@@ -43,7 +43,7 @@ ArticleResponse {
 		this.name = name;
 		this.isMine = isMine;
 		this.date = date;
-		this.urls = urls;
+		this.images = images;
 		this.board = board;
 		this.subject = subject;
 		this.content = content;
@@ -56,8 +56,12 @@ ArticleResponse {
 			.name(article.getMember().getName())
 			.isMine(isMine)
 			.date(article.getDate())
-			.urls(
-				article.getImages().stream().map(image -> image.getUrl()).collect(Collectors.toList()))
+			.images(
+				article.getImages()
+					.stream()
+					.map(image -> ArticleImageResponse.create(image.getFileName(), image.getFileNameExtension(),
+						image.getKey(), image.getUrl()))
+					.collect(Collectors.toList()))
 			.board(article.getBoardType())
 			.subject(article.getSubject())
 			.content(article.getContent())

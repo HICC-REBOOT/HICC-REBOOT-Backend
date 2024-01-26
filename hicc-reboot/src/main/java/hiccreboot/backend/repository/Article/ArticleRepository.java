@@ -21,6 +21,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 	Page<Article> findBySubjectContainingAndBoardType(String subject, BoardType boardType, Pageable pageable);
 
 	Page<Article> findAllByMember(Member member, Pageable pageable);
+
 	Page<Article> findAllBySubjectContainingAndBoardTypeAndArticleGrade(String subject, BoardType boardType,
 		ArticleGrade articleGrade,
 		Pageable pageable);

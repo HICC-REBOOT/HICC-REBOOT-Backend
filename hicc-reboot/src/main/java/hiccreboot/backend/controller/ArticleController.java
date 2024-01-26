@@ -62,7 +62,6 @@ public class ArticleController {
 	public BaseResponse updateArticle(
 		@PathVariable("article-id") Long id,
 		@RequestBody ArticleRequest articleRequest) {
-
 		articleService.updateArticle(id, articleRequest);
 
 		return DataResponse.noContent();

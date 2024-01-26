@@ -8,11 +8,9 @@ import lombok.Getter;
 
 @Getter
 public class PostScheduleRequest {
+
 	private String name;
-
 	private List<LocalDate> dates;
-
 	private ScheduleType type;
-
 	private String content;
 }
