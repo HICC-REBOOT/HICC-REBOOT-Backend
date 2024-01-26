@@ -1,5 +1,7 @@
 package hiccreboot.backend.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,8 @@ import hiccreboot.backend.common.exception.dto.ErrorResponse;
 import hiccreboot.backend.dto.request.ReissuePasswordRequest;
 import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
+import hiccreboot.backend.dto.response.DepartmentResponse;
+import hiccreboot.backend.service.DepartmentService;
 import hiccreboot.backend.service.EmailService;
 import hiccreboot.backend.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
 	private final MemberService memberService;
+	private final DepartmentService departmentService;
 	private final EmailService emailService;
 	private final TokenProvider tokenProvider;
 
@@ -74,6 +79,11 @@ public class AuthController {
 		String studentNumber = tokenProvider.extractStudentNumber(servletRequest)
 			.orElse(null);
 		return memberService.findSimpleInfo(studentNumber);
+	}
+
+	@GetMapping("/departments")
+	public DataResponse<List<DepartmentResponse>> findDepartments() {
+		return departmentService.findDepartments();
 	}
 
 	@PostMapping("/password/{student-number}")

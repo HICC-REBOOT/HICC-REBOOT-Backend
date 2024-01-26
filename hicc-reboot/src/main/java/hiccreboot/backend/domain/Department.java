@@ -30,6 +30,6 @@ public class Department {
 	@Column(nullable = false)
 	private String name;
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "department")
 	private List<Member> members = new ArrayList<>();
 }
