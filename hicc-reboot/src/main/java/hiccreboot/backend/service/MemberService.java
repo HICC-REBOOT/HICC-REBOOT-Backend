@@ -54,9 +54,11 @@ public class MemberService {
 		String name = request.getName();
 		String password = request.getPassword();
 		String phoneNumber = request.getPhoneNumber();
-		Department department = request.getDepartment();
+		Department department = departmentRepository.findByName(request.getDepartment())
+			.orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
+		String email = request.getEmail();
 
-		Member member = Member.signUp(studentNumber, department, name, password, phoneNumber);
+		Member member = Member.signUp(studentNumber, department, name, password, phoneNumber, email);
 
 		member.passwordEncode(passwordEncoder);
 		memberRepository.save(member);
@@ -165,6 +167,7 @@ public class MemberService {
 		modifyPhoneNumber(member, request.getPhoneNumber());
 		modifyDepartment(member, request.getDepartment());
 		modifyPassword(member, request.getPassword());
+		modifyEmail(member, request.getEmail());
 	}
 
 	public void withdraw(String studentNumber) {
@@ -202,6 +205,13 @@ public class MemberService {
 		}
 		member.updatePassword(password);
 		member.passwordEncode(passwordEncoder);
+	}
+
+	private void modifyEmail(Member member, String email) {
+		if (email == null) {
+			return;
+		}
+		member.updateEmail(email);
 	}
 
 	public DataResponse<Page<PersonalArticleResponse>> findPersonalArticles(int page, int size, String studentNumber) {

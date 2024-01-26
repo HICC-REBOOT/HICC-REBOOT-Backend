@@ -1,5 +1,6 @@
 package hiccreboot.backend.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,4 +16,7 @@ public class ProfileModifyRequest {
 	private String department;
 
 	private String password;
+
+	@Email
+	private String email;
 }

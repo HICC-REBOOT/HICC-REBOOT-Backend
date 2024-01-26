@@ -54,27 +54,29 @@ public class Member {
 
 	private LocalDateTime approvedDate;
 
+	@Column(nullable = false)
+	private String email;
+
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	private List<Article> articles = new ArrayList<>();
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	private List<Comment> comments = new ArrayList<>();
 
-	private String refreshToken;
-
 	@Builder(access = AccessLevel.PRIVATE)
 	private Member(String studentNumber, Department department, String name, String password, Grade grade,
-		String phoneNumber) {
+		String phoneNumber, String email) {
 		this.studentNumber = studentNumber;
 		this.department = department;
 		this.name = name;
 		this.password = password;
 		this.grade = grade;
 		this.phoneNumber = phoneNumber;
+		this.email = email;
 	}
 
 	public static Member signUp(String studentNumber, Department department, String name, String password,
-		String phoneNumber) {
+		String phoneNumber, String email) {
 		return Member.builder()
 			.studentNumber(studentNumber)
 			.department(department)
@@ -82,6 +84,7 @@ public class Member {
 			.password(password)
 			.grade(Grade.APPLICANT)
 			.phoneNumber(phoneNumber)
+			.email(email)
 			.build();
 	}
 
@@ -101,16 +104,12 @@ public class Member {
 		this.password = password;
 	}
 
+	public void updateEmail(String email) {
+		this.email = email;
+	}
+
 	public void passwordEncode(PasswordEncoder passwordEncoder) {
 		this.password = passwordEncoder.encode(this.password);
-	}
-
-	public void updateRefreshToken(String updateRefreshToken) {
-		this.refreshToken = updateRefreshToken;
-	}
-
-	public void destroyRefreshToken() {
-		this.refreshToken = null;
 	}
 
 	public void approve() {
