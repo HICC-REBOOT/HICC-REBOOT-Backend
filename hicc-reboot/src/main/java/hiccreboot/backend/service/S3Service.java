@@ -19,11 +19,17 @@ import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.dto.S3.ImageResponse;
 import hiccreboot.backend.common.dto.S3.SimpleImageRequest;
+import hiccreboot.backend.common.exception.FileNameExtenstionNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class S3Service {
+
+	private final String FILE_NAME_EXTENSION_JPG = "JPG";
+	private final String FILE_NAME_EXTENSION_JPEG = "JPEG";
+	private final String FILE_NAME_EXTENSION_PNG = "PNG";
+
 	private final AmazonS3 amazonS3;
 
 	@Value("${cloud.aws.s3.bucket}")
@@ -31,12 +37,15 @@ public class S3Service {
 
 	private final int TIME_LIMIT = 1000 * 60 * 2;
 
-	public BaseResponse getPreSignedUrls(List<SimpleImageRequest> simpleImageRequests) {
+	public BaseResponse makePreSignedUrls(List<SimpleImageRequest> simpleImageRequests) {
+		//확장자 검사
+		simpleImageRequests.stream()
+			.forEach(simpleImageRequest -> checkFileNameExtension(simpleImageRequest.getFileNameExtension()));
 
 		List<ImageResponse> response = new ArrayList<>();
 		for (SimpleImageRequest simpleImageRequest : simpleImageRequests) {
 			String key = UUID.randomUUID() + simpleImageRequest.getFileName();
-			String fileNameExtension = simpleImageRequest.getFileNameExtension();
+			String fileNameExtension = simpleImageRequest.getFileNameExtension().toUpperCase();
 
 			//s3 디렉터리 경로 설정
 			if (!fileNameExtension.equals("")) {
@@ -47,6 +56,20 @@ public class S3Service {
 		}
 
 		return DataResponse.ok(response);
+	}
+
+	private void checkFileNameExtension(String fileNameExtension) {
+		fileNameExtension = fileNameExtension.toUpperCase();
+
+		System.out.println(fileNameExtension);
+
+		if (fileNameExtension.equals(FILE_NAME_EXTENSION_JPG)
+			|| fileNameExtension.equals(FILE_NAME_EXTENSION_JPEG)
+			|| fileNameExtension.equals(FILE_NAME_EXTENSION_PNG)) {
+			return;
+		}
+
+		throw FileNameExtenstionNotFoundException.EXCEPTION;
 	}
 
 	private String getPreSignedUrl(String fileName) {
