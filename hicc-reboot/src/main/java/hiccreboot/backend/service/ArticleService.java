@@ -15,6 +15,7 @@ import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
+import hiccreboot.backend.common.exception.SortNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
@@ -59,7 +60,7 @@ public class ArticleService {
 			return findArticlesBySubjectAndBoardType(pageNumber, pageSize, boardType, articleGrade, search);
 		}
 
-		throw ArticleNotFoundException.EXCEPTION;
+		throw SortNotFoundException.EXCEPTION;
 	}
 
 	private Page<Article> findArticlesByBoardTypeAndArticleGrade(int pageNumber, int pageSize, BoardType boardType,
