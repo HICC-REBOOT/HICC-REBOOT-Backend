@@ -60,12 +60,12 @@ public class Image {
 			.build();
 	}
 
-	public static Image createImage(ArticleImageRequest articleImageRequest, Article article) {
+	public static Image createImage(ArticleImageRequest articleImageRequest, String url, Article article) {
 		return Image.builder()
 			.fileName(articleImageRequest.getFileName())
 			.fileNameExtension(articleImageRequest.getFileNameExtension())
 			.key(articleImageRequest.getKey())
-			.url(articleImageRequest.getUrl())
+			.url(url)
 			.article(article)
 			.build();
 	}

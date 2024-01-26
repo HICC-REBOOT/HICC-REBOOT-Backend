@@ -1,6 +1,8 @@
 package hiccreboot.backend.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -122,7 +124,7 @@ public class ArticleService {
 		Article article = Article.create(member, makeArticleGradeByMemberGrade(member.getGrade()), articleRequest);
 
 		articleRequest.getImages()
-			.forEach(imageRequest -> Image.createImage(imageRequest, article));
+			.forEach(imageRequest -> Image.createImage(imageRequest, s3Service.getUrl(imageRequest.getKey()), article));
 
 		return articleRepository.save(article);
 	}
@@ -141,10 +143,25 @@ public class ArticleService {
 		article.updateSubject(articleRequest.getSubject());
 		article.updateContent(articleRequest.getContent());
 		article.updateBoardType(articleRequest.getBoard());
+
+		// image 변경
+		List<String> oldKeys = article.getImages().stream()
+			.map(image -> image.getKey()).collect(Collectors.toList());
+		List<String> newKeys = articleRequest.getImages().stream()
+			.map(image -> image.getKey()).collect(Collectors.toList());
+
+		List<String> deleteKeys = oldKeys.stream()
+			.filter(oldKey -> !newKeys.contains(oldKey))
+			.collect(Collectors.toList());
+
+		//s3 image 삭제
+		deleteKeys.stream()
+			.forEach(key -> s3Service.deleteImage(key));
+
 		article.getImages().clear();
 		articleRequest.getImages().stream()
 			.forEach(image -> Image.createImage(image.getFileName(), image.getFileNameExtension(), image.getKey(),
-				image.getUrl(), article));
+				s3Service.getUrl(image.getKey()), article));
 
 		return article;
 	}
@@ -153,14 +170,13 @@ public class ArticleService {
 	public void deleteArticle(Long id, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
-
 		Article article = articleRepository.findById(id)
 			.filter(foundArticle -> foundArticle.getMember() == member)
 			.orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
 		//S3 image 제거
 		article.getImages()
-			.forEach(image -> s3Service.deleteImage(image.getFileName()));
+			.forEach(image -> s3Service.deleteImage(image.getKey()));
 
 		articleRepository.deleteById(id);
 	}
