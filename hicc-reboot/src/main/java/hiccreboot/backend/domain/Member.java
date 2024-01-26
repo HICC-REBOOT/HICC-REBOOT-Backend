@@ -104,6 +104,10 @@ public class Member {
 		this.password = password;
 	}
 
+	public void updateEmail(String email) {
+		this.email = email;
+	}
+
 	public void passwordEncode(PasswordEncoder passwordEncoder) {
 		this.password = passwordEncoder.encode(this.password);
 	}

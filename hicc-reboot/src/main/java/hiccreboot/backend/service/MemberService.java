@@ -166,6 +166,7 @@ public class MemberService {
 		modifyPhoneNumber(member, request.getPhoneNumber());
 		modifyDepartment(member, request.getDepartment());
 		modifyPassword(member, request.getPassword());
+		modifyEmail(member, request.getEmail());
 	}
 
 	public void withdraw(String studentNumber) {
@@ -203,6 +204,13 @@ public class MemberService {
 		}
 		member.updatePassword(password);
 		member.passwordEncode(passwordEncoder);
+	}
+
+	private void modifyEmail(Member member, String email) {
+		if (email == null) {
+			return;
+		}
+		member.updateEmail(email);
 	}
 
 	public DataResponse<Page<PersonalArticleResponse>> findPersonalArticles(int page, int size, String studentNumber) {
