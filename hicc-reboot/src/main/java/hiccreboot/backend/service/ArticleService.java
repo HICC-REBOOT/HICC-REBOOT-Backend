@@ -27,7 +27,6 @@ import hiccreboot.backend.domain.Image;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +41,6 @@ public class ArticleService {
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
 	private final S3Service s3Service;
-	private final EntityManager entityManager;
 
 	public Page<Article> findArticles(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
@@ -57,7 +55,7 @@ public class ArticleService {
 		String search) {
 		sort = sort.toUpperCase();
 		if (sort.equals(SORT_BY_SUBJECT)) {
-			return findArticlesBySubjectAndBoardType(pageable, boardType, articleGrade, search);
+			return findArticlesBySubjectAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade, search);
 		} else if (sort.equals(SORT_BY_MEMBER_NAME)) {
 			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade,
 				search);
@@ -79,7 +77,7 @@ public class ArticleService {
 			pageable);
 	}
 
-	private Page<Article> findArticlesBySubjectAndBoardType(Pageable pageable, BoardType boardType,
+	private Page<Article> findArticlesBySubjectAndBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
 		return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
