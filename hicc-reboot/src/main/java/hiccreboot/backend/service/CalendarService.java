@@ -13,7 +13,6 @@ import hiccreboot.backend.common.dto.Calendar.ScheduleResponse;
 import hiccreboot.backend.common.dto.Calendar.SimpleScheduleResponse;
 import hiccreboot.backend.common.dto.Calendar.UpdateScheduleRequest;
 import hiccreboot.backend.common.dto.DataResponse;
-import hiccreboot.backend.common.exception.ArticleNotFoundException;
 import hiccreboot.backend.common.exception.ScheduleNotFoundException;
 import hiccreboot.backend.domain.Schedule;
 import hiccreboot.backend.domain.ScheduleDate;
@@ -36,10 +35,6 @@ public class CalendarService {
 
 	public BaseResponse makeMonthSchedules(int year, int month) {
 		List<ScheduleDate> scheduleDates = findScheduleDatesByMonth(year, month);
-
-		if (scheduleDates.isEmpty()) {
-			throw ArticleNotFoundException.EXCEPTION;
-		}
 
 		List<SimpleScheduleResponse> simpleScheduleResponses = new ArrayList<>();
 		scheduleDates.stream().forEach(scheduleDate -> {

@@ -35,8 +35,8 @@ public class ArticleController {
 		@RequestParam(value = "size") int pageSize,
 		@RequestParam(value = "board") BoardType boardType,
 		@RequestParam(value = "articleGrade", required = false, defaultValue = "NORMAL") ArticleGrade articleGrade,
-		@RequestParam(value = "sort", required = false, defaultValue = "article") String sort,
-		@RequestParam(value = "search", required = false, defaultValue = "null") String search) {
+		@RequestParam(value = "sort", required = false, defaultValue = "ARTICLE") String sort,
+		@RequestParam(value = "search", required = false, defaultValue = "") String search) {
 
 		return articleService.makeArticles(pageNumber, pageSize, boardType, articleGrade,
 			sort, search);
