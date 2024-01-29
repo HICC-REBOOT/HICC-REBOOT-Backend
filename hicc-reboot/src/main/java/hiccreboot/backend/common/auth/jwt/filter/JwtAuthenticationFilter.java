@@ -1,6 +1,7 @@
 package hiccreboot.backend.common.auth.jwt.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,6 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String LOGIN_URL = "/api/auth/login";
 	private static final String REFRESH_URL = "/api/auth/refresh";
+	private static final List<String> ALLOWED_URLS = List.of("/api/auth/duplicate",
+		"/api/auth/departments", "/api/auth/password", "/api/main");
 
 	private final TokenProvider tokenProvider;
 	private final MemberRepository memberRepository;
@@ -67,9 +70,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (accessToken != null) {
 			checkAccessTokenAndAuthentication(response, accessToken);
 			filterChain.doFilter(request, response);
+		} else if (isAllowedUrl(request.getRequestURI())) {
+			filterChain.doFilter(request, response);
 		} else {
 			sendErrorResponse(request, response, GlobalErrorCode.ACCESS_TOKEN_UNAUTHORIZED);
 		}
+	}
+
+	private boolean isAllowedUrl(String uri) {
+		return ALLOWED_URLS.stream().anyMatch(uri::startsWith);
 	}
 
 	private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
@@ -115,6 +124,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private void sendErrorResponse(HttpServletRequest request, HttpServletResponse response,
 		GlobalErrorCode errorCode) {
 		ErrorResponse errorResponse = ErrorResponse.fromErrorCode(errorCode, request.getRequestURI());
+		response.setStatus(errorCode.getErrorReason().getStatus());
+
 		ResponseWriter.writeResponse(response, errorResponse);
 	}
 }
