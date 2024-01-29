@@ -8,6 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Configuration
 public class EmailConfig {
@@ -64,6 +68,16 @@ public class EmailConfig {
 		message.setFrom(username);
 
 		return message;
+	}
+
+	@Bean
+	public MimeMessageHelper mimeMessageHelper() throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender().createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+		helper.setFrom(username);
+
+		return helper;
 	}
 
 	private Properties mailProperties() {
