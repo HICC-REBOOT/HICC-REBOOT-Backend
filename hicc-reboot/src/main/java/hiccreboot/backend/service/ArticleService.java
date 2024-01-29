@@ -66,22 +66,32 @@ public class ArticleService {
 
 	private Page<Article> findArticlesByBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade) {
-		return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
+		}
+		return articleRepository.findAllByBoardType(boardType, pageable);
 	}
 
 	private Page<Article> findArticlesByMemberNameAndBoardTypeAndArticleGrade(Pageable pageable,
 		BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
-		return articleRepository.findAllByMemberNameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
-			pageable);
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByMemberNameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
+				pageable);
+		}
+		return articleRepository.findAllByMemberNameAndBoardType(search, boardType, pageable);
 	}
 
 	private Page<Article> findArticlesBySubjectAndBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
-		return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
-			pageable);
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType,
+				articleGrade,
+				pageable);
+		}
+		return articleRepository.findAllBySubjectContainingAndBoardType(search, boardType, pageable);
 	}
 
 	public BaseResponse makeArticles(int pageNumber, int pageSize, BoardType boardType,
@@ -97,7 +107,7 @@ public class ArticleService {
 		return DataResponse.ok(articles);
 	}
 
-	public Optional<Article> findArticle(Long id) {
+	private Optional<Article> findArticle(Long id) {
 		return articleRepository.findById(id);
 	}
 
@@ -123,7 +133,7 @@ public class ArticleService {
 		return articleRepository.save(article);
 	}
 
-	public ArticleGrade makeArticleGradeByMemberGrade(Grade grade) {
+	private ArticleGrade makeArticleGradeByMemberGrade(Grade grade) {
 		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
 			return ArticleGrade.EXECUTIVE;
 		}
@@ -167,7 +177,7 @@ public class ArticleService {
 		return article;
 	}
 
-	public void checkUpdateAuthority(Member member, Article article) {
+	private void checkUpdateAuthority(Member member, Article article) {
 		if (member != article.getMember()) {
 			throw AccessForbiddenException.EXCEPTION;
 		}
@@ -189,7 +199,7 @@ public class ArticleService {
 		articleRepository.deleteById(id);
 	}
 
-	public void checkDeleteAuthority(Member member, Article article) {
+	private void checkDeleteAuthority(Member member, Article article) {
 		if (member.getGrade() == Grade.PRESIDENT || member.getGrade() == Grade.PRESIDENT) {
 			return;
 		}
