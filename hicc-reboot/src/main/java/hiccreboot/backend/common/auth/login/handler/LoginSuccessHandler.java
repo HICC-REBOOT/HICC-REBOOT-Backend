@@ -36,7 +36,8 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 		String refreshToken = tokenProvider.createRefreshToken(studentNumber);
 
 		tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
-
+		tokenProvider.disableRefreshToken(studentNumber);
+		
 		RefreshToken token = RefreshToken.createRefreshToken(findMemberByStudentNumber(studentNumber),
 			refreshToken);
 
