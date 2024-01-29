@@ -3,6 +3,7 @@ package hiccreboot.backend.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,10 +14,12 @@ import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.dto.ErrorResponse;
-import hiccreboot.backend.dto.request.ReissuePasswordRequest;
+import hiccreboot.backend.dto.request.CreateNonceRequest;
+import hiccreboot.backend.dto.request.ModifyPasswordRequest;
 import hiccreboot.backend.dto.request.SignUpRequest;
 import hiccreboot.backend.dto.request.StudentNumberCheckRequest;
 import hiccreboot.backend.dto.response.DepartmentResponse;
+import hiccreboot.backend.service.AuthService;
 import hiccreboot.backend.service.DepartmentService;
 import hiccreboot.backend.service.EmailService;
 import hiccreboot.backend.service.MemberService;
@@ -40,6 +43,7 @@ public class AuthController {
 
 	private final MemberService memberService;
 	private final DepartmentService departmentService;
+	private final AuthService authService;
 	private final EmailService emailService;
 	private final TokenProvider tokenProvider;
 
@@ -87,11 +91,18 @@ public class AuthController {
 	}
 
 	@PostMapping("/password/{student-number}")
-	public BaseResponse reissuePassword(@PathVariable(value = "student-number") String studentNumber,
-		@Valid @RequestBody ReissuePasswordRequest request) {
-		emailService.sendTempPassword(studentNumber, request.getEmail());
+	public BaseResponse sendNonce(@PathVariable(value = "student-number") String studentNumber,
+		@Valid @RequestBody CreateNonceRequest request) {
+		emailService.sendNonce(studentNumber, request.getEmail());
 
 		return DataResponse.ok();
 	}
 
+	@PatchMapping("/password/verify/{nonce}")
+	public BaseResponse verifyNonce(@PathVariable(value = "nonce") String nonce,
+		@Valid @RequestBody ModifyPasswordRequest request) {
+		authService.resetPassword(nonce, request.getPassword());
+
+		return DataResponse.ok();
+	}
 }
