@@ -12,7 +12,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
+import hiccreboot.backend.common.exception.GlobalErrorCode;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
+import hiccreboot.backend.common.exception.dto.ErrorResponse;
+import hiccreboot.backend.common.util.ResponseWriter;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.domain.RefreshToken;
 import hiccreboot.backend.repository.member.MemberRepository;
@@ -52,6 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (request.getRequestURI().equals(REFRESH_URL) && refreshToken != null) {
 			checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
 			return;
+		} else if (request.getRequestURI().equals(REFRESH_URL) && refreshToken == null) {
+			sendErrorResponse(request, response, GlobalErrorCode.REFRESH_TOKEN_UNAUTHORIZED);
+			return;
 		}
 
 		String accessToken = tokenProvider.extractAccessToken(request)
@@ -62,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			checkAccessTokenAndAuthentication(response, accessToken);
 			filterChain.doFilter(request, response);
 		} else {
-			filterChain.doFilter(request, response);
+			sendErrorResponse(request, response, GlobalErrorCode.ACCESS_TOKEN_UNAUTHORIZED);
 		}
 	}
 
@@ -83,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			.flatMap(memberRepository::findByStudentNumber)
 			.ifPresentOrElse(this::saveAuthentication,
 				() -> {
-					log.info("액세스 토큰 인증 실패");
+					log.info("회원을 찾을 수 없습니다.");
 				});
 
 	}
@@ -104,5 +110,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private Member findMember(Long id) {
 		return memberRepository.findById(id)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+	}
+
+	private void sendErrorResponse(HttpServletRequest request, HttpServletResponse response,
+		GlobalErrorCode errorCode) {
+		ErrorResponse errorResponse = ErrorResponse.fromErrorCode(errorCode, request.getRequestURI());
+		ResponseWriter.writeResponse(response, errorResponse);
 	}
 }
