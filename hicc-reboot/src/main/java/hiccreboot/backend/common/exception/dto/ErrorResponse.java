@@ -28,7 +28,11 @@ public class ErrorResponse extends BaseResponse {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private ErrorResponse(ErrorReason errorReason, String path) {
-		this(HttpStatusCode.valueOf(errorReason.getStatus()), errorReason.getReason(), path);
+		super(false, HttpStatusCode.valueOf(errorReason.getStatus()));
+		this.status = errorReason.getStatus();
+		this.code = errorReason.getCode();
+		this.reason = errorReason.getReason();
+		this.path = path;
 	}
 
 	public static ErrorResponse fromCustomException(CustomException e, String path) {
