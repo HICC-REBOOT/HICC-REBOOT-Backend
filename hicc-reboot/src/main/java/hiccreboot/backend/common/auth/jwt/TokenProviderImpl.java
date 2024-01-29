@@ -161,7 +161,20 @@ public class TokenProviderImpl implements TokenProvider {
 	@Override
 	public boolean isValidToken(String token) {
 		try {
-			return !getClaims(token).getExpiration().before(new Date());
+			boolean tokenNotExpired = !getClaims(token).getExpiration().before(new Date());
+			boolean connected;
+			if (isAccessToken(token)) {
+				String studentNumber = extractStudentNumber(token).get();
+				connected = memberRepository.findByStudentNumber(studentNumber)
+					.map(Member::getId)
+					.flatMap(refreshTokenRepository::findById)
+					.isPresent();
+			} else {
+				connected = refreshTokenRepository.findByToken(token)
+					.isPresent();
+			}
+			return tokenNotExpired && connected;
+
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			log.error("토큰 검증 실패 : {}", token);
@@ -179,5 +192,10 @@ public class TokenProviderImpl implements TokenProvider {
 			.setSigningKey(secretKey.getBytes())
 			.parseClaimsJws(token)
 			.getBody();
+	}
+
+	private boolean isAccessToken(String token) {
+		Claims claims = getClaims(token);
+		return claims.getSubject().equals(ACCESS_TOKEN_SUBJECT);
 	}
 }
