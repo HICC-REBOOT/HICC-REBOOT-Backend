@@ -18,6 +18,7 @@ import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.ImageCountTooLarge;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ArticleGrade;
@@ -37,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ArticleService {
 	private final String FIND_BY_MEMBER_NAME = "MEMBER";
 	private final String FIND_BY_SUBJECT = "SUBJECT";
+	private final int IMAGE_COUNT_LIMIT = 10;
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
@@ -125,6 +127,8 @@ public class ArticleService {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
 
+		checkImageSize(articleRequest.getImages().size());
+
 		Article article = Article.create(member, makeArticleGradeByMemberGrade(member.getGrade()), articleRequest);
 
 		articleRequest.getImages()
@@ -150,6 +154,7 @@ public class ArticleService {
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
 
 		checkUpdateAuthority(member, article);
+		checkImageSize(articleRequest.getImages().size());
 
 		article.updateSubject(articleRequest.getSubject());
 		article.updateContent(articleRequest.getContent());
@@ -207,5 +212,11 @@ public class ArticleService {
 			return;
 		}
 		throw AccessForbiddenException.EXCEPTION;
+	}
+
+	private void checkImageSize(int size) {
+		if (size > IMAGE_COUNT_LIMIT) {
+			throw ImageCountTooLarge.EXCEPTION;
+		}
 	}
 }
