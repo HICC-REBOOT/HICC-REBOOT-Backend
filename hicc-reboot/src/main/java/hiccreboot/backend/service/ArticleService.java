@@ -35,8 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
-	private final String SORT_BY_MEMBER_NAME = "MEMBER";
-	private final String SORT_BY_SUBJECT = "SUBJECT";
+	private final String FIND_BY_MEMBER_NAME = "MEMBER";
+	private final String FIND_BY_SUBJECT = "SUBJECT";
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
@@ -47,16 +47,16 @@ public class ArticleService {
 		return articleRepository.findAll(pageable);
 	}
 
-	private Page<Article> findArticlesBySort(
+	private Page<Article> findArticlesByFindBy(
 		Pageable pageable,
 		BoardType boardType,
 		ArticleGrade articleGrade,
-		String sort,
+		String findBy,
 		String search) {
-		sort = sort.toUpperCase();
-		if (sort.equals(SORT_BY_SUBJECT)) {
+		findBy = findBy.toUpperCase();
+		if (findBy.equals(FIND_BY_SUBJECT)) {
 			return findArticlesBySubjectAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade, search);
-		} else if (sort.equals(SORT_BY_MEMBER_NAME)) {
+		} else if (findBy.equals(FIND_BY_MEMBER_NAME)) {
 			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade,
 				search);
 		} else {
@@ -86,12 +86,12 @@ public class ArticleService {
 
 	public BaseResponse makeArticles(int pageNumber, int pageSize, BoardType boardType,
 		ArticleGrade articleGrade,
-		String sort,
+		String findBy,
 		String search) {
 		PageRequest pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
 
-		Page<ArticleListResponse> articles = findArticlesBySort(pageable,
-			boardType, articleGrade, sort,
+		Page<ArticleListResponse> articles = findArticlesByFindBy(pageable,
+			boardType, articleGrade, findBy,
 			search).map(ArticleListResponse::create);
 
 		return DataResponse.ok(articles);
