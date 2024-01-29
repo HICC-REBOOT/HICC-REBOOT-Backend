@@ -61,8 +61,9 @@ public class ArticleController {
 	@PatchMapping("/{article-id}")
 	public BaseResponse updateArticle(
 		@PathVariable("article-id") Long id,
-		@RequestBody ArticleRequest articleRequest) {
-		articleService.updateArticle(id, articleRequest);
+		@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
+		articleService.updateArticle(id, articleRequest, studentNumber);
 
 		return DataResponse.noContent();
 	}

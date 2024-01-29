@@ -134,8 +134,12 @@ public class ArticleService {
 	}
 
 	@Transactional
-	public Article updateArticle(Long id, ArticleRequest articleRequest) {
+	public Article updateArticle(Long id, ArticleRequest articleRequest, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+
+		checkUpdateAuthority(member, article);
 
 		article.updateSubject(articleRequest.getSubject());
 		article.updateContent(articleRequest.getContent());
@@ -163,13 +167,20 @@ public class ArticleService {
 		return article;
 	}
 
+	public void checkUpdateAuthority(Member member, Article article) {
+		if (member != article.getMember()) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+	}
+
 	@Transactional
 	public void deleteArticle(Long id, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		Article article = articleRepository.findById(id)
-			.filter(foundArticle -> foundArticle.getMember() == member)
 			.orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+
+		checkDeleteAuthority(member, article);
 
 		//S3 image 제거
 		article.getImages()
@@ -178,4 +189,13 @@ public class ArticleService {
 		articleRepository.deleteById(id);
 	}
 
+	public void checkDeleteAuthority(Member member, Article article) {
+		if (member.getGrade() == Grade.PRESIDENT || member.getGrade() == Grade.PRESIDENT) {
+			return;
+		}
+		if (member == article.getMember()) {
+			return;
+		}
+		throw AccessForbiddenException.EXCEPTION;
+	}
 }
