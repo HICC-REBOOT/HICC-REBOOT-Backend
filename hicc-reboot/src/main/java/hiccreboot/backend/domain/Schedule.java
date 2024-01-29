@@ -3,6 +3,7 @@ package hiccreboot.backend.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import hiccreboot.backend.common.dto.Calendar.PostScheduleRequest;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,6 +53,14 @@ public class Schedule {
 			.name(name)
 			.content(content)
 			.scheduleType(scheduleType)
+			.build();
+	}
+
+	public static Schedule createSchedule(PostScheduleRequest postScheduleRequest) {
+		return Schedule.builder()
+			.name(postScheduleRequest.getName())
+			.content(postScheduleRequest.getContent())
+			.scheduleType(postScheduleRequest.getType())
 			.build();
 	}
 

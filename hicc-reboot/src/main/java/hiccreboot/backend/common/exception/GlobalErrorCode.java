@@ -22,7 +22,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
 	ACCESS_FORBIDDEN(FORBIDDEN, "FORBIDDEN_403_1", "접근 권한이 없습니다."),
 	FILE_NAME_EXTENSION_NOT_FOUND(NOT_FOUND, " FILE_NAME_EXTENSION_NOT_FOUND_404_1", "파일확장자를 찾을 수 없습니다."),
 	SORT_NOT_FOUND(NOT_FOUND, " SORT_NOT_FOUND_404_1", "분류기준을 찾을 수 없습니다."),
-	;
+	IMAGE_COUNT_TOO_LARGE(PAYLOAD_TOO_LARGE, "IMAGE_COUNT_TOO_LARGE_413_1", "이미지 개수가 너무 많습니다.");
 	private final Integer status;
 	private final String code;
 	private final String reason;

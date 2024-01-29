@@ -19,6 +19,7 @@ public class ArticleListResponse {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private final LocalDateTime date;
 	private final BoardType board;
+	private final Boolean imageExistence;
 	private final String subject;
 
 	@Builder(access = AccessLevel.PRIVATE)
@@ -28,12 +29,14 @@ public class ArticleListResponse {
 		String name,
 		LocalDateTime date,
 		BoardType board,
+		Boolean imageExistence,
 		String subject) {
 		this.articleId = articleId;
 		this.grade = grade;
 		this.name = name;
 		this.date = date;
 		this.board = board;
+		this.imageExistence = imageExistence;
 		this.subject = subject;
 	}
 
@@ -44,6 +47,7 @@ public class ArticleListResponse {
 			.name(article.getMember().getName())
 			.date(article.getDate())
 			.board(article.getBoardType())
+			.imageExistence(!article.getImages().isEmpty())
 			.subject(article.getSubject())
 			.build();
 	}

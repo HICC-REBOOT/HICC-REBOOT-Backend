@@ -35,11 +35,11 @@ public class ArticleController {
 		@RequestParam(value = "size") int pageSize,
 		@RequestParam(value = "board") BoardType boardType,
 		@RequestParam(value = "articleGrade", required = false, defaultValue = "NORMAL") ArticleGrade articleGrade,
-		@RequestParam(value = "sort", required = false, defaultValue = "ARTICLE") String sort,
+		@RequestParam(value = "findBy", required = false, defaultValue = "ARTICLE") String findBy,
 		@RequestParam(value = "search", required = false, defaultValue = "") String search) {
 
 		return articleService.makeArticles(pageNumber, pageSize, boardType, articleGrade,
-			sort, search);
+			findBy, search);
 	}
 
 	@GetMapping("/{article-id}")
@@ -61,8 +61,9 @@ public class ArticleController {
 	@PatchMapping("/{article-id}")
 	public BaseResponse updateArticle(
 		@PathVariable("article-id") Long id,
-		@RequestBody ArticleRequest articleRequest) {
-		articleService.updateArticle(id, articleRequest);
+		@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
+		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
+		articleService.updateArticle(id, articleRequest, studentNumber);
 
 		return DataResponse.noContent();
 	}

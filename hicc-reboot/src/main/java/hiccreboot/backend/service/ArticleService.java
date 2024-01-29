@@ -18,6 +18,7 @@ import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.ImageCountTooLarge;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.ArticleGrade;
@@ -35,8 +36,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ArticleService {
-	private final String SORT_BY_MEMBER_NAME = "MEMBER";
-	private final String SORT_BY_SUBJECT = "SUBJECT";
+	private final String FIND_BY_MEMBER_NAME = "MEMBER";
+	private final String FIND_BY_SUBJECT = "SUBJECT";
+	private final int IMAGE_COUNT_LIMIT = 10;
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
@@ -47,16 +49,16 @@ public class ArticleService {
 		return articleRepository.findAll(pageable);
 	}
 
-	private Page<Article> findArticlesBySort(
+	private Page<Article> findArticlesByFindBy(
 		Pageable pageable,
 		BoardType boardType,
 		ArticleGrade articleGrade,
-		String sort,
+		String findBy,
 		String search) {
-		sort = sort.toUpperCase();
-		if (sort.equals(SORT_BY_SUBJECT)) {
+		findBy = findBy.toUpperCase();
+		if (findBy.equals(FIND_BY_SUBJECT)) {
 			return findArticlesBySubjectAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade, search);
-		} else if (sort.equals(SORT_BY_MEMBER_NAME)) {
+		} else if (findBy.equals(FIND_BY_MEMBER_NAME)) {
 			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade,
 				search);
 		} else {
@@ -66,38 +68,48 @@ public class ArticleService {
 
 	private Page<Article> findArticlesByBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade) {
-		return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
+		}
+		return articleRepository.findAllByBoardType(boardType, pageable);
 	}
 
 	private Page<Article> findArticlesByMemberNameAndBoardTypeAndArticleGrade(Pageable pageable,
 		BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
-		return articleRepository.findAllByMemberNameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
-			pageable);
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByMemberNameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
+				pageable);
+		}
+		return articleRepository.findAllByMemberNameAndBoardType(search, boardType, pageable);
 	}
 
 	private Page<Article> findArticlesBySubjectAndBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
 		ArticleGrade articleGrade,
 		String search) {
-		return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
-			pageable);
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType,
+				articleGrade,
+				pageable);
+		}
+		return articleRepository.findAllBySubjectContainingAndBoardType(search, boardType, pageable);
 	}
 
 	public BaseResponse makeArticles(int pageNumber, int pageSize, BoardType boardType,
 		ArticleGrade articleGrade,
-		String sort,
+		String findBy,
 		String search) {
 		PageRequest pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
 
-		Page<ArticleListResponse> articles = findArticlesBySort(pageable,
-			boardType, articleGrade, sort,
+		Page<ArticleListResponse> articles = findArticlesByFindBy(pageable,
+			boardType, articleGrade, findBy,
 			search).map(ArticleListResponse::create);
 
 		return DataResponse.ok(articles);
 	}
 
-	public Optional<Article> findArticle(Long id) {
+	private Optional<Article> findArticle(Long id) {
 		return articleRepository.findById(id);
 	}
 
@@ -115,6 +127,8 @@ public class ArticleService {
 		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
 			MemberNotFoundException.EXCEPTION);
 
+		checkImageSize(articleRequest.getImages().size());
+
 		Article article = Article.create(member, makeArticleGradeByMemberGrade(member.getGrade()), articleRequest);
 
 		articleRequest.getImages()
@@ -123,7 +137,7 @@ public class ArticleService {
 		return articleRepository.save(article);
 	}
 
-	public ArticleGrade makeArticleGradeByMemberGrade(Grade grade) {
+	private ArticleGrade makeArticleGradeByMemberGrade(Grade grade) {
 		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
 			return ArticleGrade.EXECUTIVE;
 		}
@@ -134,8 +148,13 @@ public class ArticleService {
 	}
 
 	@Transactional
-	public Article updateArticle(Long id, ArticleRequest articleRequest) {
+	public Article updateArticle(Long id, ArticleRequest articleRequest, String studentNumber) {
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+
+		checkUpdateAuthority(member, article);
+		checkImageSize(articleRequest.getImages().size());
 
 		article.updateSubject(articleRequest.getSubject());
 		article.updateContent(articleRequest.getContent());
@@ -163,13 +182,20 @@ public class ArticleService {
 		return article;
 	}
 
+	private void checkUpdateAuthority(Member member, Article article) {
+		if (member != article.getMember()) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+	}
+
 	@Transactional
 	public void deleteArticle(Long id, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		Article article = articleRepository.findById(id)
-			.filter(foundArticle -> foundArticle.getMember() == member)
 			.orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+
+		checkDeleteAuthority(member, article);
 
 		//S3 image 제거
 		article.getImages()
@@ -178,4 +204,19 @@ public class ArticleService {
 		articleRepository.deleteById(id);
 	}
 
+	private void checkDeleteAuthority(Member member, Article article) {
+		if (member.getGrade() == Grade.PRESIDENT || member.getGrade() == Grade.PRESIDENT) {
+			return;
+		}
+		if (member == article.getMember()) {
+			return;
+		}
+		throw AccessForbiddenException.EXCEPTION;
+	}
+
+	private void checkImageSize(int size) {
+		if (size > IMAGE_COUNT_LIMIT) {
+			throw ImageCountTooLarge.EXCEPTION;
+		}
+	}
 }
