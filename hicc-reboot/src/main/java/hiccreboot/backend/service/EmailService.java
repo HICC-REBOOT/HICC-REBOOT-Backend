@@ -5,13 +5,18 @@ import java.security.SecureRandom;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import hiccreboot.backend.domain.PasswordReset;
+import hiccreboot.backend.repository.PasswordResetRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,36 +28,40 @@ public class EmailService {
 
 	private final JavaMailSender javaMailSender;
 	private final MemberRepository memberRepository;
-	private final SimpleMailMessage template;
-	private final PasswordEncoder passwordEncoder;
+	private final PasswordResetRepository passwordResetRepository;
+	private final SpringTemplateEngine springTemplateEngine;
+	private final MimeMessageHelper helper;
 
 	private static final String SUBJECT = "HICC password reissue";
-	private static final String CONTENT = "임시 비밀번호가 발급되었습니다.\n반드시 비밀번호를 변경해주세요.\nReissued Password:%s";
 
-	public void sendTempPassword(String studentNumber, String email) {
+	public void sendNonce(String studentNumber, String email) {
 		memberRepository.findByStudentNumber(studentNumber)
 			.filter(member -> member.getEmail().equals(email))
 			.ifPresent(member -> {
-				String reissuedPassword = makeTempNumber();
+				String nonce = makeTempNumber();
 
-				SimpleMailMessage mail = createEmail(member.getEmail(), reissuedPassword);
+				MimeMessage mail = createEmail(member.getEmail(), nonce);
 
-				member.updatePassword(reissuedPassword);
-				member.passwordEncode(passwordEncoder);
+				passwordResetRepository.save(PasswordReset.create(member, nonce));
 				javaMailSender.send(mail);
 			});
 	}
 
-	private SimpleMailMessage createEmail(String receiver, String reissuedPassword) {
+	private MimeMessage createEmail(String receiver, String reissuedPassword) {
+		try {
+			helper.setTo(receiver);
+			helper.setSubject(SUBJECT);
 
-		SimpleMailMessage message = new SimpleMailMessage(template);
+			Context context = new Context();
+			context.setVariable("nonce", reissuedPassword);
+			String html = springTemplateEngine.process("index", context);
+			helper.setText(html, true);
 
-		message.setTo(receiver);
-		message.setSubject(SUBJECT);
-		String text = String.format(CONTENT, reissuedPassword);
-		message.setText(text);
+			return helper.getMimeMessage();
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
 
-		return message;
 	}
 
 	private String makeTempNumber() {
