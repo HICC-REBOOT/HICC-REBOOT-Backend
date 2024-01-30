@@ -11,7 +11,8 @@ import lombok.Getter;
 public class PersonalCommentResponse {
 	private String subject;
 	private String content;
-	private Long id;
+	private Long articleId;
+	private Long commentId;
 
 	public static PersonalCommentResponse create(Comment comment) {
 		Article article = comment.getArticle();
@@ -19,7 +20,8 @@ public class PersonalCommentResponse {
 		return PersonalCommentResponse.builder()
 			.subject(article.getSubject())
 			.content(comment.getContent())
-			.id(article.getId())
+			.articleId(article.getId())
+			.commentId(comment.getId())
 			.build();
 	}
 }
