@@ -1,5 +1,6 @@
 package hiccreboot.backend.common.exception;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,16 +13,23 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(CustomException.class)
-	public ErrorResponse customExceptionHandler(CustomException e, HttpServletRequest request) {
-		return ErrorResponse.fromCustomException(e, request.getRequestURI());
+	public ResponseEntity<ErrorResponse> customExceptionHandler(CustomException e, HttpServletRequest request) {
+		log.error("{} Custom Exception: {}", e.getErrorCode(), request.getRequestURI());
+
+		ErrorResponse errorResponse = ErrorResponse.fromCustomException(e, request.getRequestURI());
+
+		return ResponseEntity.status(errorResponse.getStatus())
+			.body(errorResponse);
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ErrorResponse handleException(Exception e, HttpServletRequest request) {
-		log.error("INTERNAL_SERVER_ERROR: ", e);
+	public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
+		log.error("INTERNAL_SERVER_ERROR: {} {}", e, request.getRequestURI());
 		BaseErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_EXCEPTION;
-		String path = request.getRequestURI();
 
-		return ErrorResponse.fromErrorCode(errorCode, path);
+		ErrorResponse errorResponse = ErrorResponse.fromErrorCode(errorCode, request.getRequestURI());
+
+		return ResponseEntity.status(errorResponse.getStatus())
+			.body(errorResponse);
 	}
 }
