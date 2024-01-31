@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String LOGIN_URL = "/api/auth/login";
 	private static final String REFRESH_URL = "/api/auth/refresh";
-	private static final List<String> ALLOWED_URLS = List.of("/api/auth/duplicate",
+	private static final List<String> ALLOWED_URLS = List.of("/api/auth/sign-up", "/api/auth/duplicate",
 		"/api/auth/departments", "/api/auth/password", "/api/main");
 
 	private final TokenProvider tokenProvider;
