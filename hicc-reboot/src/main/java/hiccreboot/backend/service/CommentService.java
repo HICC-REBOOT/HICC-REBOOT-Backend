@@ -118,11 +118,7 @@ public class CommentService {
 
 		checkDeleteAuthority(member, comment);
 
-		if (comment.getMember() != member) {
-			throw AccessForbiddenException.EXCEPTION;
-		}
-
-		commentRepository.deleteById(id);
+		comment.deleteComment();
 	}
 
 	private void checkDeleteAuthority(Member member, Comment comment) {

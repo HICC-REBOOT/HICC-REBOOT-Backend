@@ -24,6 +24,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Comment {
 
+	private final String BLANK_CONTENT = "";
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "COMMENT_ID")
@@ -103,5 +105,12 @@ public class Comment {
 
 	public void deleteMemberName() {
 		this.memberName = DELETED_MEMBER_NAME;
+	}
+
+	public void deleteComment() {
+		deleteMember();
+		deleteMemberName();
+		commentGrade = CommentGrade.NORMAL;
+		content = BLANK_CONTENT;
 	}
 }
