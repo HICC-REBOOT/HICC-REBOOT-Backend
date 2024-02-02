@@ -17,6 +17,7 @@ import hiccreboot.backend.common.exception.CommentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.Comment;
+import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
 import hiccreboot.backend.repository.Comment.CommentRepository;
@@ -73,6 +74,8 @@ public class CommentService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
+		checkSaveAuthority(member);
+
 		Comment comment;
 		if (postCommentRequest.getParentCommentId() > PARENT_COMMENT) {
 			comment = Comment.createChildComment(postCommentRequest.getParentCommentId(), member, article,
@@ -84,6 +87,12 @@ public class CommentService {
 		return commentRepository.save(comment);
 	}
 
+	private void checkSaveAuthority(Member member) {
+		if (member.getGrade() == Grade.APPLICANT) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+	}
+
 	@Transactional
 	public void deleteComment(Long id, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
@@ -91,10 +100,23 @@ public class CommentService {
 		Comment comment = commentRepository.findById(id)
 			.orElseThrow(() -> CommentNotFoundException.EXCEPTION);
 
+		checkDeleteAuthority(member, comment);
+
 		if (comment.getMember() != member) {
 			throw AccessForbiddenException.EXCEPTION;
 		}
 
 		commentRepository.deleteById(id);
+	}
+
+	private void checkDeleteAuthority(Member member, Comment comment) {
+		if (comment.getMember() == member) {
+			return;
+		}
+		if (member.getGrade() == Grade.EXECUTIVE || member.getGrade() == Grade.PRESIDENT) {
+			return;
+		}
+
+		throw AccessForbiddenException.EXCEPTION;
 	}
 }
