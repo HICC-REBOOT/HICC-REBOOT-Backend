@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.dto.DataResponse;
+import hiccreboot.backend.dto.response.FooterResponse;
 import hiccreboot.backend.service.MainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,6 +39,11 @@ public class MainController {
 		@RequestParam(value = "page") int pageNumber,
 		@RequestParam(value = "size") int pageSize) {
 		return mainService.makeLatestNews(pageNumber, pageSize);
+	}
+
+	@GetMapping("/footer")
+	public DataResponse<FooterResponse> footer() {
+		return mainService.footerResponse();
 	}
 }
 

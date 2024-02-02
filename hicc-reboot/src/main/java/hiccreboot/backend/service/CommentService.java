@@ -97,6 +97,12 @@ public class CommentService {
 		return commentRepository.save(comment);
 	}
 
+	private void checkSaveAuthority(Member member) {
+		if (member.getGrade() == Grade.APPLICANT) {
+			throw AccessForbiddenException.EXCEPTION;
+		}
+	}
+
 	private CommentGrade makeCommentGradeByMemberGrade(Grade grade) {
 		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
 			return CommentGrade.EXECUTIVE;
@@ -105,12 +111,6 @@ public class CommentService {
 			return CommentGrade.NORMAL;
 		}
 		throw AccessForbiddenException.EXCEPTION;
-	}
-
-	private void checkSaveAuthority(Member member) {
-		if (member.getGrade() == Grade.APPLICANT) {
-			throw AccessForbiddenException.EXCEPTION;
-		}
 	}
 
 	@Transactional
@@ -135,4 +135,5 @@ public class CommentService {
 
 		throw AccessForbiddenException.EXCEPTION;
 	}
+
 }
