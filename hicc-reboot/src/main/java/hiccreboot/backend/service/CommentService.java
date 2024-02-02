@@ -17,6 +17,7 @@ import hiccreboot.backend.common.exception.CommentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.Comment;
+import hiccreboot.backend.domain.CommentGrade;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
@@ -78,13 +79,28 @@ public class CommentService {
 
 		Comment comment;
 		if (postCommentRequest.getParentCommentId() > PARENT_COMMENT) {
-			comment = Comment.createChildComment(postCommentRequest.getParentCommentId(), member, article,
+			comment = Comment.createChildComment(
+				postCommentRequest.getParentCommentId(),
+				member,
+				makeCommentGradeByMemberGrade(member.getGrade()),
+				article,
 				postCommentRequest.getContent());
 		} else {
-			comment = Comment.createParentComment(member, article, postCommentRequest.getContent());
+			comment = Comment.createParentComment(member, makeCommentGradeByMemberGrade(member.getGrade()), article,
+				postCommentRequest.getContent());
 		}
 
 		return commentRepository.save(comment);
+	}
+
+	private CommentGrade makeCommentGradeByMemberGrade(Grade grade) {
+		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
+			return CommentGrade.EXECUTIVE;
+		}
+		if (grade == Grade.NORMAL) {
+			return CommentGrade.NORMAL;
+		}
+		throw AccessForbiddenException.EXCEPTION;
 	}
 
 	private void checkSaveAuthority(Member member) {

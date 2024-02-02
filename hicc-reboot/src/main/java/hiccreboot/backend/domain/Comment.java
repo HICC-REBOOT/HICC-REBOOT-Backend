@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,6 +42,10 @@ public class Comment {
 	@Column(nullable = false)
 	private String memberName;
 
+	@Column(name = "COMMENT_GRADE")
+	@Enumerated(EnumType.STRING)
+	private CommentGrade commentGrade;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ARTICLE_ID")
 	private Article article;
@@ -48,32 +54,38 @@ public class Comment {
 	private String content;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private Comment(Long parentCommentId, LocalDateTime date, Member member, String memberName, Article article,
+	private Comment(Long parentCommentId, LocalDateTime date, Member member, String memberName,
+		CommentGrade commentGrade, Article article,
 		String content) {
 		this.parentCommentId = parentCommentId;
 		this.date = date;
 		this.member = member;
 		this.memberName = memberName;
+		this.commentGrade = commentGrade;
 		addArticle(article);
 		this.content = content;
 	}
 
-	public static Comment createParentComment(Member member, Article article, String content) {
+	public static Comment createParentComment(Member member, CommentGrade commentGrade, Article article,
+		String content) {
 		return Comment.builder()
 			.parentCommentId(-1L)
 			.member(member)
 			.memberName(member.getName())
+			.commentGrade(commentGrade)
 			.article(article)
 			.date(LocalDateTime.now())
 			.content(content)
 			.build();
 	}
 
-	public static Comment createChildComment(Long parentCommentId, Member member, Article article, String content) {
+	public static Comment createChildComment(Long parentCommentId, Member member, CommentGrade commentGrade,
+		Article article, String content) {
 		return Comment.builder()
 			.parentCommentId(parentCommentId)
 			.member(member)
 			.memberName(member.getName())
+			.commentGrade(commentGrade)
 			.article(article)
 			.date(LocalDateTime.now())
 			.content(content)
