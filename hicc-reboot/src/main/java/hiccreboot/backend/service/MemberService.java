@@ -215,7 +215,7 @@ public class MemberService {
 	}
 
 	public DataResponse<Page<PersonalArticleResponse>> findPersonalArticles(int page, int size, String studentNumber) {
-		Pageable pageable = PageRequest.of(page, size);
+		Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
@@ -227,7 +227,7 @@ public class MemberService {
 	}
 
 	public DataResponse<Page<PersonalCommentResponse>> findPersonalComments(int page, int size, String studentNumber) {
-		Pageable pageable = PageRequest.of(page, size);
+		Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
