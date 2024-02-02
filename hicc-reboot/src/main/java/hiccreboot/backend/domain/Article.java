@@ -100,12 +100,9 @@ public class Article {
 		this.boardType = boardType;
 	}
 
-	public void deleteMember() {
+	public void deleteArticleSoftly() {
 		this.member = null;
-	}
-
-	public void deleteMemberName() {
 		this.memberName = DELETED_MEMBER_NAME;
+		this.articleGrade = ArticleGrade.NORMAL;
 	}
-
 }

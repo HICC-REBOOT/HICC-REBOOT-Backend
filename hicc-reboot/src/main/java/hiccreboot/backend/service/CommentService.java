@@ -79,6 +79,10 @@ public class CommentService {
 
 		Comment comment;
 		if (postCommentRequest.getParentCommentId() > PARENT_COMMENT) {
+			//부모 댓글이 있는 지 확인
+			commentRepository.findById(postCommentRequest.getParentCommentId())
+				.orElseThrow(() -> CommentNotFoundException.EXCEPTION);
+
 			comment = Comment.createChildComment(
 				postCommentRequest.getParentCommentId(),
 				member,
@@ -118,7 +122,7 @@ public class CommentService {
 
 		checkDeleteAuthority(member, comment);
 
-		comment.deleteComment();
+		comment.deleteCommentSoftlyWithContent();
 	}
 
 	private void checkDeleteAuthority(Member member, Comment comment) {

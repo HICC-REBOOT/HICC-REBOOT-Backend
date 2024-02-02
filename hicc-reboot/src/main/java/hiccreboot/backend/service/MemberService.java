@@ -136,13 +136,11 @@ public class MemberService {
 	private void deleteMember(Member deletedMember) {
 		articleRepository.findAllByMember(deletedMember)
 			.forEach(article -> {
-				article.deleteMember();
-				article.deleteMemberName();
+				article.deleteArticleSoftly();
 			});
 		commentRepository.findAllByMember(deletedMember)
 			.forEach(comment -> {
-				comment.deleteMember();
-				comment.deleteMemberName();
+				comment.deleteCommentSoftly();
 			});
 
 		memberRepository.delete(deletedMember);

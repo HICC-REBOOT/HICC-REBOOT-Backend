@@ -99,17 +99,15 @@ public class Comment {
 		article.getComments().add(this);
 	}
 
-	public void deleteMember() {
+	public void deleteCommentSoftly() {
 		this.member = null;
-	}
-
-	public void deleteMemberName() {
 		this.memberName = DELETED_MEMBER_NAME;
+		commentGrade = CommentGrade.NORMAL;
 	}
 
-	public void deleteComment() {
-		deleteMember();
-		deleteMemberName();
+	public void deleteCommentSoftlyWithContent() {
+		this.member = null;
+		this.memberName = DELETED_MEMBER_NAME;
 		commentGrade = CommentGrade.NORMAL;
 		content = BLANK_CONTENT;
 	}
