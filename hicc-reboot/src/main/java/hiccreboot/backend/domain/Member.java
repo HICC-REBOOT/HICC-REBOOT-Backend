@@ -1,8 +1,6 @@
 package hiccreboot.backend.domain;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,7 +14,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,12 +53,6 @@ public class Member {
 
 	@Column(nullable = false)
 	private String email;
-
-	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-	private List<Article> articles = new ArrayList<>();
-
-	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-	private List<Comment> comments = new ArrayList<>();
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Member(String studentNumber, Department department, String name, String password, Grade grade,
@@ -116,4 +107,5 @@ public class Member {
 		this.grade = Grade.NORMAL;
 		this.approvedDate = LocalDateTime.now();
 	}
+
 }

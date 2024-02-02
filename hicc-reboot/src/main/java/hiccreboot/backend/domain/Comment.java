@@ -1,5 +1,7 @@
 package hiccreboot.backend.domain;
 
+import static hiccreboot.backend.common.consts.MemberConstants.*;
+
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -35,6 +37,9 @@ public class Comment {
 	@JoinColumn(name = "MEMBER_ID")
 	private Member member;
 
+	@Column(nullable = false)
+	private String memberName;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ARTICLE_ID")
 	private Article article;
@@ -43,10 +48,12 @@ public class Comment {
 	private String content;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private Comment(Long parentCommentId, LocalDateTime date, Member member, Article article, String content) {
+	private Comment(Long parentCommentId, LocalDateTime date, Member member, String memberName, Article article,
+		String content) {
 		this.parentCommentId = parentCommentId;
 		this.date = date;
-		addMember(member);
+		this.member = member;
+		this.memberName = memberName;
 		addArticle(article);
 		this.content = content;
 	}
@@ -55,6 +62,7 @@ public class Comment {
 		return Comment.builder()
 			.parentCommentId(-1L)
 			.member(member)
+			.memberName(member.getName())
 			.article(article)
 			.date(LocalDateTime.now())
 			.content(content)
@@ -65,20 +73,23 @@ public class Comment {
 		return Comment.builder()
 			.parentCommentId(parentCommentId)
 			.member(member)
+			.memberName(member.getName())
 			.article(article)
 			.date(LocalDateTime.now())
 			.content(content)
 			.build();
 	}
 
-	//연관 관계 메서드
-	private void addMember(Member member) {
-		this.member = member;
-		member.getComments().add(this);
-	}
-
 	private void addArticle(Article article) {
 		this.article = article;
 		article.getComments().add(this);
+	}
+
+	public void deleteMember() {
+		this.member = null;
+	}
+
+	public void deleteMemberName() {
+		this.memberName = DELETED_MEMBER_NAME;
 	}
 }
