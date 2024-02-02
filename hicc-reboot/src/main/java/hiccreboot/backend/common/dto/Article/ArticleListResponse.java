@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
-import hiccreboot.backend.domain.Grade;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import lombok.Getter;
 @Getter
 public class ArticleListResponse {
 	private final Long articleId;
-	private final Grade grade;
+	private final ArticleGrade grade;
 	private final String name;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private final LocalDateTime date;
@@ -25,7 +25,7 @@ public class ArticleListResponse {
 	@Builder(access = AccessLevel.PRIVATE)
 	private ArticleListResponse(
 		Long articleId,
-		Grade grade,
+		ArticleGrade grade,
 		String name,
 		LocalDateTime date,
 		BoardType board,
@@ -43,8 +43,8 @@ public class ArticleListResponse {
 	public static ArticleListResponse create(Article article) {
 		return ArticleListResponse.builder()
 			.articleId(article.getId())
-			.grade(article.getMember().getGrade())
-			.name(article.getMember().getName())
+			.grade(article.getArticleGrade())
+			.name(article.getMemberName())
 			.date(article.getDate())
 			.board(article.getBoardType())
 			.imageExistence(!article.getImages().isEmpty())

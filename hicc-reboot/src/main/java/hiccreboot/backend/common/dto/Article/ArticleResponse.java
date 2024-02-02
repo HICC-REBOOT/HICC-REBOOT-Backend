@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.ArticleGrade;
 import hiccreboot.backend.domain.BoardType;
-import hiccreboot.backend.domain.Grade;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +17,7 @@ import lombok.Getter;
 public class
 ArticleResponse {
 	private final Long articleId;
-	private final Grade grade;
+	private final ArticleGrade grade;
 	private final String name;
 	private final Boolean isMine;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -30,7 +30,7 @@ ArticleResponse {
 	@Builder(access = AccessLevel.PRIVATE)
 	private ArticleResponse(
 		Long articleId,
-		Grade grade,
+		ArticleGrade grade,
 		String name,
 		Boolean isMine,
 		LocalDateTime date,
@@ -52,15 +52,14 @@ ArticleResponse {
 	public static ArticleResponse create(Article article, Boolean isMine) {
 		return ArticleResponse.builder()
 			.articleId(article.getId())
-			.grade(article.getMember().getGrade())
-			.name(article.getMember().getName())
+			.grade(article.getArticleGrade())
+			.name(article.getMemberName())
 			.isMine(isMine)
 			.date(article.getDate())
 			.images(
 				article.getImages()
 					.stream()
-					.map(image -> ArticleImageResponse.create(image.getFileName(), image.getFileNameExtension(),
-						image.getKey(), image.getUrl()))
+					.map(ArticleImageResponse::create)
 					.collect(Collectors.toList()))
 			.board(article.getBoardType())
 			.subject(article.getSubject())

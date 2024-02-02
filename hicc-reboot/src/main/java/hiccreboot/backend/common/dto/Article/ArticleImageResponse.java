@@ -1,5 +1,6 @@
 package hiccreboot.backend.common.dto.Article;
 
+import hiccreboot.backend.domain.Image;
 import lombok.Getter;
 
 @Getter
@@ -19,5 +20,10 @@ public class ArticleImageResponse {
 
 	public static ArticleImageResponse create(String fileName, String fileNameExtension, String key, String url) {
 		return new ArticleImageResponse(fileName, fileNameExtension, key, url);
+	}
+
+	public static ArticleImageResponse create(Image image) {
+		return new ArticleImageResponse(image.getFileName(), image.getFileNameExtension(), image.getKey(),
+			image.getUrl());
 	}
 }
