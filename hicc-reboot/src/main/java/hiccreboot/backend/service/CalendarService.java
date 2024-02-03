@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.Calendar.PostScheduleRequest;
+import hiccreboot.backend.common.dto.Calendar.ScheduleDateResponse;
 import hiccreboot.backend.common.dto.Calendar.ScheduleResponse;
 import hiccreboot.backend.common.dto.Calendar.SimpleScheduleResponse;
 import hiccreboot.backend.common.dto.Calendar.UpdateScheduleRequest;
@@ -53,6 +54,15 @@ public class CalendarService {
 
 	public Optional<Schedule> findSchedule(Long id) {
 		return scheduleRepository.findById(id);
+	}
+
+	public DataResponse<List<ScheduleDateResponse>> findScheduleByDate(int year, int month, int day) {
+		List<ScheduleDateResponse> result = scheduleDateRepository.findAllByYearAndMonthAndDayOfMonth(year, month, day)
+			.stream()
+			.map(ScheduleDateResponse::create)
+			.toList();
+
+		return DataResponse.ok(result);
 	}
 
 	public BaseResponse makeSchedule(Long id) {
