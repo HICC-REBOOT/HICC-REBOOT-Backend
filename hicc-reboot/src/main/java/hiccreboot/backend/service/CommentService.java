@@ -17,6 +17,7 @@ import hiccreboot.backend.common.exception.CommentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domain.Article;
 import hiccreboot.backend.domain.Comment;
+import hiccreboot.backend.domain.CommentGrade;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.repository.Article.ArticleRepository;
@@ -78,10 +79,19 @@ public class CommentService {
 
 		Comment comment;
 		if (postCommentRequest.getParentCommentId() > PARENT_COMMENT) {
-			comment = Comment.createChildComment(postCommentRequest.getParentCommentId(), member, article,
+			//부모 댓글이 있는 지 확인
+			commentRepository.findById(postCommentRequest.getParentCommentId())
+				.orElseThrow(() -> CommentNotFoundException.EXCEPTION);
+
+			comment = Comment.createChildComment(
+				postCommentRequest.getParentCommentId(),
+				member,
+				makeCommentGradeByMemberGrade(member.getGrade()),
+				article,
 				postCommentRequest.getContent());
 		} else {
-			comment = Comment.createParentComment(member, article, postCommentRequest.getContent());
+			comment = Comment.createParentComment(member, makeCommentGradeByMemberGrade(member.getGrade()), article,
+				postCommentRequest.getContent());
 		}
 
 		return commentRepository.save(comment);
@@ -93,6 +103,16 @@ public class CommentService {
 		}
 	}
 
+	private CommentGrade makeCommentGradeByMemberGrade(Grade grade) {
+		if (grade == Grade.EXECUTIVE || grade == Grade.PRESIDENT) {
+			return CommentGrade.EXECUTIVE;
+		}
+		if (grade == Grade.NORMAL) {
+			return CommentGrade.NORMAL;
+		}
+		throw AccessForbiddenException.EXCEPTION;
+	}
+
 	@Transactional
 	public void deleteComment(Long id, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
@@ -102,11 +122,7 @@ public class CommentService {
 
 		checkDeleteAuthority(member, comment);
 
-		if (comment.getMember() != member) {
-			throw AccessForbiddenException.EXCEPTION;
-		}
-
-		commentRepository.deleteById(id);
+		comment.deleteCommentSoftlyWithContent();
 	}
 
 	private void checkDeleteAuthority(Member member, Comment comment) {
@@ -119,4 +135,5 @@ public class CommentService {
 
 		throw AccessForbiddenException.EXCEPTION;
 	}
+
 }

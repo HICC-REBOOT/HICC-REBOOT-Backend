@@ -1,5 +1,7 @@
 package hiccreboot.backend.repository.Article;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +18,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 	Page<Article> findAllByBoardTypeAndArticleGrade(BoardType boardType, ArticleGrade articleGrade, Pageable pageable);
 
 	Page<Article> findAllByBoardType(BoardType boardType, Pageable pageable);
+
+	List<Article> findAllByMember(Member member);
 
 	@Query("select a from Article a where a.member.name like concat('%', :name, '%') and a.boardType=:boardType and a.articleGrade=:articleGrade")
 	Page<Article> findAllByMemberNameAndBoardTypeAndArticleGrade(String name, BoardType boardType,

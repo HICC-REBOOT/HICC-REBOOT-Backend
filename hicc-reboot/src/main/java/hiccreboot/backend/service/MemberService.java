@@ -101,7 +101,7 @@ public class MemberService {
 	public void reject(Long applicantId) {
 		memberRepository.findById(applicantId)
 			.filter(applicant -> applicant.getGrade().equals(Grade.APPLICANT))
-			.ifPresentOrElse(memberRepository::delete, () -> {
+			.ifPresentOrElse(this::deleteMember, () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
 	}
@@ -128,9 +128,22 @@ public class MemberService {
 	public void expel(Long deletedMemberId, String presidentStudentNumber) {
 		memberRepository.findById(deletedMemberId)
 			.filter(deletedMember -> validateTargetNotRequester(deletedMember, presidentStudentNumber))
-			.ifPresentOrElse(memberRepository::delete, () -> {
+			.ifPresentOrElse(this::deleteMember, () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
+	}
+
+	private void deleteMember(Member deletedMember) {
+		articleRepository.findAllByMember(deletedMember)
+			.forEach(article -> {
+				article.deleteArticleSoftly();
+			});
+		commentRepository.findAllByMember(deletedMember)
+			.forEach(comment -> {
+				comment.deleteCommentSoftly();
+			});
+
+		memberRepository.delete(deletedMember);
 	}
 
 	private Sort getSort(String sortBy) {
@@ -172,7 +185,7 @@ public class MemberService {
 
 	public void withdraw(String studentNumber) {
 		memberRepository.findByStudentNumber(studentNumber)
-			.ifPresentOrElse(memberRepository::delete, () -> {
+			.ifPresentOrElse(this::deleteMember, () -> {
 				throw MemberNotFoundException.EXCEPTION;
 			});
 	}
@@ -237,4 +250,5 @@ public class MemberService {
 
 		return DataResponse.ok(result);
 	}
+
 }

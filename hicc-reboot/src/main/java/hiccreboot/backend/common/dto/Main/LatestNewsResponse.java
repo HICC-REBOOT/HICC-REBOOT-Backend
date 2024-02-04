@@ -5,20 +5,21 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import hiccreboot.backend.domain.Article;
-import hiccreboot.backend.domain.Grade;
+import hiccreboot.backend.domain.ArticleGrade;
 import lombok.Getter;
 
 @Getter
 public class LatestNewsResponse {
 	private final Long articleId;
-	private final Grade grade;
+	private final ArticleGrade grade;
 	private final String name;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
 	private final LocalDateTime date;
 	private final Boolean imageExistence;
 	private final String subject;
 
-	private LatestNewsResponse(Long articleId, Grade grade, String name, LocalDateTime date, Boolean imageExistence,
+	private LatestNewsResponse(Long articleId, ArticleGrade grade, String name, LocalDateTime date,
+		Boolean imageExistence,
 		String subject) {
 		this.articleId = articleId;
 		this.grade = grade;
@@ -31,8 +32,8 @@ public class LatestNewsResponse {
 	public static LatestNewsResponse create(Article article) {
 		return new LatestNewsResponse(
 			article.getId(),
-			article.getMember().getGrade(),
-			article.getMember().getName(),
+			article.getArticleGrade(),
+			article.getMemberName(),
 			article.getDate(),
 			!article.getImages().isEmpty(),
 			article.getSubject());

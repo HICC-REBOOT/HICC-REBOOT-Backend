@@ -1,5 +1,7 @@
 package hiccreboot.backend.domain;
 
+import static hiccreboot.backend.common.consts.MemberConstants.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,9 @@ public class Article {
 	@JoinColumn(name = "MEMBER_ID")
 	private Member member;
 
+	@Column(nullable = false)
+	private String memberName;
+
 	@Column(name = "ARTICLE_GRADE")
 	@Enumerated(EnumType.STRING)
 	private ArticleGrade articleGrade;
@@ -60,9 +65,11 @@ public class Article {
 	@OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
-	private Article(Member member, ArticleGrade articleGrade, String subject, String content, BoardType boardType,
+	private Article(Member member, String memberName, ArticleGrade articleGrade, String subject, String content,
+		BoardType boardType,
 		LocalDateTime date) {
-		changeMember(member);
+		this.member = member;
+		this.memberName = memberName;
 		this.articleGrade = articleGrade;
 		this.subject = subject;
 		this.content = content;
@@ -72,11 +79,12 @@ public class Article {
 
 	public static Article create(Member member, ArticleGrade articleGrade, String subject, String content,
 		BoardType boardType) {
-		return new Article(member, articleGrade, subject, content, boardType, LocalDateTime.now());
+		return new Article(member, member.getName(), articleGrade, subject, content, boardType, LocalDateTime.now());
 	}
 
 	public static Article create(Member member, ArticleGrade articleGrade, ArticleRequest articleRequest) {
-		return new Article(member, articleGrade, articleRequest.getSubject(), articleRequest.getContent(),
+		return new Article(member, member.getName(), articleGrade, articleRequest.getSubject(),
+			articleRequest.getContent(),
 			articleRequest.getBoard(), LocalDateTime.now());
 	}
 
@@ -92,9 +100,9 @@ public class Article {
 		this.boardType = boardType;
 	}
 
-	//연관 관계 메서드
-	private void changeMember(Member member) {
-		this.member = member;
-		member.getArticles().add(this);
+	public void deleteArticleSoftly() {
+		this.member = null;
+		this.memberName = DELETED_MEMBER_NAME;
+		this.articleGrade = ArticleGrade.NORMAL;
 	}
 }

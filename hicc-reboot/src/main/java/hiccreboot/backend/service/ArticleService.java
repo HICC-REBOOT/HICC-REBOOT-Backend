@@ -205,7 +205,7 @@ public class ArticleService {
 	}
 
 	private void checkDeleteAuthority(Member member, Article article) {
-		if (member.getGrade() == Grade.PRESIDENT || member.getGrade() == Grade.PRESIDENT) {
+		if (member.getGrade() == Grade.PRESIDENT || member.getGrade() == Grade.EXECUTIVE) {
 			return;
 		}
 		if (member == article.getMember()) {
