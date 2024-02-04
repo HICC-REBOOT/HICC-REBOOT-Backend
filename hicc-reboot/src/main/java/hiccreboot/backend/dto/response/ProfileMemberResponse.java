@@ -12,7 +12,6 @@ public class ProfileMemberResponse {
 	private String name;
 	private Grade grade;
 	private String phoneNumber;
-	private String studentNumber;
 	private String department;
 
 	public static ProfileMemberResponse create(Member member) {
@@ -20,7 +19,6 @@ public class ProfileMemberResponse {
 			.name(member.getName())
 			.grade(member.getGrade())
 			.phoneNumber(member.getPhoneNumber())
-			.studentNumber(member.getStudentNumber())
 			.department(member.getDepartment().getName())
 			.build();
 	}
