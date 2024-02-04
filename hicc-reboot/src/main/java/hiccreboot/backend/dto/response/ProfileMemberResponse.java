@@ -12,16 +12,16 @@ public class ProfileMemberResponse {
 	private String name;
 	private Grade grade;
 	private String phoneNumber;
-	private String studentNumber;
 	private String department;
+	private String email;
 
 	public static ProfileMemberResponse create(Member member) {
 		return ProfileMemberResponse.builder()
 			.name(member.getName())
 			.grade(member.getGrade())
 			.phoneNumber(member.getPhoneNumber())
-			.studentNumber(member.getStudentNumber())
 			.department(member.getDepartment().getName())
+			.email(member.getEmail())
 			.build();
 	}
 
