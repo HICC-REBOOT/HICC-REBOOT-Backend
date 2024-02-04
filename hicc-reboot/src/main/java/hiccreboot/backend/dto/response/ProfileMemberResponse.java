@@ -13,6 +13,7 @@ public class ProfileMemberResponse {
 	private Grade grade;
 	private String phoneNumber;
 	private String department;
+	private String email;
 
 	public static ProfileMemberResponse create(Member member) {
 		return ProfileMemberResponse.builder()
@@ -20,6 +21,7 @@ public class ProfileMemberResponse {
 			.grade(member.getGrade())
 			.phoneNumber(member.getPhoneNumber())
 			.department(member.getDepartment().getName())
+			.email(member.getEmail())
 			.build();
 	}
 
