@@ -1,9 +1,11 @@
 package hiccreboot.backend.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +14,10 @@ import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.Calendar.PostScheduleRequest;
 import hiccreboot.backend.common.dto.Calendar.ScheduleDateResponse;
 import hiccreboot.backend.common.dto.Calendar.ScheduleResponse;
-import hiccreboot.backend.common.dto.Calendar.SimpleScheduleResponse;
 import hiccreboot.backend.common.dto.Calendar.UpdateScheduleRequest;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.AccessForbiddenException;
+import hiccreboot.backend.common.exception.DateTimePreconditionFailed;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.ScheduleNotFoundException;
 import hiccreboot.backend.domain.Grade;
@@ -32,31 +34,23 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class CalendarService {
 
-	private final ScheduleRepository scheduleRepository;
 	private final ScheduleDateRepository scheduleDateRepository;
+	private final ScheduleRepository scheduleRepository;
 	private final MemberRepository memberRepository;
 
-	private List<ScheduleDate> findScheduleDatesByMonth(int year, int month) {
-		return scheduleDateRepository.findAllByYearAndMonth(year, month);
-	}
-
 	public BaseResponse makeMonthSchedules(int year, int month) {
-		List<ScheduleDate> scheduleDates = findScheduleDatesByMonth(year, month);
+		List<ScheduleResponse> scheduleResponses = scheduleRepository.findAllByYearAndMonth(year, month).stream()
+			.map(ScheduleResponse::create)
+			.toList();
 
-		List<SimpleScheduleResponse> simpleScheduleResponses = new ArrayList<>();
-		scheduleDates.stream().forEach(scheduleDate -> {
-			simpleScheduleResponses.add(
-				SimpleScheduleResponse.create(scheduleDate));
-		});
-
-		return DataResponse.ok(simpleScheduleResponses);
+		return DataResponse.ok(scheduleResponses);
 	}
 
 	public Optional<Schedule> findSchedule(Long id) {
 		return scheduleRepository.findById(id);
 	}
 
-	public DataResponse<List<ScheduleDateResponse>> findScheduleByDate(int year, int month, int day) {
+	public BaseResponse findScheduleByDate(int year, int month, int day) {
 		List<ScheduleDateResponse> result = scheduleDateRepository.findAllByYearAndMonthAndDayOfMonth(year, month, day)
 			.stream()
 			.map(ScheduleDateResponse::create)
@@ -66,17 +60,10 @@ public class CalendarService {
 	}
 
 	public BaseResponse makeSchedule(Long id) {
-		Schedule schedule = findSchedule(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
-
-		List<LocalDate> localDates = new ArrayList<>();
-		schedule.getScheduleDates()
-			.stream()
-			.forEach(scheduleDate -> localDates.add(
-				LocalDate.of(scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDayOfMonth())));
+		Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
 		return DataResponse.ok(
-			new ScheduleResponse(schedule.getName(), schedule.getId(), localDates, schedule.getScheduleType(),
-				schedule.getContent()));
+			ScheduleResponse.create(schedule));
 	}
 
 	@Transactional
@@ -85,14 +72,15 @@ public class CalendarService {
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
 		checkCalendarAuthority(member.getGrade());
+		validateDates(postScheduleRequest.getStartDateTime(), postScheduleRequest.getEndDateTime());
 
 		Schedule schedule = Schedule.createSchedule(postScheduleRequest);
 
-		List<LocalDate> dates = postScheduleRequest.getDates();
-		dates.stream()
-			.forEach(date -> ScheduleDate.create(date, schedule));
-		scheduleRepository.save(schedule);
+		LocalDate startDate = postScheduleRequest.getStartDateTime().toLocalDate();
+		LocalDate endDate = postScheduleRequest.getEndDateTime().toLocalDate();
+		getDatesBetweenTwoDates(startDate, endDate).forEach(localDate -> ScheduleDate.create(localDate, schedule));
 
+		scheduleRepository.save(schedule);
 		return schedule;
 	}
 
@@ -112,6 +100,7 @@ public class CalendarService {
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
 		checkCalendarAuthority(member.getGrade());
+		validateDates(updateScheduleRequest.getStartDateTime(), updateScheduleRequest.getEndDateTime());
 
 		Schedule schedule = findSchedule(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
@@ -119,12 +108,11 @@ public class CalendarService {
 		schedule.updateName(updateScheduleRequest.getName());
 		schedule.updateContent(updateScheduleRequest.getContent());
 		schedule.updateScheduleType(updateScheduleRequest.getType());
+
 		schedule.getScheduleDates().clear();
-		updateScheduleRequest.getDates().stream()
-			.forEach(date -> {
-				ScheduleDate.create(date.getYear(), date.getMonthValue(),
-					date.getDayOfMonth(), schedule);
-			});
+		LocalDate startDate = updateScheduleRequest.getStartDateTime().toLocalDate();
+		LocalDate endDate = updateScheduleRequest.getEndDateTime().toLocalDate();
+		getDatesBetweenTwoDates(startDate, endDate).forEach(localDate -> ScheduleDate.create(localDate, schedule));
 
 		return schedule;
 	}
@@ -134,5 +122,18 @@ public class CalendarService {
 			return;
 		}
 		throw AccessForbiddenException.EXCEPTION;
+	}
+
+	private void validateDates(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+		if (endDateTime.compareTo(startDateTime) >= 0) {
+			return;
+		}
+		throw DateTimePreconditionFailed.EXCEPTION;
+	}
+
+	private List<LocalDate> getDatesBetweenTwoDates(LocalDate startDate, LocalDate endDate) {
+		int numOfDaysBetween = (int)ChronoUnit.DAYS.between(startDate, endDate);
+
+		return IntStream.rangeClosed(0, numOfDaysBetween).mapToObj(startDate::plusDays).toList();
 	}
 }
