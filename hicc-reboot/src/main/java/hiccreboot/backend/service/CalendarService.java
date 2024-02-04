@@ -1,7 +1,5 @@
 package hiccreboot.backend.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,7 +105,7 @@ public class CalendarService {
 	}
 
 	@Transactional
-	public Schedule updateSchedule(String studentNumber, Long id, UpdateScheduleRequest updateScheduleRequest) {
+	public void updateSchedule(String studentNumber, Long id, UpdateScheduleRequest updateScheduleRequest) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
@@ -119,14 +117,10 @@ public class CalendarService {
 		schedule.updateName(updateScheduleRequest.getName());
 		schedule.updateContent(updateScheduleRequest.getContent());
 		schedule.updateScheduleType(updateScheduleRequest.getType());
-		schedule.getScheduleDates().clear();
-		updateScheduleRequest.getDates().stream()
-			.forEach(date -> {
-				ScheduleDate.create(date.getYear(), date.getMonthValue(),
-					date.getDayOfMonth(), schedule);
-			});
 
-		return schedule;
+		schedule.getScheduleDates().clear();
+		updateScheduleRequest.getDates()
+			.forEach(date -> ScheduleDate.create(date, schedule));
 	}
 
 	private void checkCalendarAuthority(Grade grade) {
