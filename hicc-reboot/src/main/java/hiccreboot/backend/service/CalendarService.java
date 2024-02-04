@@ -65,7 +65,7 @@ public class CalendarService {
 	}
 
 	@Transactional
-	public Schedule saveSchedule(String studentNumber, PostScheduleRequest postScheduleRequest) {
+	public void saveSchedule(String studentNumber, PostScheduleRequest postScheduleRequest) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
@@ -73,12 +73,9 @@ public class CalendarService {
 
 		Schedule schedule = Schedule.createSchedule(postScheduleRequest);
 
-		List<LocalDate> dates = postScheduleRequest.getDates();
-		dates.stream()
+		postScheduleRequest.getDates()
 			.forEach(date -> ScheduleDate.create(date, schedule));
 		scheduleRepository.save(schedule);
-
-		return schedule;
 	}
 
 	@Transactional
