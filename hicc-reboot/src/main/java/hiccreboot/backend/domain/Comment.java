@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Comment {
 
-	private final String BLANK_CONTENT = "";
+	private final String BLANK_CONTENT = "댓글이 삭제되었습니다.";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
