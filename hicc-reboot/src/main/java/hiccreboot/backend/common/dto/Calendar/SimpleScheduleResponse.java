@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import hiccreboot.backend.domain.Schedule;
 import hiccreboot.backend.domain.ScheduleDate;
 import hiccreboot.backend.domain.ScheduleType;
 import lombok.AccessLevel;
@@ -27,11 +28,13 @@ public class SimpleScheduleResponse {
 	}
 
 	public static SimpleScheduleResponse create(ScheduleDate scheduleDate) {
+		Schedule schedule = scheduleDate.getSchedule();
+
 		return SimpleScheduleResponse.builder()
-			.name(scheduleDate.getSchedule().getName())
-			.scheduleId(scheduleDate.getSchedule().getId())
+			.name(schedule.getName())
+			.scheduleId(schedule.getId())
 			.date(LocalDate.of(scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDayOfMonth()))
-			.type(scheduleDate.getSchedule().getScheduleType())
+			.type(schedule.getScheduleType())
 			.build();
 	}
 }

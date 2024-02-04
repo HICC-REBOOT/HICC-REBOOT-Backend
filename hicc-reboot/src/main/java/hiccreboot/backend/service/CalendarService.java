@@ -34,20 +34,13 @@ public class CalendarService {
 	private final ScheduleDateRepository scheduleDateRepository;
 	private final MemberRepository memberRepository;
 
-	private List<ScheduleDate> findScheduleDatesByMonth(int year, int month) {
-		return scheduleDateRepository.findAllByYearAndMonth(year, month);
-	}
-
 	public BaseResponse makeMonthSchedules(int year, int month) {
-		List<ScheduleDate> scheduleDates = findScheduleDatesByMonth(year, month);
+		List<SimpleScheduleResponse> result = scheduleDateRepository.findAllByYearAndMonth(year, month)
+			.stream()
+			.map(SimpleScheduleResponse::create)
+			.toList();
 
-		List<SimpleScheduleResponse> simpleScheduleResponses = new ArrayList<>();
-		scheduleDates.stream().forEach(scheduleDate -> {
-			simpleScheduleResponses.add(
-				SimpleScheduleResponse.create(scheduleDate));
-		});
-
-		return DataResponse.ok(simpleScheduleResponses);
+		return DataResponse.ok(result);
 	}
 
 	public Optional<Schedule> findSchedule(Long id) {
