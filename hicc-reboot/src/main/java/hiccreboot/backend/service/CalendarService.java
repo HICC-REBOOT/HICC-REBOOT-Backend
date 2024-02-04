@@ -57,17 +57,11 @@ public class CalendarService {
 	}
 
 	public BaseResponse makeSchedule(Long id) {
-		Schedule schedule = findSchedule(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
+		ScheduleResponse result = scheduleRepository.findById(id)
+			.map(ScheduleResponse::create)
+			.orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
-		List<LocalDate> localDates = new ArrayList<>();
-		schedule.getScheduleDates()
-			.stream()
-			.forEach(scheduleDate -> localDates.add(
-				LocalDate.of(scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDayOfMonth())));
-
-		return DataResponse.ok(
-			new ScheduleResponse(schedule.getName(), schedule.getId(), localDates, schedule.getScheduleType(),
-				schedule.getContent()));
+		return DataResponse.ok(result);
 	}
 
 	@Transactional
