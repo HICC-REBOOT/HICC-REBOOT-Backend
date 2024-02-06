@@ -126,10 +126,7 @@ public class MemberService {
 
 		memberRepository.findById(modifiedMemberId)
 			.filter(modifiedMember -> validateTargetNotRequester(modifiedMember, presidentStudentNumber))
-			.filter(modifiedMember -> validateModifyAnotherGrade(modifiedMember, grade))
-			.ifPresentOrElse(member -> member.updateGrade(grade), () -> {
-				throw MemberNotFoundException.EXCEPTION;
-			});
+			.ifPresent(modifiedMember -> modifiedMember.updateGrade(grade));
 	}
 
 	private void handOverPresident(Long modifiedMemberId, String presidentStudentNumber) {
@@ -175,10 +172,6 @@ public class MemberService {
 
 	private boolean validateTargetNotRequester(Member member, String requesterStudentNumber) {
 		return !member.getStudentNumber().equals(requesterStudentNumber);
-	}
-
-	private boolean validateModifyAnotherGrade(Member modifiedMember, Grade modifiedGrade) {
-		return !modifiedMember.getGrade().equals(modifiedGrade);
 	}
 
 	public DataResponse<ProfileMemberResponse> getProfile(String studentNumber) {
