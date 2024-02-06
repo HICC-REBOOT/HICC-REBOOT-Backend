@@ -13,6 +13,8 @@ import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.DepartmentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.StudentDuplicateException;
+import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.Comment;
 import hiccreboot.backend.domain.Department;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
@@ -152,13 +154,10 @@ public class MemberService {
 
 	private void deleteMember(Member deletedMember) {
 		articleRepository.findAllByMember(deletedMember)
-			.forEach(article -> {
-				article.deleteArticleSoftly();
-			});
+			.forEach(Article::deleteArticleSoftly);
+
 		commentRepository.findAllByMember(deletedMember)
-			.forEach(comment -> {
-				comment.deleteCommentSoftly();
-			});
+			.forEach(Comment::deleteCommentSoftly);
 
 		memberRepository.delete(deletedMember);
 	}
