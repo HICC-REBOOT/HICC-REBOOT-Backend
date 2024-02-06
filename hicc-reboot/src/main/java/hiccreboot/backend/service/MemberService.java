@@ -117,11 +117,28 @@ public class MemberService {
 	}
 
 	public void modifyGrade(Long modifiedMemberId, Grade grade, String presidentStudentNumber) {
+		if (grade.equals(Grade.PRESIDENT)) {
+			handOverPresident(modifiedMemberId, presidentStudentNumber);
+			return;
+		}
+
 		memberRepository.findById(modifiedMemberId)
 			.filter(modifiedMember -> validateTargetNotRequester(modifiedMember, presidentStudentNumber))
 			.filter(modifiedMember -> validateModifyAnotherGrade(modifiedMember, grade))
 			.ifPresentOrElse(member -> member.updateGrade(grade), () -> {
 				throw MemberNotFoundException.EXCEPTION;
+			});
+	}
+
+	private void handOverPresident(Long modifiedMemberId, String presidentStudentNumber) {
+		Member nextPresident = memberRepository.findById(modifiedMemberId)
+			.filter(modifiedMember -> validateTargetNotRequester(modifiedMember, presidentStudentNumber))
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		memberRepository.findByStudentNumber(presidentStudentNumber)
+			.ifPresent(existingPresident -> {
+				existingPresident.updateGrade(Grade.EXECUTIVE);
+				nextPresident.updateGrade(Grade.PRESIDENT);
 			});
 	}
 
