@@ -130,6 +130,8 @@ public class WebSecurityConfig {
 		configuration.setAllowCredentials(true);
 		configuration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT"));
+		configuration.setAllowedOriginPatterns(
+			List.of("http://localhost:3000", "https://hicc.co.kr", "https://www.hicc.co.kr"));
 		configuration.setAllowedHeaders(List.of("*"));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
