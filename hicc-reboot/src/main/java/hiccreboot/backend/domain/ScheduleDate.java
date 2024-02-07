@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -38,7 +37,6 @@ public class ScheduleDate {
 	@JoinColumn(name = "SCHEDULE_ID")
 	private Schedule schedule;
 
-	@Builder(access = AccessLevel.PRIVATE)
 	private ScheduleDate(int year, int month, int dayOfMonth, Schedule schedule) {
 		this.year = year;
 		this.month = month;
@@ -47,21 +45,16 @@ public class ScheduleDate {
 	}
 
 	public static ScheduleDate create(int year, int month, int dayOfMonth, Schedule schedule) {
-		return ScheduleDate.builder()
-			.year(year)
-			.month(month)
-			.dayOfMonth(dayOfMonth)
-			.schedule(schedule)
-			.build();
+		return new ScheduleDate(year, month, dayOfMonth, schedule);
 	}
 
 	public static ScheduleDate create(LocalDate localDate, Schedule schedule) {
-		return ScheduleDate.builder()
-			.year(localDate.getYear())
-			.month(localDate.getMonthValue())
-			.dayOfMonth(localDate.getDayOfMonth())
-			.schedule(schedule)
-			.build();
+		return new ScheduleDate(
+			localDate.getYear(),
+			localDate.getMonthValue(),
+			localDate.getDayOfMonth(),
+			schedule
+		);
 	}
 
 	//연관관계 메소드

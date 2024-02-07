@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.Article.ArticleRequest;
+import hiccreboot.backend.common.dto.Article.ArticleResponse;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
@@ -43,7 +44,8 @@ public class ArticleController {
 	}
 
 	@GetMapping("/{article-id}")
-	public BaseResponse searchArticle(@PathVariable("article-id") Long id, HttpServletRequest httpServletRequest) {
+	public DataResponse<ArticleResponse> searchArticle(@PathVariable("article-id") Long id,
+		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		return articleService.makeArticle(id, studentNumber);

@@ -1,7 +1,8 @@
 package hiccreboot.backend.common.dto.Calendar;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import hiccreboot.backend.domain.ScheduleType;
 import lombok.Getter;
@@ -10,7 +11,10 @@ import lombok.Getter;
 public class UpdateScheduleRequest {
 
 	private String name;
-	private List<LocalDate> dates;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime startDateTime;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime endDateTime;
 	private ScheduleType type;
 	private String content;
 }

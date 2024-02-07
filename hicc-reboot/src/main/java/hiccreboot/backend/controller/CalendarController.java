@@ -16,6 +16,7 @@ import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.Calendar.PostScheduleRequest;
 import hiccreboot.backend.common.dto.Calendar.ScheduleDateResponse;
+import hiccreboot.backend.common.dto.Calendar.ScheduleResponse;
 import hiccreboot.backend.common.dto.Calendar.UpdateScheduleRequest;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.service.CalendarService;
@@ -31,7 +32,8 @@ public class CalendarController {
 	private final TokenProvider tokenProvider;
 
 	@GetMapping("/month-schedule")
-	public BaseResponse searchMonthSchedule(@RequestParam("year") int year, @RequestParam("month") int month) {
+	public DataResponse<List<ScheduleResponse>> searchMonthSchedule(@RequestParam("year") int year,
+		@RequestParam("month") int month) {
 		return calendarService.makeMonthSchedules(year, month);
 	}
 
@@ -42,7 +44,7 @@ public class CalendarController {
 	}
 
 	@GetMapping("/schedule/{schedule-id}")
-	public BaseResponse searchSchedule(@PathVariable("schedule-id") Long id) {
+	public DataResponse<ScheduleResponse> searchSchedule(@PathVariable("schedule-id") Long id) {
 		return calendarService.makeSchedule(id);
 	}
 

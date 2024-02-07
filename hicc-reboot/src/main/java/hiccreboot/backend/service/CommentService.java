@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.Comment.ChildCommentResponse;
 import hiccreboot.backend.common.dto.Comment.ParentCommentResponse;
 import hiccreboot.backend.common.dto.Comment.PostCommentRequest;
@@ -42,7 +41,7 @@ public class CommentService {
 		return commentRepository.findAllByArticle_IdAndParentCommentIdGreaterThan(articleId, PARENT_COMMENT);
 	}
 
-	public BaseResponse makeParentComments(Long articleId, String studentNumber) {
+	public DataResponse<List<ParentCommentResponse>> makeParentComments(Long articleId, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
@@ -55,7 +54,7 @@ public class CommentService {
 		return DataResponse.ok(parentCommentResponses);
 	}
 
-	public BaseResponse makeChildComments(Long articleId, String studentNumber) {
+	public DataResponse<List<ChildCommentResponse>> makeChildComments(Long articleId, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 

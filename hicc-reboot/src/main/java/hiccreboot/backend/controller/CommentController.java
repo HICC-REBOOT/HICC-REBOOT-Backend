@@ -1,5 +1,7 @@
 package hiccreboot.backend.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.dto.BaseResponse;
+import hiccreboot.backend.common.dto.Comment.ChildCommentResponse;
+import hiccreboot.backend.common.dto.Comment.ParentCommentResponse;
 import hiccreboot.backend.common.dto.Comment.PostCommentRequest;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.service.CommentService;
@@ -25,7 +29,7 @@ public class CommentController {
 	private final TokenProvider tokenProvider;
 
 	@GetMapping("/parent/{article-id}")
-	public BaseResponse searchParentComment(@PathVariable("article-id") Long id,
+	public DataResponse<List<ParentCommentResponse>> searchParentComment(@PathVariable("article-id") Long id,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
@@ -33,7 +37,7 @@ public class CommentController {
 	}
 
 	@GetMapping("/child/{article-id}")
-	public BaseResponse searchChildComment(@PathVariable("article-id") Long id,
+	public DataResponse<List<ChildCommentResponse>> searchChildComment(@PathVariable("article-id") Long id,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
