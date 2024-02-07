@@ -13,6 +13,8 @@ import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.DepartmentNotFoundException;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.StudentDuplicateException;
+import hiccreboot.backend.domain.Article;
+import hiccreboot.backend.domain.Comment;
 import hiccreboot.backend.domain.Department;
 import hiccreboot.backend.domain.Grade;
 import hiccreboot.backend.domain.Member;
@@ -117,11 +119,25 @@ public class MemberService {
 	}
 
 	public void modifyGrade(Long modifiedMemberId, Grade grade, String presidentStudentNumber) {
+		if (grade.equals(Grade.PRESIDENT)) {
+			handOverPresident(modifiedMemberId, presidentStudentNumber);
+			return;
+		}
+
 		memberRepository.findById(modifiedMemberId)
 			.filter(modifiedMember -> validateTargetNotRequester(modifiedMember, presidentStudentNumber))
-			.filter(modifiedMember -> validateModifyAnotherGrade(modifiedMember, grade))
-			.ifPresentOrElse(member -> member.updateGrade(grade), () -> {
-				throw MemberNotFoundException.EXCEPTION;
+			.ifPresent(modifiedMember -> modifiedMember.updateGrade(grade));
+	}
+
+	private void handOverPresident(Long modifiedMemberId, String presidentStudentNumber) {
+		Member nextPresident = memberRepository.findById(modifiedMemberId)
+			.filter(modifiedMember -> validateTargetNotRequester(modifiedMember, presidentStudentNumber))
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+
+		memberRepository.findByStudentNumber(presidentStudentNumber)
+			.ifPresent(existingPresident -> {
+				existingPresident.updateGrade(Grade.EXECUTIVE);
+				nextPresident.updateGrade(Grade.PRESIDENT);
 			});
 	}
 
@@ -135,13 +151,10 @@ public class MemberService {
 
 	private void deleteMember(Member deletedMember) {
 		articleRepository.findAllByMember(deletedMember)
-			.forEach(article -> {
-				article.deleteArticleSoftly();
-			});
+			.forEach(Article::deleteArticleSoftly);
+
 		commentRepository.findAllByMember(deletedMember)
-			.forEach(comment -> {
-				comment.deleteCommentSoftly();
-			});
+			.forEach(Comment::deleteCommentSoftly);
 
 		memberRepository.delete(deletedMember);
 	}
@@ -159,10 +172,6 @@ public class MemberService {
 
 	private boolean validateTargetNotRequester(Member member, String requesterStudentNumber) {
 		return !member.getStudentNumber().equals(requesterStudentNumber);
-	}
-
-	private boolean validateModifyAnotherGrade(Member modifiedMember, Grade modifiedGrade) {
-		return !modifiedMember.getGrade().equals(modifiedGrade);
 	}
 
 	public DataResponse<ProfileMemberResponse> getProfile(String studentNumber) {
