@@ -13,7 +13,6 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 
-import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.dto.S3.ImageResponse;
 import hiccreboot.backend.common.dto.S3.SimpleImageRequest;
@@ -35,7 +34,7 @@ public class S3Service {
 
 	private final int TIME_LIMIT = 1000 * 60 * 2;
 
-	public BaseResponse makePreSignedUrls(SimpleImageRequest simpleImageRequest) {
+	public DataResponse<ImageResponse> makePreSignedUrls(SimpleImageRequest simpleImageRequest) {
 		//확장자 검사
 		checkFileNameExtension(simpleImageRequest.getFileNameExtension());
 

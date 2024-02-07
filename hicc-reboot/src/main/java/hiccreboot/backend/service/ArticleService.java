@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import hiccreboot.backend.common.dto.Article.ArticleListResponse;
 import hiccreboot.backend.common.dto.Article.ArticleRequest;
 import hiccreboot.backend.common.dto.Article.ArticleResponse;
-import hiccreboot.backend.common.dto.BaseResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
@@ -96,7 +95,7 @@ public class ArticleService {
 		return articleRepository.findAllBySubjectContainingAndBoardType(search, boardType, pageable);
 	}
 
-	public BaseResponse makeArticles(int pageNumber, int pageSize, BoardType boardType,
+	public DataResponse<Page<ArticleListResponse>> makeArticles(int pageNumber, int pageSize, BoardType boardType,
 		ArticleGrade articleGrade,
 		String findBy,
 		String search) {
@@ -113,7 +112,7 @@ public class ArticleService {
 		return articleRepository.findById(id);
 	}
 
-	public BaseResponse makeArticle(Long id, String studentNumber) {
+	public DataResponse<ArticleResponse> makeArticle(Long id, String studentNumber) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
