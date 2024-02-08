@@ -1,6 +1,5 @@
 package hiccreboot.backend.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -45,11 +44,9 @@ public class CommentService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
-		List<ParentCommentResponse> parentCommentResponses = new ArrayList<>();
-		findParentComments(articleId).stream()
-			.forEach((parentComment) -> parentCommentResponses.add(new ParentCommentResponse(
-				parentComment,
-				parentComment.getMember() == member)));
+		List<ParentCommentResponse> parentCommentResponses = findParentComments(articleId).stream()
+			.map((parentComment) -> new ParentCommentResponse(parentComment, parentComment.getMember() == member))
+			.toList();
 
 		return DataResponse.ok(parentCommentResponses);
 	}
@@ -58,11 +55,9 @@ public class CommentService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
-		List<ChildCommentResponse> childCommentResponses = new ArrayList<>();
-		findChildComments(articleId).stream()
-			.forEach((childComment) -> childCommentResponses.add(new ChildCommentResponse(
-				childComment,
-				childComment.getMember() == member)));
+		List<ChildCommentResponse> childCommentResponses = findChildComments(articleId).stream()
+			.map((childComment) -> new ChildCommentResponse(childComment, childComment.getMember() == member))
+			.toList();
 
 		return DataResponse.ok(childCommentResponses);
 	}

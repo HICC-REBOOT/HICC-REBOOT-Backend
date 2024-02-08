@@ -15,6 +15,7 @@ public class ParentCommentResponse {
 
 	private final Long articleId;
 	private final Long commentId;
+	private final Boolean isDeleted;
 	private final String name;
 	private final CommentGrade grade;
 	private final Boolean isMine;
@@ -25,6 +26,7 @@ public class ParentCommentResponse {
 	public ParentCommentResponse(Comment comment, Boolean isMine) {
 		this.articleId = comment.getArticle().getId();
 		this.commentId = comment.getId();
+		this.isDeleted = comment.getIsDeleted();
 		this.name = comment.getMemberName();
 		this.grade = comment.getCommentGrade();
 		this.isMine = isMine;

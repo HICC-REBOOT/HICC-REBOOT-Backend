@@ -35,6 +35,9 @@ public class Comment {
 	private Long parentCommentId;
 
 	@Column(nullable = false)
+	private Boolean isDeleted;
+
+	@Column(nullable = false)
 	private LocalDateTime date;
 
 	@ManyToOne
@@ -56,10 +59,11 @@ public class Comment {
 	private String content;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private Comment(Long parentCommentId, LocalDateTime date, Member member, String memberName,
+	private Comment(Long parentCommentId, Boolean isDeleted, LocalDateTime date, Member member, String memberName,
 		CommentGrade commentGrade, Article article,
 		String content) {
 		this.parentCommentId = parentCommentId;
+		this.isDeleted = isDeleted;
 		this.date = date;
 		this.member = member;
 		this.memberName = memberName;
@@ -72,6 +76,7 @@ public class Comment {
 		String content) {
 		return Comment.builder()
 			.parentCommentId(-1L)
+			.isDeleted(false)
 			.member(member)
 			.memberName(member.getName())
 			.commentGrade(commentGrade)
@@ -85,6 +90,7 @@ public class Comment {
 		Article article, String content) {
 		return Comment.builder()
 			.parentCommentId(parentCommentId)
+			.isDeleted(false)
 			.member(member)
 			.memberName(member.getName())
 			.commentGrade(commentGrade)
@@ -102,12 +108,14 @@ public class Comment {
 	public void deleteCommentSoftly() {
 		this.member = null;
 		this.memberName = DELETED_MEMBER_NAME;
+		this.isDeleted = true;
 		commentGrade = CommentGrade.NORMAL;
 	}
 
 	public void deleteCommentSoftlyWithContent() {
 		this.member = null;
 		this.memberName = DELETED_MEMBER_NAME;
+		this.isDeleted = true;
 		commentGrade = CommentGrade.NORMAL;
 		content = BLANK_CONTENT;
 	}
