@@ -21,12 +21,12 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
 	List<Article> findAllByMember(Member member);
 
-	@Query("select a from Article a where a.member.name like concat('%', :name, '%') and a.boardType=:boardType and a.articleGrade=:articleGrade")
+	@Query("select a from Article a where a.memberName like concat('%', :name, '%') and a.boardType=:boardType and a.articleGrade=:articleGrade")
 	Page<Article> findAllByMemberNameAndBoardTypeAndArticleGrade(String name, BoardType boardType,
 		ArticleGrade articleGrade,
 		Pageable pageable);
 
-	@Query("select a from Article a where a.member.name like concat('%', :name, '%') and a.boardType=:boardType")
+	@Query("select a from Article a where a.memberName like concat('%', :name, '%') and a.boardType=:boardType")
 	Page<Article> findAllByMemberNameAndBoardType(String name, BoardType boardType, Pageable pageable);
 
 	Page<Article> findAllByMember(Member member, Pageable pageable);
