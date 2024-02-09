@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import hiccreboot.backend.common.exception.EmailMismatchException;
+import hiccreboot.backend.common.exception.MemberNotFoundException;
+import hiccreboot.backend.domain.Member;
 import hiccreboot.backend.domain.PasswordReset;
 import hiccreboot.backend.repository.PasswordResetRepository;
 import hiccreboot.backend.repository.member.MemberRepository;
@@ -36,15 +39,24 @@ public class EmailService {
 
 	public void sendNonce(String studentNumber, String email) {
 		memberRepository.findByStudentNumber(studentNumber)
-			.filter(member -> member.getEmail().equals(email))
-			.ifPresent(member -> {
+			.filter(member -> validateEmail(member, email))
+			.ifPresentOrElse(member -> {
 				String nonce = makeTempNumber();
 
 				MimeMessage mail = createEmail(member.getEmail(), nonce);
 
 				passwordResetRepository.save(PasswordReset.create(member, nonce));
 				javaMailSender.send(mail);
+			}, () -> {
+				throw MemberNotFoundException.EXCEPTION;
 			});
+	}
+
+	private boolean validateEmail(Member member, String email) {
+		if (member.getEmail().equals(email)) {
+			return true;
+		}
+		throw EmailMismatchException.EXCEPTION;
 	}
 
 	private MimeMessage createEmail(String receiver, String reissuedPassword) {
