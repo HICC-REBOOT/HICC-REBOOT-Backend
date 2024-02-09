@@ -162,7 +162,7 @@ public class MemberService {
 	private Sort getSort(String sortBy) {
 		String uppercaseSortBy = sortBy.toUpperCase();
 		if (uppercaseSortBy.equals("DEPARTMENT")) {
-			return Sort.by("department");
+			return Sort.by("department.name");
 		} else if (uppercaseSortBy.equals("NAME")) {
 			return Sort.by("name");
 		} else {
