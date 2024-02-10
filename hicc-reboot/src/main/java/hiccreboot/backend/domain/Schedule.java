@@ -71,5 +71,13 @@ public class Schedule {
     public void updateScheduleType(ScheduleType scheduleType) {
         this.scheduleType = scheduleType;
     }
+
+    public void updateStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public void updateEndDateTime(LocalDateTime endDateTime) {
+        this.endDateTime = endDateTime;
+    }
 }
 
