@@ -36,6 +36,8 @@ public class EmailService {
 	private final MimeMessageHelper helper;
 
 	private static final String SUBJECT = "HICC password reissue";
+	private static final String NONCE = "NONCE";
+	private static final String PASSWORD_EMAIL_TEMPLATE = "index";
 
 	public void sendNonce(String studentNumber, String email) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
@@ -62,8 +64,8 @@ public class EmailService {
 			helper.setSubject(SUBJECT);
 
 			Context context = new Context();
-			context.setVariable("nonce", reissuedPassword);
-			String html = springTemplateEngine.process("index", context);
+			context.setVariable(NONCE, reissuedPassword);
+			String html = springTemplateEngine.process(PASSWORD_EMAIL_TEMPLATE, context);
 			helper.setText(html, true);
 
 			return helper.getMimeMessage();
