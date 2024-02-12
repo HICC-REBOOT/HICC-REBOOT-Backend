@@ -18,7 +18,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
 		ErrorResponse errorResponse = ErrorResponse.fromErrorCode(GlobalErrorCode.ACCESS_DENIED,
 			request.getRequestURI());
-
+		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		ResponseWriter.writeResponse(response, errorResponse);
 	}
 
