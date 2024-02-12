@@ -36,7 +36,7 @@ public class EmailService {
 	private final MimeMessageHelper helper;
 
 	private static final String SUBJECT = "HICC password reissue";
-	private static final String NONCE = "NONCE";
+	private static final String NONCE = "nonce";
 	private static final String PASSWORD_EMAIL_TEMPLATE = "index";
 
 	public void sendNonce(String studentNumber, String email) {
