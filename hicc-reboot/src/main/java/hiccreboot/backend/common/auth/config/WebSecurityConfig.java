@@ -46,6 +46,7 @@ public class WebSecurityConfig {
 
 	private final LoginSuccessHandler loginSuccessHandler;
 	private final LoginFailureHandler loginFailureHandler;
+	private final CustomAccessDeniedHandler accessDeniedHandler;
 
 	private static final String PRESIDENT = "PRESIDENT";
 	private static final String[] PRESIDENT_AND_EXECUTIVE = new String[] {"PRESIDENT", "EXECUTIVE"};
@@ -88,6 +89,8 @@ public class WebSecurityConfig {
 				.deleteCookies())
 			.addFilterAfter(jwtAuthenticationFilter(), LogoutFilter.class)
 			.addFilterAfter(studentNumberPasswordAuthenticationFilter(), JwtAuthenticationFilter.class)
+			.exceptionHandling(
+				exceptionHandlingConfigurer -> exceptionHandlingConfigurer.accessDeniedHandler(accessDeniedHandler))
 			.build();
 	}
 
