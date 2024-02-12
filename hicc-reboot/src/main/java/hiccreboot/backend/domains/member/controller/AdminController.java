@@ -57,6 +57,14 @@ public class AdminController {
 		return adminService.findMembers(page, size, sortBy, searchName);
 	}
 
+	@GetMapping("/president/members")
+	public DataResponse<Page<MemberResponse>> findMembersByPresident(@RequestParam(value = "page") int page,
+		@RequestParam(value = "size") int size,
+		@RequestParam(value = "sort", defaultValue = "grade") String sortBy,
+		@RequestParam(value = "search", defaultValue = "", required = false) String searchName) {
+		return adminService.findMembers(page, size, sortBy, searchName);
+	}
+
 	@PatchMapping("/president/members/{member-id}")
 	public BaseResponse modifyGrade(@PathVariable(value = "member-id") Long memberId,
 		@Valid @RequestBody ModifyGradeRequest request, HttpServletRequest servletRequest) {
