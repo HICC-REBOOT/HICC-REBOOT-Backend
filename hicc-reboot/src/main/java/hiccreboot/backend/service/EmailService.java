@@ -38,18 +38,15 @@ public class EmailService {
 	private static final String SUBJECT = "HICC password reissue";
 
 	public void sendNonce(String studentNumber, String email) {
-		memberRepository.findByStudentNumber(studentNumber)
-			.filter(member -> validateEmail(member, email))
-			.ifPresentOrElse(member -> {
-				String nonce = makeTempNumber();
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.filter(targetMember -> validateEmail(targetMember, email))
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
-				MimeMessage mail = createEmail(member.getEmail(), nonce);
+		String nonce = makeTempNumber();
+		MimeMessage mail = createEmail(member.getEmail(), nonce);
 
-				passwordResetRepository.save(PasswordReset.create(member, nonce));
-				javaMailSender.send(mail);
-			}, () -> {
-				throw MemberNotFoundException.EXCEPTION;
-			});
+		passwordResetRepository.save(PasswordReset.create(member, nonce));
+		javaMailSender.send(mail);
 	}
 
 	private boolean validateEmail(Member member, String email) {
