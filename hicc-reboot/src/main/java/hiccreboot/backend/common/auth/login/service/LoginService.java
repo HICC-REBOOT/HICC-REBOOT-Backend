@@ -7,8 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import hiccreboot.backend.common.exception.MemberNotFoundException;
-import hiccreboot.backend.domain.Member;
-import hiccreboot.backend.repository.member.MemberRepository;
+import hiccreboot.backend.domains.member.domain.Member;
+import hiccreboot.backend.domains.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
