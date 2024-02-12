@@ -5,13 +5,13 @@ import static hiccreboot.backend.common.consts.JwtConstants.*;
 import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import hiccreboot.backend.common.auth.jwt.dto.AccessTokenAndRefreshTokenResponse;
 import hiccreboot.backend.common.auth.jwt.dto.AccessTokenResponse;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
+import hiccreboot.backend.common.properties.JwtProperties;
 import hiccreboot.backend.common.util.ResponseWriter;
 import hiccreboot.backend.domains.auth.domain.RefreshToken;
 import hiccreboot.backend.domains.auth.repository.RefreshTokenRepository;
@@ -31,47 +31,30 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TokenProviderImpl implements TokenProvider {
 
-	@Value("${jwt.issuer}")
-	private String issuer;
-
-	@Value("${jwt.secret}")
-	private String secretKey;
-
-	@Value("${jwt.access.expiration}")
-	private Long accessTokenExpirationPeriod;
-
-	@Value("${jwt.refresh.expiration}")
-	private Long refreshTokenExpirationPeriod;
-
-	@Value("${jwt.access.header}")
-	private String accessHeader;
-
-	@Value("${jwt.refresh.header}")
-	private String refreshHeader;
-
 	private final MemberRepository memberRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
+	private final JwtProperties jwtProperties;
 
 	@Override
 	public String createAccessToken(String studentNumber) {
 		Date now = new Date();
-		Date expiration = new Date(now.getTime() + accessTokenExpirationPeriod);
+		Date expiration = new Date(now.getTime() + jwtProperties.getAccess().getExpiration());
 
 		return Jwts.builder()
 			.setHeaderParam(Header.TYPE, Header.JWT_TYPE)
 			.setSubject(ACCESS_TOKEN_SUBJECT)
 			.setIssuedAt(now)
 			.setExpiration(expiration)
-			.setIssuer(issuer)
+			.setIssuer(jwtProperties.getIssuer())
 			.claim(STUDENT_NUMBER, studentNumber)
-			.signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+			.signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret().getBytes())
 			.compact();
 	}
 
 	@Override
 	public String createRefreshToken(String studentNumber) {
 		Date now = new Date();
-		Date expiration = new Date(now.getTime() + refreshTokenExpirationPeriod);
+		Date expiration = new Date(now.getTime() + jwtProperties.getRefresh().getExpiration());
 
 		Member member = getMemberByStudentNumber(studentNumber);
 
@@ -80,8 +63,8 @@ public class TokenProviderImpl implements TokenProvider {
 			.setSubject(REFRESH_TOKEN_SUBJECT)
 			.setIssuedAt(now)
 			.setExpiration(expiration)
-			.setIssuer(issuer)
-			.signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+			.setIssuer(jwtProperties.getIssuer())
+			.signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret().getBytes())
 			.compact();
 
 		return refreshTokenRepository.save(RefreshToken.createRefreshToken(member, issuedRefreshToken)).getToken();
@@ -120,14 +103,14 @@ public class TokenProviderImpl implements TokenProvider {
 
 	@Override
 	public Optional<String> extractAccessToken(HttpServletRequest request) {
-		return Optional.ofNullable(request.getHeader(accessHeader))
+		return Optional.ofNullable(request.getHeader(jwtProperties.getAccess().getHeader()))
 			.filter(accessToken -> accessToken.startsWith(BEARER))
 			.map(accessToken -> accessToken.replace(BEARER, ""));
 	}
 
 	@Override
 	public Optional<String> extractRefreshToken(HttpServletRequest request) {
-		return Optional.ofNullable(request.getHeader(refreshHeader))
+		return Optional.ofNullable(request.getHeader(jwtProperties.getRefresh().getHeader()))
 			.filter(refreshToken -> refreshToken.startsWith(BEARER))
 			.map(refreshToken -> refreshToken.replace(BEARER, ""));
 	}
@@ -150,12 +133,12 @@ public class TokenProviderImpl implements TokenProvider {
 
 	@Override
 	public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-		response.setHeader(accessHeader, accessToken);
+		response.setHeader(jwtProperties.getAccess().getHeader(), accessToken);
 	}
 
 	@Override
 	public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-		response.setHeader(refreshHeader, refreshToken);
+		response.setHeader(jwtProperties.getRefresh().getHeader(), refreshToken);
 	}
 
 	@Override
@@ -189,7 +172,7 @@ public class TokenProviderImpl implements TokenProvider {
 
 	private Claims getClaims(String token) {
 		return Jwts.parser()
-			.setSigningKey(secretKey.getBytes())
+			.setSigningKey(jwtProperties.getSecret().getBytes())
 			.parseClaimsJws(token)
 			.getBody();
 	}
