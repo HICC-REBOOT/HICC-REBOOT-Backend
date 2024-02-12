@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
-import hiccreboot.backend.domain.Member;
-import hiccreboot.backend.domain.RefreshToken;
-import hiccreboot.backend.repository.member.MemberRepository;
-import hiccreboot.backend.repository.refreshToken.RefreshTokenRepository;
+import hiccreboot.backend.domains.auth.domain.RefreshToken;
+import hiccreboot.backend.domains.auth.repository.RefreshTokenRepository;
+import hiccreboot.backend.domains.member.domain.Member;
+import hiccreboot.backend.domains.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
 		tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 		tokenProvider.disableRefreshToken(studentNumber);
-		
+
 		RefreshToken token = RefreshToken.createRefreshToken(findMemberByStudentNumber(studentNumber),
 			refreshToken);
 

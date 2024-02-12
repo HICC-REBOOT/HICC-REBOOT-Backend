@@ -29,8 +29,8 @@ import hiccreboot.backend.common.auth.login.filter.StudentNumberPasswordAuthenti
 import hiccreboot.backend.common.auth.login.handler.LoginFailureHandler;
 import hiccreboot.backend.common.auth.login.handler.LoginSuccessHandler;
 import hiccreboot.backend.common.auth.login.service.LoginService;
-import hiccreboot.backend.repository.member.MemberRepository;
-import hiccreboot.backend.repository.refreshToken.RefreshTokenRepository;
+import hiccreboot.backend.domains.auth.repository.RefreshTokenRepository;
+import hiccreboot.backend.domains.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @EnableWebSecurity
