@@ -2,6 +2,7 @@ package hiccreboot.backend.domains.calendar.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -35,7 +36,9 @@ public class CalendarService {
 	private final MemberRepository memberRepository;
 
 	public DataResponse<List<ScheduleResponse>> makeMonthSchedules(int year, int month) {
-		List<ScheduleResponse> scheduleResponses = scheduleRepository.findAllByYearAndMonth(year, month).stream()
+		List<ScheduleResponse> scheduleResponses = scheduleRepository.findAllByYearAndMonth(year, month)
+			.stream()
+			.sorted(Comparator.comparing(Schedule::getStartDateTime))
 			.map(ScheduleResponse::create)
 			.toList();
 
@@ -45,6 +48,7 @@ public class CalendarService {
 	public DataResponse<List<ScheduleDateResponse>> findScheduleByDate(int year, int month, int day) {
 		List<ScheduleDateResponse> result = scheduleDateRepository.findAllByYearAndMonthAndDayOfMonth(year, month, day)
 			.stream()
+			.sorted(Comparator.comparing(scheduleDate -> scheduleDate.getSchedule().getStartDateTime()))
 			.map(ScheduleDateResponse::create)
 			.toList();
 
