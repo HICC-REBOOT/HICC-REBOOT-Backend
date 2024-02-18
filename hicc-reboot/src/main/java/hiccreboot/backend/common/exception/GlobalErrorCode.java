@@ -13,6 +13,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
 	REFRESH_TOKEN_UNAUTHORIZED(UNAUTHORIZED, "REFRESH_TOKEN_UNAUTHORIZED_401_1", "리프레쉬 토큰 인증을 실패하였습니다."),
 	// 403
 	ACCESS_FORBIDDEN(FORBIDDEN, "FORBIDDEN_403_1", "접근 권한이 없습니다."),
+	ACCESS_DENIED(FORBIDDEN, "FORBIDDEN_403_2", "접근 권한이 없습니다."),
 	// 404
 	MEMBER_NOT_FOUND(NOT_FOUND, "MEMBER_NOT_FOUND_404_1", "회원을 찾을 수 없습니다."),
 	ARTICLE_NOT_FOUND(NOT_FOUND, "ARTICLE_NOT_FOUND_404_1", "글을 찾을 수 없습니다."),

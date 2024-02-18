@@ -43,6 +43,9 @@ public class WebSecurityConfig {
 
 	private final LoginSuccessHandler loginSuccessHandler;
 	private final LoginFailureHandler loginFailureHandler;
+	private final CustomAccessDeniedHandler accessDeniedHandler;
+
+	private final CorsConfigurationSource corsConfigurationSource;
 
 	private final CorsConfigurationSource corsConfigurationSource;
 
@@ -87,6 +90,8 @@ public class WebSecurityConfig {
 				.deleteCookies())
 			.addFilterAfter(jwtAuthenticationFilter(), LogoutFilter.class)
 			.addFilterAfter(studentNumberPasswordAuthenticationFilter(), JwtAuthenticationFilter.class)
+			.exceptionHandling(
+				exceptionHandlingConfigurer -> exceptionHandlingConfigurer.accessDeniedHandler(accessDeniedHandler))
 			.build();
 	}
 
