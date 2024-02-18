@@ -38,7 +38,7 @@ public class CalendarService {
 	public DataResponse<List<ScheduleResponse>> makeMonthSchedules(int year, int month) {
 		List<ScheduleResponse> scheduleResponses = scheduleRepository.findAllByYearAndMonth(year, month)
 			.stream()
-			.sorted(Comparator.comparing(Schedule::getStartDateTime))
+			.sorted(Comparator.comparing(schedule -> schedule.getStartDateTime().toLocalTime()))
 			.map(ScheduleResponse::create)
 			.toList();
 
@@ -48,7 +48,10 @@ public class CalendarService {
 	public DataResponse<List<ScheduleDateResponse>> findScheduleByDate(int year, int month, int day) {
 		List<ScheduleDateResponse> result = scheduleDateRepository.findAllByYearAndMonthAndDayOfMonth(year, month, day)
 			.stream()
-			.sorted(Comparator.comparing(scheduleDate -> scheduleDate.getSchedule().getStartDateTime()))
+			.sorted(Comparator.comparing(scheduleDate -> scheduleDate
+				.getSchedule()
+				.getStartDateTime()
+				.toLocalTime()))
 			.map(ScheduleDateResponse::create)
 			.toList();
 
