@@ -90,7 +90,7 @@ public class CalendarService {
 	}
 
 	@Transactional
-	public Schedule updateSchedule(String studentNumber, Long id, UpdateScheduleRequest updateScheduleRequest) {
+	public void updateSchedule(String studentNumber, Long id, UpdateScheduleRequest updateScheduleRequest) {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
@@ -109,9 +109,8 @@ public class CalendarService {
 		schedule.getScheduleDates().clear();
 		LocalDate startDate = updateScheduleRequest.getStartDateTime().toLocalDate();
 		LocalDate endDate = updateScheduleRequest.getEndDateTime().toLocalDate();
-		startDate.datesUntil(endDate.plusDays(1)).forEach(localDate -> ScheduleDate.create(localDate, schedule));
-
-		return schedule;
+		startDate.datesUntil(endDate.plusDays(1))
+			.forEach(localDate -> ScheduleDate.create(localDate, schedule));
 	}
 
 	private void checkCalendarAuthority(Grade grade) {
