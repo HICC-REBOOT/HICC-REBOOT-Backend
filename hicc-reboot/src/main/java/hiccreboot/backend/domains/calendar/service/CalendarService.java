@@ -59,7 +59,8 @@ public class CalendarService {
 	}
 
 	public DataResponse<ScheduleResponse> makeSchedule(Long id) {
-		Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
+		Schedule schedule = scheduleRepository.findById(id)
+			.orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
 		return DataResponse.ok(
 			ScheduleResponse.create(schedule));
@@ -77,7 +78,8 @@ public class CalendarService {
 
 		LocalDate startDate = postScheduleRequest.getStartDateTime().toLocalDate();
 		LocalDate endDate = postScheduleRequest.getEndDateTime().toLocalDate();
-		startDate.datesUntil(endDate.plusDays(1)).forEach(localDate -> ScheduleDate.create(localDate, schedule));
+		startDate.datesUntil(endDate.plusDays(1))
+			.forEach(localDate -> ScheduleDate.create(localDate, schedule));
 
 		scheduleRepository.save(schedule);
 	}
@@ -100,7 +102,8 @@ public class CalendarService {
 		checkCalendarAuthority(member.getGrade());
 		validateDates(updateScheduleRequest.getStartDateTime(), updateScheduleRequest.getEndDateTime());
 
-		Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
+		Schedule schedule = scheduleRepository.findById(id)
+			.orElseThrow(() -> ScheduleNotFoundException.EXCEPTION);
 
 		//schedule 변경
 		schedule.updateName(updateScheduleRequest.getName());
