@@ -127,10 +127,9 @@ public class CalendarService {
 	}
 
 	private void validateDates(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-		if (!endDateTime.isBefore(startDateTime)) {
-			return;
+		if (startDateTime.isAfter(endDateTime)) {
+			throw DateTimePreconditionFailed.EXCEPTION;
 		}
-		throw DateTimePreconditionFailed.EXCEPTION;
 	}
 
 }
