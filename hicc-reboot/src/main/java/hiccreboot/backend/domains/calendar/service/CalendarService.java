@@ -123,7 +123,7 @@ public class CalendarService {
 	}
 
 	private void validateDates(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-		if (endDateTime.compareTo(startDateTime) >= 0) {
+		if (!endDateTime.isBefore(startDateTime)) {
 			return;
 		}
 		throw DateTimePreconditionFailed.EXCEPTION;
