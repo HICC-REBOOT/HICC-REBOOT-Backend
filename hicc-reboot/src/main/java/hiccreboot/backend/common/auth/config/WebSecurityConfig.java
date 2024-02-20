@@ -47,8 +47,6 @@ public class WebSecurityConfig {
 
 	private final CorsConfigurationSource corsConfigurationSource;
 
-	private final CorsConfigurationSource corsConfigurationSource;
-
 	private static final String PRESIDENT = "PRESIDENT";
 	private static final String[] PRESIDENT_AND_EXECUTIVE = new String[] {"PRESIDENT", "EXECUTIVE"};
 
