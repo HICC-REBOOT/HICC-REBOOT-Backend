@@ -18,7 +18,7 @@ public class SignUpRequest {
 	private String studentNumber;
 
 	@NotNull
-	@Pattern(regexp = "[a-zA-Z가-힣]{1,6}", message = "이름을 확인해주세요.")
+	@Pattern(regexp = "[가-힣]{2,7}", message = "이름을 확인해주세요.")
 	private String name;
 
 	@NotNull
