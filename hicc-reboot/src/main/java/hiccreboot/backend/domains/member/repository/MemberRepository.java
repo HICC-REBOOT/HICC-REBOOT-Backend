@@ -24,4 +24,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 		+ "from Member m "
 		+ "where ( (m.name like concat('%',:name, '%')) AND (m.grade <> 'APPLICANT'))")
 	Page<Member> findAllByNameWithoutApplicant(@Param("name") String name, Pageable pageable);
+
+	Long countByGradeNot(Grade grade);
 }
