@@ -20,6 +20,7 @@ import hiccreboot.backend.domains.article.dto.request.ArticleRequest;
 import hiccreboot.backend.domains.article.dto.response.ArticleResponse;
 import hiccreboot.backend.domains.article.service.ArticleService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -52,7 +53,8 @@ public class ArticleController {
 	}
 
 	@PostMapping
-	public BaseResponse addArticle(@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
+	public BaseResponse addArticle(@Valid @RequestBody ArticleRequest articleRequest,
+		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
 		articleService.saveArticle(studentNumber, articleRequest);
@@ -63,7 +65,7 @@ public class ArticleController {
 	@PatchMapping("/{article-id}")
 	public BaseResponse updateArticle(
 		@PathVariable("article-id") Long id,
-		@RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
+		@Valid @RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 		articleService.updateArticle(id, articleRequest, studentNumber);
 
