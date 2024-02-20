@@ -27,7 +27,7 @@ public class MainService {
 	private final ArticleService articleService;
 
 	public Long findMemberCount() {
-		return memberRepository.count();
+		return memberRepository.countByGradeNot(Grade.APPLICANT);
 	}
 
 	public DataResponse<List<LatestNewsResponse>> makeLatestNews(int pageNumber, int pageSize) {
