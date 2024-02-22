@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum GlobalErrorCode implements BaseErrorCode {
 
+	// 400
+	MESSAGE_NOT_READABLE(BAD_REQUEST, "MESSAGE_NOT_READABLE_400_1", "잘못된 요청입니다."),
 	// 401
 	ACCESS_TOKEN_UNAUTHORIZED(UNAUTHORIZED, "ACCESS_TOKEN_UNAUTHORIZED_401_1", "액세스 토큰 인증을 실패하였습니다."),
 	REFRESH_TOKEN_UNAUTHORIZED(UNAUTHORIZED, "REFRESH_TOKEN_UNAUTHORIZED_401_1", "리프레쉬 토큰 인증을 실패하였습니다."),
