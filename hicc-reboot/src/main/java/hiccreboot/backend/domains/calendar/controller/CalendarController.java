@@ -21,6 +21,7 @@ import hiccreboot.backend.domains.calendar.dto.response.ScheduleDateResponse;
 import hiccreboot.backend.domains.calendar.dto.response.ScheduleResponse;
 import hiccreboot.backend.domains.calendar.service.CalendarService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -49,7 +50,7 @@ public class CalendarController {
 	}
 
 	@PostMapping("/schedule")
-	public BaseResponse addSchedule(@RequestBody PostScheduleRequest postScheduleRequest,
+	public BaseResponse addSchedule(@Valid @RequestBody PostScheduleRequest postScheduleRequest,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
@@ -69,7 +70,7 @@ public class CalendarController {
 
 	@PatchMapping("schedule/{schedule-id}")
 	public BaseResponse updateSchedule(@PathVariable("schedule-id") Long id,
-		@RequestBody UpdateScheduleRequest updateScheduleRequest, HttpServletRequest httpServletRequest) {
+		@Valid @RequestBody UpdateScheduleRequest updateScheduleRequest, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 
 		calendarService.updateSchedule(studentNumber, id, updateScheduleRequest);

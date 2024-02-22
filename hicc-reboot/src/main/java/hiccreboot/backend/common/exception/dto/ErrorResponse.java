@@ -48,4 +48,8 @@ public class ErrorResponse extends BaseResponse {
 			.path(path)
 			.build();
 	}
+
+	public static ErrorResponse create(HttpStatusCode status, String message, String path) {
+		return new ErrorResponse(status, message, path);
+	}
 }

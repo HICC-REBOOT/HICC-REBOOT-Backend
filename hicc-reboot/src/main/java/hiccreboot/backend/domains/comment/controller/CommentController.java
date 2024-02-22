@@ -18,6 +18,7 @@ import hiccreboot.backend.domains.comment.dto.response.ChildCommentResponse;
 import hiccreboot.backend.domains.comment.dto.response.ParentCommentResponse;
 import hiccreboot.backend.domains.comment.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -45,7 +46,7 @@ public class CommentController {
 	}
 
 	@PostMapping
-	public BaseResponse addComment(@RequestBody PostCommentRequest postCommentRequest,
+	public BaseResponse addComment(@Valid @RequestBody PostCommentRequest postCommentRequest,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 		commentService.saveComment(studentNumber, postCommentRequest);

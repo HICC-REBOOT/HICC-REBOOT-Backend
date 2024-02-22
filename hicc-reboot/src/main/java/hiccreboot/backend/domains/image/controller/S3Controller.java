@@ -9,6 +9,7 @@ import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.domains.image.dto.request.SimpleImageRequest;
 import hiccreboot.backend.domains.image.dto.response.ImageResponse;
 import hiccreboot.backend.domains.image.service.S3Service;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,7 +20,7 @@ public class S3Controller {
 	private final S3Service s3Service;
 
 	@PostMapping
-	public DataResponse<ImageResponse> postPreSignedURLs(@RequestBody SimpleImageRequest simpleImageRequest) {
+	public DataResponse<ImageResponse> postPreSignedURLs(@Valid @RequestBody SimpleImageRequest simpleImageRequest) {
 		return s3Service.makePreSignedUrls(simpleImageRequest);
 	}
 }
