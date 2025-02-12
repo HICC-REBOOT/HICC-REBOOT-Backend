@@ -16,9 +16,11 @@ import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.dto.ErrorResponse;
 import hiccreboot.backend.common.mail.service.EmailService;
 import hiccreboot.backend.domains.auth.dto.request.CreateNonceRequest;
+import hiccreboot.backend.domains.auth.dto.request.LoginRequest;
 import hiccreboot.backend.domains.auth.dto.request.ModifyPasswordRequest;
 import hiccreboot.backend.domains.auth.dto.request.SignUpRequest;
 import hiccreboot.backend.domains.auth.dto.request.StudentNumberCheckRequest;
+import hiccreboot.backend.domains.auth.dto.response.LoginResponse;
 import hiccreboot.backend.domains.auth.service.AuthService;
 import hiccreboot.backend.domains.department.dto.response.DepartmentResponse;
 import hiccreboot.backend.domains.department.service.DepartmentService;
@@ -44,6 +46,14 @@ public class AuthController {
 	private final AuthService authService;
 	private final EmailService emailService;
 	private final TokenProvider tokenProvider;
+
+	@PostMapping("/login")
+	@Operation(summary = "로그인")
+	public DataResponse<LoginResponse> login(@RequestBody LoginRequest request) {
+		// swagger 문서를 위한 가짜 코드
+
+		return DataResponse.ok(new LoginResponse("", ""));
+	}
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입")
