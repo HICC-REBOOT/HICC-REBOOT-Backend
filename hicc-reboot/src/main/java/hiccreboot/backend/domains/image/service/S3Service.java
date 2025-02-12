@@ -46,7 +46,9 @@ public class S3Service {
 			key = fileNameExtension + "/" + key;
 		}
 
-		return DataResponse.ok(ImageResponse.create(simpleImageRequest.getFileName(), key, getPreSignedUrl(key)));
+		String url = getUrl(key);
+
+		return DataResponse.ok(ImageResponse.create(simpleImageRequest.getFileName(), key, getPreSignedUrl(key), url));
 	}
 
 	private void checkFileNameExtension(String fileNameExtension) {
