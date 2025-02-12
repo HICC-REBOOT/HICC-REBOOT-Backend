@@ -1,8 +1,6 @@
 package hiccreboot.backend.domains.article.service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -160,21 +158,7 @@ public class ArticleService {
 		article.updateContent(articleRequest.getContent());
 		article.updateBoardType(articleRequest.getBoard());
 
-		// image 변경
-		List<String> oldKeys = article.getImages().stream()
-			.map(image -> image.getKey()).collect(Collectors.toList());
-		List<String> newKeys = articleRequest.getImages().stream()
-			.map(image -> image.getKey()).collect(Collectors.toList());
-
-		List<String> deleteKeys = oldKeys.stream()
-			.filter(oldKey -> !newKeys.contains(oldKey))
-			.collect(Collectors.toList());
-
-		//s3 image 삭제
-		deleteKeys.stream()
-			.forEach(key -> s3Service.deleteImage(key));
-
-		article.getImages().clear();
+		// 기존 이미지 중에 게시글에서 제외된 것은 삭제하지 않고, 오직 추가된 것만 추가로 저장한다. 제외된 것은 게시글 삭제시에만 전부 삭제된다.
 		articleRequest.getImages().stream()
 			.forEach(image -> Image.createImage(image.getFileName(), image.getFileNameExtension(), image.getKey(),
 				s3Service.getUrl(image.getKey()), article));
