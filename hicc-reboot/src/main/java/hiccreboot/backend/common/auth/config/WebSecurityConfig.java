@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +47,7 @@ public class WebSecurityConfig {
 	private final CustomAccessDeniedHandler accessDeniedHandler;
 
 	private final CorsConfigurationSource corsConfigurationSource;
+	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	private static final String PRESIDENT = "PRESIDENT";
 	private static final String[] PRESIDENT_AND_EXECUTIVE = new String[] {"PRESIDENT", "EXECUTIVE"};
@@ -59,7 +61,10 @@ public class WebSecurityConfig {
 		"/api/main/**",
 		"/api/auth/password/**",
 		"/swagger-ui/**",
-		"/api-docs/**"
+		"/api-docs/**",
+		"/swagger-ui.html",
+		"/api-docs",
+		"/v3/api-docs/**"
 	};
 
 	@Bean
@@ -100,7 +105,7 @@ public class WebSecurityConfig {
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(tokenProvider, memberRepository, refreshTokenRepository);
+		return new JwtAuthenticationFilter(tokenProvider, memberRepository, refreshTokenRepository,pathMatcher);
 	}
 
 	@Bean

@@ -1,6 +1,7 @@
 package hiccreboot.backend.common.auth.jwt.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,6 +11,7 @@ import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
@@ -34,13 +36,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String LOGIN_URL = "/api/auth/login";
 	private static final String REFRESH_URL = "/api/auth/refresh";
-	private static final List<String> ALLOWED_URLS = List.of("/api/auth/sign-up", "/api/auth/duplicate",
-		"/api/auth/departments", "/api/auth/password", "/api/main");
+	private static final List<String> ALLOWED_URLS = List.of(
+		"/api/auth/sign-up",
+		"/api/auth/duplicate",
+		"/api/auth/departments",
+		"/api/auth/password",
+		"/api/main",
+		"/swagger-ui/**",
+		"/api-docs/**",
+		"/swagger-ui.html",
+		"/api-docs",
+		"/v3/api-docs/**"
+		);
 
 	private final TokenProvider tokenProvider;
 	private final MemberRepository memberRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+	private final AntPathMatcher pathMatcher;
+
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		String path = request.getRequestURI();
+
+		boolean result = Arrays.stream(ALLOWED_URLS.toArray())
+			.anyMatch(permitUrl -> pathMatcher.match((String)permitUrl, path));
+
+		log.info("JwtAuthenticationFilter.shouldNotFilter({}) : {}", path, result);
+
+		return result;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
