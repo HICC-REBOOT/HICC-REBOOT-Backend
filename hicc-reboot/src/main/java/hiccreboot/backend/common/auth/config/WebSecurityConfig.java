@@ -27,6 +27,7 @@ import hiccreboot.backend.common.auth.login.filter.StudentNumberPasswordAuthenti
 import hiccreboot.backend.common.auth.login.handler.LoginFailureHandler;
 import hiccreboot.backend.common.auth.login.handler.LoginSuccessHandler;
 import hiccreboot.backend.common.auth.login.service.LoginService;
+import hiccreboot.backend.common.properties.SecurityProperties;
 import hiccreboot.backend.domains.auth.repository.RefreshTokenRepository;
 import hiccreboot.backend.domains.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,36 +37,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
+	private final SecurityProperties securityProperties;
 	private final TokenProvider tokenProvider;
 	private final MemberRepository memberRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final ObjectMapper objectMapper;
 	private final LoginService loginService;
-
 	private final LoginSuccessHandler loginSuccessHandler;
 	private final LoginFailureHandler loginFailureHandler;
 	private final CustomAccessDeniedHandler accessDeniedHandler;
-
 	private final CorsConfigurationSource corsConfigurationSource;
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	private static final String PRESIDENT = "PRESIDENT";
-	private static final String[] PRESIDENT_AND_EXECUTIVE = new String[] {"PRESIDENT", "EXECUTIVE"};
-
-	private static final String[] ALLOWED_PATTERN = new String[] {
-		"/api/auth/login/**",
-		"/api/auth/sign-up/**",
-		"/api/auth/duplicate/**",
-		"/api/auth/departments",
-		"/api/auth/logout/**",
-		"/api/main/**",
-		"/api/auth/password/**",
-		"/swagger-ui/**",
-		"/api-docs/**",
-		"/swagger-ui.html",
-		"/api-docs",
-		"/v3/api-docs/**"
-	};
+	private static final String[] PRESIDENT_AND_EXECUTIVE = {"PRESIDENT", "EXECUTIVE"};
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -76,7 +61,7 @@ public class WebSecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.cors(cors -> cors.configurationSource(corsConfigurationSource))
 			.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-				.requestMatchers(Stream.of(ALLOWED_PATTERN)
+				.requestMatchers(Stream.of(securityProperties.getPermitUrls())
 					.map(AntPathRequestMatcher::antMatcher)
 					.toArray(AntPathRequestMatcher[]::new))
 				.permitAll()
@@ -105,7 +90,7 @@ public class WebSecurityConfig {
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(tokenProvider, memberRepository, refreshTokenRepository,pathMatcher);
+		return new JwtAuthenticationFilter(securityProperties, tokenProvider, memberRepository, refreshTokenRepository,pathMatcher);
 	}
 
 	@Bean

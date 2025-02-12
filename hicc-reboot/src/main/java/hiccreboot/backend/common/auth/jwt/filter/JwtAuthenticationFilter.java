@@ -18,6 +18,7 @@ import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.exception.GlobalErrorCode;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.dto.ErrorResponse;
+import hiccreboot.backend.common.properties.SecurityProperties;
 import hiccreboot.backend.common.util.ResponseWriter;
 import hiccreboot.backend.domains.auth.domain.RefreshToken;
 import hiccreboot.backend.domains.auth.repository.RefreshTokenRepository;
@@ -36,19 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String LOGIN_URL = "/api/auth/login";
 	private static final String REFRESH_URL = "/api/auth/refresh";
-	private static final List<String> ALLOWED_URLS = List.of(
-		"/api/auth/sign-up",
-		"/api/auth/duplicate",
-		"/api/auth/departments",
-		"/api/auth/password",
-		"/api/main",
-		"/swagger-ui/**",
-		"/api-docs/**",
-		"/swagger-ui.html",
-		"/api-docs",
-		"/v3/api-docs/**"
-		);
 
+	private final SecurityProperties securityProperties;
 	private final TokenProvider tokenProvider;
 	private final MemberRepository memberRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
@@ -59,8 +49,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 		String path = request.getRequestURI();
 
-		boolean result = Arrays.stream(ALLOWED_URLS.toArray())
-			.anyMatch(permitUrl -> pathMatcher.match((String)permitUrl, path));
+		boolean result = Arrays.stream(securityProperties.getPermitUrls())
+			.anyMatch(permitUrl -> pathMatcher.match(permitUrl, path));
 
 		log.info("JwtAuthenticationFilter.shouldNotFilter({}) : {}", path, result);
 
@@ -95,15 +85,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (accessToken != null) {
 			checkAccessTokenAndAuthentication(response, accessToken);
 			filterChain.doFilter(request, response);
-		} else if (isAllowedUrl(request.getRequestURI())) {
-			filterChain.doFilter(request, response);
 		} else {
 			sendErrorResponse(request, response, GlobalErrorCode.ACCESS_TOKEN_UNAUTHORIZED);
 		}
-	}
-
-	private boolean isAllowedUrl(String uri) {
-		return ALLOWED_URLS.stream().anyMatch(uri::startsWith);
 	}
 
 	private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
