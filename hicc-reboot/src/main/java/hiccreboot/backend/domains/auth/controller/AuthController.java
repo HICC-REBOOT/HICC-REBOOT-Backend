@@ -70,7 +70,7 @@ public class AuthController {
 	}
 
 	@GetMapping("/info")
-	@Operation(summary = "헤더 사용자 정보 조회")
+	@Operation(summary = "사용자 정보 간단 조회(헤더용)")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "성공",
 			content = {@Content(schema = @Schema(implementation = DataResponse.class))}),
