@@ -12,7 +12,6 @@ import lombok.Getter;
 @Getter
 public class ArticleRequest {
 	@Valid
-	@NotNull
 	private List<ArticleImageRequest> images;
 	@NotNull
 	private BoardType board;
