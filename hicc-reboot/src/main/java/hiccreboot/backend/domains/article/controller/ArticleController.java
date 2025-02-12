@@ -19,6 +19,7 @@ import hiccreboot.backend.domains.article.domain.BoardType;
 import hiccreboot.backend.domains.article.dto.request.ArticleRequest;
 import hiccreboot.backend.domains.article.dto.response.ArticleResponse;
 import hiccreboot.backend.domains.article.service.ArticleService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class ArticleController {
 	private final TokenProvider tokenProvider;
 
 	@GetMapping
+	@Operation(summary = "게시글 목록 조회")
 	public BaseResponse searchArticleList(
 		@RequestParam(value = "page") int pageNumber,
 		@RequestParam(value = "size") int pageSize,
@@ -45,6 +47,7 @@ public class ArticleController {
 	}
 
 	@GetMapping("/{article-id}")
+	@Operation(summary = "게시글 상세 조회")
 	public DataResponse<ArticleResponse> searchArticle(@PathVariable("article-id") Long id,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest)
@@ -53,6 +56,7 @@ public class ArticleController {
 	}
 
 	@PostMapping
+	@Operation(summary = "게시글 작성")
 	public BaseResponse addArticle(@Valid @RequestBody ArticleRequest articleRequest,
 		HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
@@ -63,6 +67,7 @@ public class ArticleController {
 	}
 
 	@PatchMapping("/{article-id}")
+	@Operation(summary = "게시글 수정")
 	public BaseResponse updateArticle(
 		@PathVariable("article-id") Long id,
 		@Valid @RequestBody ArticleRequest articleRequest, HttpServletRequest httpServletRequest) {
@@ -73,6 +78,7 @@ public class ArticleController {
 	}
 
 	@DeleteMapping("/{article-id}")
+	@Operation(summary = "게시글 삭제")
 	public BaseResponse deleteArticle(@PathVariable("article-id") Long id, HttpServletRequest httpServletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(httpServletRequest).orElse(null);
 

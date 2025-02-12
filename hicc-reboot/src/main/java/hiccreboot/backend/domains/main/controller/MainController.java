@@ -42,6 +42,7 @@ public class MainController {
 	}
 
 	@GetMapping("/footer")
+	@Operation(summary = "푸터 정보", description = "푸터 정보를 반환하는 api")
 	public DataResponse<FooterResponse> footer() {
 		return mainService.footerResponse();
 	}

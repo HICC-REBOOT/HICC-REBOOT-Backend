@@ -84,11 +84,13 @@ public class AuthController {
 	}
 
 	@GetMapping("/departments")
+	@Operation(summary = "학과 목록 조회")
 	public DataResponse<List<DepartmentResponse>> findDepartments() {
 		return departmentService.findDepartments();
 	}
 
 	@PostMapping("/password/{student-number}")
+	@Operation(summary = "비밀번호 찾기")
 	public BaseResponse sendNonce(@PathVariable(value = "student-number") String studentNumber,
 		@Valid @RequestBody CreateNonceRequest request) {
 		emailService.sendNonce(studentNumber, request.getEmail());
@@ -97,6 +99,7 @@ public class AuthController {
 	}
 
 	@PatchMapping("/password/verify/{nonce}")
+	@Operation(summary = "비밀번호 재발급 코드 전송")
 	public BaseResponse verifyNonce(@PathVariable(value = "nonce") String nonce,
 		@Valid @RequestBody ModifyPasswordRequest request) {
 		authService.resetPassword(nonce, request.getPassword());
