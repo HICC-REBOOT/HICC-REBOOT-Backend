@@ -124,8 +124,8 @@ public class ArticleService {
 
 	@Transactional
 	public Article saveArticle(String studentNumber, ArticleRequest articleRequest) {
-		Member member = memberRepository.findByStudentNumber(studentNumber).orElseThrow(() ->
-			MemberNotFoundException.EXCEPTION);
+		Member member = memberRepository.findByStudentNumber(studentNumber)
+			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 
 		checkImageSize(articleRequest.getImages().size());
 

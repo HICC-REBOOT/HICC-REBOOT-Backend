@@ -39,7 +39,7 @@ public class Article {
     @Column(nullable = false)
     private String subject;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, length = 50000)
     private String content;
 
     @Enumerated(EnumType.STRING)
