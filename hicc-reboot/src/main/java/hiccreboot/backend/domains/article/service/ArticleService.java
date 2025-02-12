@@ -1,5 +1,6 @@
 package hiccreboot.backend.domains.article.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,15 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.AccessForbiddenException;
 import hiccreboot.backend.common.exception.ArticleNotFoundException;
+import hiccreboot.backend.common.exception.BoardTypeNotFoundException;
 import hiccreboot.backend.common.exception.ImageCountTooLarge;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domains.article.domain.Article;
 import hiccreboot.backend.domains.article.domain.ArticleGrade;
 import hiccreboot.backend.domains.article.domain.BoardType;
+import hiccreboot.backend.domains.article.domain.BoardTypeEntity;
 import hiccreboot.backend.domains.article.dto.request.ArticleRequest;
 import hiccreboot.backend.domains.article.dto.response.ArticleListResponse;
 import hiccreboot.backend.domains.article.dto.response.ArticleResponse;
+import hiccreboot.backend.domains.article.dto.response.FindBoardTypesResponse;
 import hiccreboot.backend.domains.article.repository.ArticleRepository;
+import hiccreboot.backend.domains.article.repository.BoardTypeRepository;
 import hiccreboot.backend.domains.image.domain.Image;
 import hiccreboot.backend.domains.image.service.S3Service;
 import hiccreboot.backend.domains.member.domain.Grade;
@@ -41,6 +46,7 @@ public class ArticleService {
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
 	private final S3Service s3Service;
+	private final BoardTypeRepository boardTypeRepository;
 
 	public Page<Article> findArticles(int pageNumber, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
@@ -202,5 +208,32 @@ public class ArticleService {
 		if (size > IMAGE_COUNT_LIMIT) {
 			throw ImageCountTooLarge.EXCEPTION;
 		}
+	}
+
+	// 게시판 목록 조회
+	public List<FindBoardTypesResponse> findBoardTypes() {
+		return boardTypeRepository.findAll()
+			.stream()
+			.map(FindBoardTypesResponse::from)
+			.toList();
+	}
+
+	// 게시판 목록 추가
+	@Transactional
+	public void createBoardType(String name) {
+		boardTypeRepository.save(new BoardTypeEntity(name));
+	}
+
+	@Transactional
+	public void deleteBoardType(Long boardTypeId) {
+		boardTypeRepository.deleteById(boardTypeId);
+	}
+
+	@Transactional
+	public void updateBoardType(Long boardTypeId, String name) {
+		BoardTypeEntity boardType = boardTypeRepository.findById(boardTypeId)
+			.orElseThrow(() -> BoardTypeNotFoundException.EXCEPTION);
+
+		boardType.updateName(name);
 	}
 }
