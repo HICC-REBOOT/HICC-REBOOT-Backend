@@ -9,32 +9,60 @@ import org.springframework.data.jpa.repository.Query;
 
 import hiccreboot.backend.domains.article.domain.Article;
 import hiccreboot.backend.domains.article.domain.ArticleGrade;
-import hiccreboot.backend.domains.article.domain.BoardType;
 import hiccreboot.backend.domains.member.domain.Member;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 	Page<Article> findAll(Pageable pageable);
 
-	Page<Article> findAllByBoardTypeAndArticleGrade(BoardType boardType, ArticleGrade articleGrade, Pageable pageable);
-
-	Page<Article> findAllByBoardType(BoardType boardType, Pageable pageable);
-
 	List<Article> findAllByMember(Member member);
-
-	@Query("select a from Article a where a.memberName like concat('%', :name, '%') and a.boardType=:boardType and a.articleGrade=:articleGrade")
-	Page<Article> findAllByMemberNameAndBoardTypeAndArticleGrade(String name, BoardType boardType,
-		ArticleGrade articleGrade,
-		Pageable pageable);
-
-	@Query("select a from Article a where a.memberName like concat('%', :name, '%') and a.boardType=:boardType")
-	Page<Article> findAllByMemberNameAndBoardType(String name, BoardType boardType, Pageable pageable);
 
 	Page<Article> findAllByMember(Member member, Pageable pageable);
 
-	Page<Article> findAllBySubjectContainingAndBoardTypeAndArticleGrade(String subject, BoardType boardType,
+	// 회원 이름으로 운영진 글 검색
+	@Query("select a from Article a where a.memberName like concat('%', :name, '%') and a.articleGrade=:articleGrade")
+	Page<Article> findAllByMemberNameAndArticleGrade(String name, ArticleGrade articleGrade, Pageable pageable);
+
+	// 회원 이름으로 글 검색
+	@Query("select a from Article a where a.memberName like concat('%', :name, '%')")
+	Page<Article> findAllByMemberName(String name, Pageable pageable);
+
+	// 회원 이름으로, 특정 게시판의 운영진 글 검색
+	@Query("select a from Article a where a.memberName like concat('%', :name, '%') and a.boardType.id=:boardTypeId and a.articleGrade=:articleGrade")
+	Page<Article> findAllByMemberNameAndBoardType_IdAndArticleGrade(
+		String name,
+		Long boardTypeId,
 		ArticleGrade articleGrade,
-		Pageable pageable);
+		Pageable pageable
+	);
 
-	Page<Article> findAllBySubjectContainingAndBoardType(String subject, BoardType boardType, Pageable pageable);
+	// 회원 이름으로, 특정 게시판의 글 검색
+	@Query("select a from Article a where a.memberName like concat('%', :search, '%') and a.boardType.id=:boardTypeId")
+	Page<Article> findAllByMemberNameAndBoardType_Id(String search, Long boardTypeId, Pageable pageable);
 
+	// 전체 게시판에서 이름으로 운영진 글 검색
+	Page<Article> findAllBySubjectContainingAndArticleGrade(
+		String subject,
+		ArticleGrade articleGrade,
+		Pageable pageable
+	);
+
+	// 특정 게시판에서 미름으로 글 검색
+	Page<Article> findAllBySubjectContainingAndBoardType_Id(String subject, Long boardTypeId, Pageable pageable);
+
+	// 특정 게시판에서 이름으로 운영진 글 검색
+	Page<Article> findAllBySubjectContainingAndBoardType_IdAndArticleGrade(
+		String subject,
+		Long boardTypeId,
+		ArticleGrade articleGrade,
+		Pageable pageable
+	);
+
+	// 전체 게시판에서 이름으로 글 검색
+	Page<Article> findAllBySubjectContaining(String subject, Pageable pageable);
+
+	Page<Article> findAllByArticleGrade(ArticleGrade articleGrade, Pageable pageable);
+
+	Page<Article> findAllByBoardType_IdAndArticleGrade(Long boardTypeId, ArticleGrade articleGrade, Pageable pageable);
+
+	Page<Article> findAllByBoardType_Id(Long boardTypeId, Pageable pageable);
 }

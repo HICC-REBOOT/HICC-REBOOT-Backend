@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import hiccreboot.backend.domains.article.domain.BoardTypeEntity;
 
 public interface BoardTypeRepository extends JpaRepository<BoardTypeEntity, Long> {
+	boolean existsByName(String name);
 }

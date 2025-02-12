@@ -2,7 +2,6 @@ package hiccreboot.backend.domains.article.dto.request;
 
 import java.util.List;
 
-import hiccreboot.backend.domains.article.domain.BoardType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +13,7 @@ public class ArticleRequest {
 	@Valid
 	private List<ArticleImageRequest> images;
 	@NotNull
-	private BoardType board;
+	private Long boardTypeId;
 	@NotBlank
 	private String subject;
 	@NotBlank

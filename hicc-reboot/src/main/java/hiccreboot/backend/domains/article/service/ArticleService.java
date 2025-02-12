@@ -1,6 +1,5 @@
 package hiccreboot.backend.domains.article.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -18,12 +17,10 @@ import hiccreboot.backend.common.exception.ImageCountTooLarge;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.domains.article.domain.Article;
 import hiccreboot.backend.domains.article.domain.ArticleGrade;
-import hiccreboot.backend.domains.article.domain.BoardType;
 import hiccreboot.backend.domains.article.domain.BoardTypeEntity;
 import hiccreboot.backend.domains.article.dto.request.ArticleRequest;
 import hiccreboot.backend.domains.article.dto.response.ArticleListResponse;
 import hiccreboot.backend.domains.article.dto.response.ArticleResponse;
-import hiccreboot.backend.domains.article.dto.response.FindBoardTypesResponse;
 import hiccreboot.backend.domains.article.repository.ArticleRepository;
 import hiccreboot.backend.domains.article.repository.BoardTypeRepository;
 import hiccreboot.backend.domains.image.domain.Image;
@@ -42,6 +39,7 @@ public class ArticleService {
 	private final String FIND_BY_MEMBER_NAME = "MEMBER";
 	private final String FIND_BY_SUBJECT = "SUBJECT";
 	private final int IMAGE_COUNT_LIMIT = 10;
+	private final int BOARD_TYPE_ALL_INDEX = -1; // 전체 게시글 조회
 
 	private final ArticleRepository articleRepository;
 	private final MemberRepository memberRepository;
@@ -53,64 +51,98 @@ public class ArticleService {
 		return articleRepository.findAll(pageable);
 	}
 
-	private Page<Article> findArticlesByFindBy(
-		Pageable pageable,
-		BoardType boardType,
+	// 게시글 목록 조회
+	public Page<ArticleListResponse> makeArticles(
+		int pageNumber,
+		int pageSize,
+		Long boardTypeId,
 		ArticleGrade articleGrade,
 		String findBy,
-		String search) {
-		findBy = findBy.toUpperCase();
-		if (findBy.equals(FIND_BY_SUBJECT)) {
-			return findArticlesBySubjectAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade, search);
-		} else if (findBy.equals(FIND_BY_MEMBER_NAME)) {
-			return findArticlesByMemberNameAndBoardTypeAndArticleGrade(pageable, boardType, articleGrade,
-				search);
-		} else {
-			return findArticlesByBoardTypeAndArticleGrade(pageable, boardType, articleGrade);
-		}
-	}
-
-	private Page<Article> findArticlesByBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
-		ArticleGrade articleGrade) {
-		if (articleGrade == ArticleGrade.EXECUTIVE) {
-			return articleRepository.findAllByBoardTypeAndArticleGrade(boardType, articleGrade, pageable);
-		}
-		return articleRepository.findAllByBoardType(boardType, pageable);
-	}
-
-	private Page<Article> findArticlesByMemberNameAndBoardTypeAndArticleGrade(Pageable pageable,
-		BoardType boardType,
-		ArticleGrade articleGrade,
-		String search) {
-		if (articleGrade == ArticleGrade.EXECUTIVE) {
-			return articleRepository.findAllByMemberNameAndBoardTypeAndArticleGrade(search, boardType, articleGrade,
-				pageable);
-		}
-		return articleRepository.findAllByMemberNameAndBoardType(search, boardType, pageable);
-	}
-
-	private Page<Article> findArticlesBySubjectAndBoardTypeAndArticleGrade(Pageable pageable, BoardType boardType,
-		ArticleGrade articleGrade,
-		String search) {
-		if (articleGrade == ArticleGrade.EXECUTIVE) {
-			return articleRepository.findAllBySubjectContainingAndBoardTypeAndArticleGrade(search, boardType,
-				articleGrade,
-				pageable);
-		}
-		return articleRepository.findAllBySubjectContainingAndBoardType(search, boardType, pageable);
-	}
-
-	public DataResponse<Page<ArticleListResponse>> makeArticles(int pageNumber, int pageSize, BoardType boardType,
-		ArticleGrade articleGrade,
-		String findBy,
-		String search) {
+		String search
+	) {
 		PageRequest pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").descending());
 
-		Page<ArticleListResponse> articles = findArticlesByFindBy(pageable,
-			boardType, articleGrade, findBy,
-			search).map(ArticleListResponse::create);
+		return findArticlesByFilter(
+			pageable,
+			boardTypeId,
+			articleGrade,
+			findBy,
+			search
+		).map(ArticleListResponse::create);
+	}
 
-		return DataResponse.ok(articles);
+	// 각 필터 조건으로 조회
+	private Page<Article> findArticlesByFilter(
+		Pageable pageable,
+		Long boardTypeId,
+		ArticleGrade articleGrade,
+		String findBy,
+		String search
+	) {
+		findBy = findBy.toUpperCase();
+
+		// 1. 제목으로 검색, 전체 게시글, 운영진 글만 조회
+		if (findBy.equals(FIND_BY_SUBJECT) && boardTypeId == BOARD_TYPE_ALL_INDEX
+			&& articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllBySubjectContainingAndArticleGrade(search, articleGrade, pageable);
+		}
+
+		// 2. 제목으로 검색, 전체 게시글, 모든 글 조회
+		if (findBy.equals(FIND_BY_SUBJECT) && boardTypeId == BOARD_TYPE_ALL_INDEX) {
+			return articleRepository.findAllBySubjectContaining(search, pageable);
+		}
+
+		// 3. 제목으로 검색, 특정 게시판, 운영진 글만 조회
+		if (findBy.equals(FIND_BY_SUBJECT) && articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllBySubjectContainingAndBoardType_IdAndArticleGrade(search, boardTypeId,
+				articleGrade, pageable);
+
+		}
+
+		// 4. 제목으로 검색, 특정 게시판, 모든 글 조회
+		if (findBy.equals(FIND_BY_SUBJECT)) {
+			return articleRepository.findAllBySubjectContainingAndBoardType_Id(search, boardTypeId, pageable);
+		}
+
+		// 5. 작성자 이름으로 검색, 전체 게시글, 운영진 글만 조회
+		if (findBy.equals(FIND_BY_MEMBER_NAME) && boardTypeId == BOARD_TYPE_ALL_INDEX
+			&& articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByMemberNameAndArticleGrade(search, articleGrade, pageable);
+		}
+
+		// 6. 작성자 이름으로 검색, 전체 게시글, 모든 글 조회
+		if (findBy.equals(FIND_BY_MEMBER_NAME) && boardTypeId == BOARD_TYPE_ALL_INDEX) {
+			return articleRepository.findAllByMemberName(search, pageable);
+		}
+
+		// 7. 작성자 이름으로 검색, 특정 게시판, 운영진 글만 조회
+		if (findBy.equals(FIND_BY_MEMBER_NAME) && articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByMemberNameAndBoardType_IdAndArticleGrade(search, boardTypeId,
+				articleGrade, pageable);
+		}
+
+		// 8. 작성자 이름으로 검색, 특정 게시판, 모든 글 조회
+		if (findBy.equals(FIND_BY_MEMBER_NAME)) {
+			return articleRepository.findAllByMemberNameAndBoardType_Id(search, boardTypeId, pageable);
+		}
+
+		// 9. 검색어로 검색x, 전체 게시글, 운영진 글만 조회
+		if (boardTypeId == BOARD_TYPE_ALL_INDEX && articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByArticleGrade(articleGrade, pageable);
+		}
+
+		// 10. 검색어로 검색x, 전체 게시글, 모든 글 조회
+		if (boardTypeId == BOARD_TYPE_ALL_INDEX) {
+			return articleRepository.findAll(pageable);
+		}
+
+		// 11. 검색어로 검색x, 특정 게시판, 운영진 글만 조회
+		if (articleGrade == ArticleGrade.EXECUTIVE) {
+			return articleRepository.findAllByBoardType_IdAndArticleGrade(boardTypeId, articleGrade, pageable);
+		}
+
+		// 12. 검색어로 검색x, 특정 게시판, 모든 글 조회
+		return articleRepository.findAllByBoardType_Id(boardTypeId, pageable);
 	}
 
 	private Optional<Article> findArticle(Long id) {
@@ -133,7 +165,17 @@ public class ArticleService {
 
 		checkImageSize(articleRequest.getImages().size());
 
-		Article article = Article.create(member, makeArticleGradeByMemberGrade(member.getGrade()), articleRequest);
+		// 게시판 타입 조회
+		BoardTypeEntity boardType = boardTypeRepository.findById(articleRequest.getBoardTypeId())
+			.orElseThrow(() -> BoardTypeNotFoundException.EXCEPTION);
+
+		Article article = Article.create(
+			member,
+			makeArticleGradeByMemberGrade(member.getGrade()),
+			articleRequest.getSubject(),
+			articleRequest.getContent(),
+			boardType
+		);
 
 		articleRequest.getImages()
 			.forEach(imageRequest -> Image.createImage(imageRequest, s3Service.getUrl(imageRequest.getKey()), article));
@@ -156,13 +198,15 @@ public class ArticleService {
 		Member member = memberRepository.findByStudentNumber(studentNumber)
 			.orElseThrow(() -> MemberNotFoundException.EXCEPTION);
 		Article article = findArticle(id).orElseThrow(() -> ArticleNotFoundException.EXCEPTION);
+		BoardTypeEntity boardType = boardTypeRepository.findById(articleRequest.getBoardTypeId())
+			.orElseThrow(() -> BoardTypeNotFoundException.EXCEPTION);
 
 		checkUpdateAuthority(member, article);
 		checkImageSize(articleRequest.getImages().size());
 
 		article.updateSubject(articleRequest.getSubject());
 		article.updateContent(articleRequest.getContent());
-		article.updateBoardType(articleRequest.getBoard());
+		article.updateBoardType(boardType);
 
 		// 기존 이미지 중에 게시글에서 제외된 것은 삭제하지 않고, 오직 추가된 것만 추가로 저장한다. 제외된 것은 게시글 삭제시에만 전부 삭제된다.
 		articleRequest.getImages().stream()
@@ -208,32 +252,5 @@ public class ArticleService {
 		if (size > IMAGE_COUNT_LIMIT) {
 			throw ImageCountTooLarge.EXCEPTION;
 		}
-	}
-
-	// 게시판 목록 조회
-	public List<FindBoardTypesResponse> findBoardTypes() {
-		return boardTypeRepository.findAll()
-			.stream()
-			.map(FindBoardTypesResponse::from)
-			.toList();
-	}
-
-	// 게시판 목록 추가
-	@Transactional
-	public void createBoardType(String name) {
-		boardTypeRepository.save(new BoardTypeEntity(name));
-	}
-
-	@Transactional
-	public void deleteBoardType(Long boardTypeId) {
-		boardTypeRepository.deleteById(boardTypeId);
-	}
-
-	@Transactional
-	public void updateBoardType(Long boardTypeId, String name) {
-		BoardTypeEntity boardType = boardTypeRepository.findById(boardTypeId)
-			.orElseThrow(() -> BoardTypeNotFoundException.EXCEPTION);
-
-		boardType.updateName(name);
 	}
 }
