@@ -9,6 +9,7 @@ import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.domains.image.dto.request.SimpleImageRequest;
 import hiccreboot.backend.domains.image.dto.response.ImageResponse;
 import hiccreboot.backend.domains.image.service.S3Service;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ public class S3Controller {
 	private final S3Service s3Service;
 
 	@PostMapping
+	@Operation(summary = "이미지 presignedUrl 요청", description = "이미지 업로드를 위한 presignedUrl을 요청하는 api")
 	public DataResponse<ImageResponse> postPreSignedURLs(@Valid @RequestBody SimpleImageRequest simpleImageRequest) {
 		return s3Service.makePreSignedUrls(simpleImageRequest);
 	}

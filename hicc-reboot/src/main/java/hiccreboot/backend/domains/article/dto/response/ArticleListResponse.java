@@ -18,7 +18,7 @@ public class ArticleListResponse {
 	private final String name;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private final LocalDateTime date;
-	private final BoardType board;
+	private final String  board;
 	private final Boolean imageExistence;
 	private final String subject;
 
@@ -28,7 +28,7 @@ public class ArticleListResponse {
 		ArticleGrade grade,
 		String name,
 		LocalDateTime date,
-		BoardType board,
+		String board,
 		Boolean imageExistence,
 		String subject) {
 		this.articleId = articleId;
@@ -46,7 +46,7 @@ public class ArticleListResponse {
 			.grade(article.getArticleGrade())
 			.name(article.getMemberName())
 			.date(article.getDate())
-			.board(article.getBoardType())
+			.board(article.getBoardType().getName())
 			.imageExistence(!article.getImages().isEmpty())
 			.subject(article.getSubject())
 			.build();

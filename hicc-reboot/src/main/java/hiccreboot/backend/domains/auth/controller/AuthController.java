@@ -16,9 +16,11 @@ import hiccreboot.backend.common.dto.DataResponse;
 import hiccreboot.backend.common.exception.dto.ErrorResponse;
 import hiccreboot.backend.common.mail.service.EmailService;
 import hiccreboot.backend.domains.auth.dto.request.CreateNonceRequest;
+import hiccreboot.backend.domains.auth.dto.request.LoginRequest;
 import hiccreboot.backend.domains.auth.dto.request.ModifyPasswordRequest;
 import hiccreboot.backend.domains.auth.dto.request.SignUpRequest;
 import hiccreboot.backend.domains.auth.dto.request.StudentNumberCheckRequest;
+import hiccreboot.backend.domains.auth.dto.response.LoginResponse;
 import hiccreboot.backend.domains.auth.service.AuthService;
 import hiccreboot.backend.domains.department.dto.response.DepartmentResponse;
 import hiccreboot.backend.domains.department.service.DepartmentService;
@@ -45,6 +47,14 @@ public class AuthController {
 	private final EmailService emailService;
 	private final TokenProvider tokenProvider;
 
+	@PostMapping("/login")
+	@Operation(summary = "로그인")
+	public DataResponse<LoginResponse> login(@RequestBody LoginRequest request) {
+		// swagger 문서를 위한 가짜 코드
+
+		return DataResponse.ok(new LoginResponse("", ""));
+	}
+
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입")
 	@ApiResponses({
@@ -70,7 +80,7 @@ public class AuthController {
 	}
 
 	@GetMapping("/info")
-	@Operation(summary = "헤더 사용자 정보 조회")
+	@Operation(summary = "사용자 정보 간단 조회(헤더용)")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "성공",
 			content = {@Content(schema = @Schema(implementation = DataResponse.class))}),
@@ -84,11 +94,13 @@ public class AuthController {
 	}
 
 	@GetMapping("/departments")
+	@Operation(summary = "학과 목록 조회")
 	public DataResponse<List<DepartmentResponse>> findDepartments() {
 		return departmentService.findDepartments();
 	}
 
 	@PostMapping("/password/{student-number}")
+	@Operation(summary = "비밀번호 찾기")
 	public BaseResponse sendNonce(@PathVariable(value = "student-number") String studentNumber,
 		@Valid @RequestBody CreateNonceRequest request) {
 		emailService.sendNonce(studentNumber, request.getEmail());
@@ -97,6 +109,7 @@ public class AuthController {
 	}
 
 	@PatchMapping("/password/verify/{nonce}")
+	@Operation(summary = "비밀번호 재발급 코드 전송")
 	public BaseResponse verifyNonce(@PathVariable(value = "nonce") String nonce,
 		@Valid @RequestBody ModifyPasswordRequest request) {
 		authService.resetPassword(nonce, request.getPassword());

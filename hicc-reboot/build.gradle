@@ -52,6 +52,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation group: 'org.springframework.boot', name: 'spring-boot-maven-plugin', version: '3.2.4'
+
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
 }
 
 tasks.named('test') {

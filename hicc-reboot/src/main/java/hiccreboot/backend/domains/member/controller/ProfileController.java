@@ -17,6 +17,7 @@ import hiccreboot.backend.domains.member.dto.response.PersonalArticleResponse;
 import hiccreboot.backend.domains.member.dto.response.PersonalCommentResponse;
 import hiccreboot.backend.domains.member.dto.response.ProfileMemberResponse;
 import hiccreboot.backend.domains.member.service.ProfileService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ProfileController {
 	private final ProfileService profileService;
 
 	@GetMapping
+	@Operation(summary = "회원 프로필 조회", description = "프로필을 조회하는 api")
 	public DataResponse<ProfileMemberResponse> getProfile(HttpServletRequest servletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(servletRequest).get();
 
@@ -37,6 +39,7 @@ public class ProfileController {
 	}
 
 	@PatchMapping
+	@Operation(summary = "회원 프로필 수정", description = "프로필을 수정하는 api")
 	public BaseResponse modifyProfile(@Valid @RequestBody ProfileModifyRequest request,
 		HttpServletRequest servletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(servletRequest).get();
@@ -46,6 +49,7 @@ public class ProfileController {
 	}
 
 	@DeleteMapping
+	@Operation(summary = "회원 탈퇴", description = "회원을 탈퇴하는 api")
 	public BaseResponse withdraw(HttpServletRequest servletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(servletRequest).get();
 
@@ -55,6 +59,7 @@ public class ProfileController {
 	}
 
 	@GetMapping("/articles")
+	@Operation(summary = "개인 게시글 조회", description = "개인 게시글을 조회하는 api")
 	public DataResponse<Page<PersonalArticleResponse>> findPersonalArticles(@RequestParam(value = "page") int page,
 		@RequestParam(value = "size") int size, HttpServletRequest servletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(servletRequest).get();
@@ -63,6 +68,7 @@ public class ProfileController {
 	}
 
 	@GetMapping("/comments")
+	@Operation(summary = "개인 댓글 조회", description = "개인 댓글을 조회하는 api")
 	public DataResponse<Page<PersonalCommentResponse>> findPersonalComments(@RequestParam(value = "page") int page,
 		@RequestParam(value = "size") int size, HttpServletRequest servletRequest) {
 		String studentNumber = tokenProvider.extractStudentNumber(servletRequest).get();

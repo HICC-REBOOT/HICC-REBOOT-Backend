@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import hiccreboot.backend.common.properties.CorsProperties;
 import hiccreboot.backend.common.properties.EmailProperties;
 import hiccreboot.backend.common.properties.JwtProperties;
+import hiccreboot.backend.common.properties.SecurityProperties;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -13,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 @EnableConfigurationProperties({
 	CorsProperties.class,
 	JwtProperties.class,
-	EmailProperties.class})
+	EmailProperties.class,
+	SecurityProperties.class
+})
 public class PropertiesConfig {
 
 }

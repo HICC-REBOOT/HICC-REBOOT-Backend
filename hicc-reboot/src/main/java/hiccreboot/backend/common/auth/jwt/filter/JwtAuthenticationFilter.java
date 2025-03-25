@@ -1,6 +1,7 @@
 package hiccreboot.backend.common.auth.jwt.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,12 +11,14 @@ import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import hiccreboot.backend.common.auth.jwt.TokenProvider;
 import hiccreboot.backend.common.exception.GlobalErrorCode;
 import hiccreboot.backend.common.exception.MemberNotFoundException;
 import hiccreboot.backend.common.exception.dto.ErrorResponse;
+import hiccreboot.backend.common.properties.SecurityProperties;
 import hiccreboot.backend.common.util.ResponseWriter;
 import hiccreboot.backend.domains.auth.domain.RefreshToken;
 import hiccreboot.backend.domains.auth.repository.RefreshTokenRepository;
@@ -34,13 +37,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private static final String LOGIN_URL = "/api/auth/login";
 	private static final String REFRESH_URL = "/api/auth/refresh";
-	private static final List<String> ALLOWED_URLS = List.of("/api/auth/sign-up", "/api/auth/duplicate",
-		"/api/auth/departments", "/api/auth/password", "/api/main");
 
+	private final SecurityProperties securityProperties;
 	private final TokenProvider tokenProvider;
 	private final MemberRepository memberRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+	private final AntPathMatcher pathMatcher;
+
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		String path = request.getRequestURI();
+
+		boolean result = Arrays.stream(securityProperties.getPermitUrls())
+			.anyMatch(permitUrl -> pathMatcher.match(permitUrl, path));
+
+		log.info("JwtAuthenticationFilter.shouldNotFilter({}) : {}", path, result);
+
+		return result;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -70,15 +85,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (accessToken != null) {
 			checkAccessTokenAndAuthentication(response, accessToken);
 			filterChain.doFilter(request, response);
-		} else if (isAllowedUrl(request.getRequestURI())) {
-			filterChain.doFilter(request, response);
 		} else {
 			sendErrorResponse(request, response, GlobalErrorCode.ACCESS_TOKEN_UNAUTHORIZED);
 		}
-	}
-
-	private boolean isAllowedUrl(String uri) {
-		return ALLOWED_URLS.stream().anyMatch(uri::startsWith);
 	}
 
 	private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
